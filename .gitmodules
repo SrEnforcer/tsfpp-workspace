@@ -1,0 +1,27 @@
+[submodule "repos/tsfpp"]
+	path = repos/tsfpp
+	url = git@github.com:tsfpp/tsfpp.git
+[submodule "repos/standard"]
+	path = repos/standard
+	url = git@github.com:tsfpp/standard.git
+[submodule "repos/prelude"]
+	path = repos/prelude
+	url = git@github.com:tsfpp/prelude.git
+[submodule "repos/boundary"]
+	path = repos/boundary
+	url = git@github.com:tsfpp/boundary.git
+[submodule "repos/agents"]
+	path = repos/agents
+	url = git@github.com:tsfpp/agents.git
+[submodule "repos/tsconfig"]
+	path = repos/tsconfig
+	url = git@github.com:tsfpp/tsconfig.git
+[submodule "repos/eslint-config"]
+	path = repos/eslint-config
+	url = git@github.com:tsfpp/eslint-config.git
+[submodule "repos/workflow"]
+	path = repos/workflow
+	url = git@github.com:tsfpp/workflow.git
+[submodule "repos/mcp-server"]
+	path = repos/mcp-server
+	url = git@github.com:tsfpp/mcp-server.git

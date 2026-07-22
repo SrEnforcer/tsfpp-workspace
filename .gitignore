@@ -1,0 +1,22 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+
+# Node / JS
+node_modules/
+dist/
+build/
+coverage/
+
+# Misc
+*.log
