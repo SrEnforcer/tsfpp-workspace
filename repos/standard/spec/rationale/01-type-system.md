@@ -208,3 +208,36 @@ TSF++ uses two discriminant conventions intentionally:
 The separation improves cognitive parsing. When a reviewer sees `_tag: 'Some'`, they read "algebraic helper type." When they see `kind: 'submitted'`, they read "business-domain variant." This lowers ambiguity in mixed modules.
 
 It also limits accidental cross-layer drift. Without a convention boundary, domain types can look like library primitives and vice versa, making API migrations and refactors noisier.
+
+---
+
+## Rule 1.13 — Numeric hazards
+
+`number` is wider than the numbers you mean. It includes three values that break the laws the rest of the code silently assumes:
+
+- **`NaN`** is not equal to itself. `NaN === NaN` is `false`, so it breaks reflexivity of equality, defeats `Array.prototype.includes`-style membership, and passes through `===` guards written to catch it. Worse, it is *absorbing*: any arithmetic touching `NaN` yields `NaN`, so a single bad parse thirty lines up surfaces as a wrong total with no stack trace pointing at the cause.
+- **`Infinity` / `-Infinity`** pass magnitude guards (`x > 0`, `x < max`) that were written for real quantities, so a divide-by-zero or an overflowed accumulator slips past validation as if it were an ordinary large number.
+
+None of these can be excluded by the type `number`, which is exactly the situation axiom 1 (correctness by construction) tells us to fix in the type. The fix has two parts.
+
+**Keep coercion at the boundary.** Every route by which `NaN` enters is a coercion: `Number('abc')`, `parseInt(x)` on non-numeric input, unary `+str`, and `JSON.parse` of a malformed numeric field. Coercion belongs in a smart constructor that immediately guards its result with `Number.isFinite` / `Number.isInteger` and returns `Option` (or `Result`). The core never coerces; it consumes values on which arithmetic reasoning is already sound.
+
+**Brand the invariants you rely on.** A count is a non-negative integer; a price is positive; an index is a non-negative integer below a length. When the code depends on such a fact, encode it once as a branded refinement (`Int`, `Positive`, `NonNegative`) rather than re-asserting `if (n >= 0)` at every use. The prelude's `mkInt` / `mkPositive` / `mkNonNegative` are the gateways; downstream functions take the brand and skip the guard, because the type already carries it.
+
+This is the same move JPL-10 and MISRA C make for C's floating point: constrain the values the language admits to the fragment on which your reasoning is valid.
+
+**Why `Number.isNaN`, not `isNaN`.** The global `isNaN` coerces its argument first, so `isNaN('hello')` is `true` — not because the string is `NaN` but because coercing it produces `NaN`. `Number.isNaN` and `Number.isFinite` do not coerce and answer the question actually asked.
+
+---
+
+## Rule 1.14 — `satisfies` over `as`
+
+`as` and `satisfies` look similar and do opposite things to your safety.
+
+`const x = value as T` tells the compiler "treat `value` as `T`, and stop checking." If `value` does not actually conform, the assertion is a silent lie that surfaces as a defect later. It also *widens*: `{ home: '/' } as Record<string, string>` throws away the literal `'/'` and leaves you with `string`, so the precise information that made the table useful is gone.
+
+`const x = value satisfies T` tells the compiler "verify `value` conforms to `T`, then keep `value`'s own narrow type." If it does not conform, that is a compile error at the definition, not a runtime surprise. If it does, downstream inference still sees `{ home: '/' }` with `home: '/'`, not `string`.
+
+A large fraction of the `as` casts a reviewer sees outside smart constructors are really conformance checks in disguise — the author wanted to assert "this literal matches that shape." `satisfies` is the correct tool for that intent, and because it cannot lie it never appears in the forbidden-constructs table. The remaining legitimate use of `as` — applying a brand after validation inside a smart constructor — is genuinely an assertion of something the type system cannot see, and stays confined there (Rule 1.6).
+
+The one thing `satisfies` does *not* do is turn `unknown` into a type: it operates on a statically known value, not on runtime input. Runtime input is still the job of a parser (Rule 8.4).

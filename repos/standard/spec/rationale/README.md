@@ -10,13 +10,13 @@ Files are prefixed with the section number they cover, matching the convention i
 
 | File | Covers |
 |------|--------|
-| [01-type-system.md](./01-type-system.md) | §1 — Type System (Rules 1.1–1.12) |
+| [01-type-system.md](./01-type-system.md) | §1 — Type System (Rules 1.1–1.14) |
 | [02-immutability.md](./02-immutability.md) | §2 — Immutability (Rules 2.1–2.5) |
 | [03-functions.md](./03-functions.md) | §3 — Functions (Rules 3.1–3.7) |
 | [04-control-flow.md](./04-control-flow.md) | §4–5 — Control Flow & Composition (Rules 4.1–5.4) |
-| [06-effects.md](./06-effects.md) | §6 — Effect Management (Rules 6.1–6.6) |
+| [06-effects.md](./06-effects.md) | §6 — Effect Management (Rules 6.1–6.7) |
 | [07-naming.md](./07-naming.md) | §7 — Naming (Rule 7.7) |
-| [08-totality-and-proof.md](./08-totality-and-proof.md) | §8 — Partiality, Totality, and Proof (Rules 8.1–8.4) |
+| [08-totality-and-proof.md](./08-totality-and-proof.md) | §8 — Partiality, Totality, and Proof (Rules 8.1–8.5) |
 | [09-tooling.md](./09-tooling.md) | §9 — Compiler and Tooling (Rules 9.1–9.6) |
 | [10-documentation-and-review.md](./10-documentation-and-review.md) | §10 — Documentation and Review Protocol (Rules 10.1–10.4) |
 | [11-module-organisation.md](./11-module-organisation.md) | §11 — Module Organisation (Rules 11.1–11.4) |

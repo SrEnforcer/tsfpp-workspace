@@ -10,7 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-No changes yet.
+### Features
+
+- add `matchOption` and `matchResult` total eliminators — collapse an ADT to a single result type with a handler per variant, without leaking `_tag` (supports Rule 8.5)
+- add `getOrElseR`, the Result counterpart to Option's `getOrElse`
+- add `mapErr` to map the error channel of a `Result` — the canonical tool for remapping a boundary error into a tagged domain error (supports Rule 6.7)
+- add `findO`, a total array search returning `Option<A>` in place of `Array.prototype.find`'s `A | undefined`
+- add `NonEmptyReadonlyArray<A>` with `isNonEmptyArray`, `mkNonEmpty`, and total `headNE` / `lastNE`
+- add refined numeric brands `Int`, `Positive`, `NonNegative` with `mkInt` / `mkPositive` / `mkNonNegative` smart constructors and the `isFiniteNumber` guard (supports Rule 1.13)
 
 ## [1.7.0] - 2026-05-29
 

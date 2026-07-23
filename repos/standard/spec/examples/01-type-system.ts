@@ -280,16 +280,61 @@ const renderOrderStatus = (order: DomainOrder): string =>
 const renderNick = (nick: PreludeOption<string>): string =>
   isSome(nick) ? nick.value : '(no nickname)'
 
+// ─── Rule 1.13 — Numeric hazards: brand constrained numerics, guard finiteness ─
+//
+// MUST: `number` includes NaN/Infinity; coercion parsing stays at the boundary,
+// and domain invariants (positive, integer) are branded.
+
+type Positive = Brand<number, 'Positive'>
+
+// Smart constructor: the ONLY gateway; NaN and non-positive values become None.
+const mkPositive = (raw: number): PreludeOption<Positive> =>
+  Number.isFinite(raw) && raw > 0
+    // The brand is applied after the guard — the one legitimate `as` (Rule 1.6).
+    ? some(raw as Positive)
+    : none
+
+// GOOD: parse at the boundary, then the core consumes a value with no NaN in it.
+const parsePrice = (rawText: string): PreludeOption<Positive> =>
+  mkPositive(Number.parseFloat(rawText))
+
+const applyDiscount = (price: Positive, pct: number): number =>
+  price * (1 - pct) // no NaN guard needed — the type already excludes it
+
+/* BAD: coercion in the core; NaN is a valid `number` and poisons every sum.
+const price = Number(rawText)   // NaN on bad input
+const total = price * quantity  // silently NaN, no signal
+if (price > 0) { ... }          // NaN > 0 is false — guard passes the wrong way
+*/
+
+// ─── Rule 1.14 — Prefer `satisfies` over `as` for literal conformance ────────
+//
+// SHOULD: `satisfies` checks conformance without widening; `as` asserts blindly.
+
+// GOOD: each value keeps its literal type, and a non-conforming entry fails to compile.
+const routes = {
+  home: '/',
+  profile: '/u/:id',
+} satisfies Record<string, `/${string}`>
+
+const homePath: '/' = routes.home // literal preserved, not widened to `string`
+
+/* BAD: asserts conformance without checking, and widens away the literals.
+const routes = { home: '/' } as Record<string, `/${string}`>
+*/
+
 // ─── Exports (make module valid) ─────────────────────────────────────────────
 export type {
   Shape, User, AdminUser, UserWithPermission,
   Config, Option, Logger,
   Brand, NodeId, DeptId, PermissionLevel,
   StrOrNum, PreludeResult, DomainOrder, PreludeOption,
+  Positive,
 }
 export {
   absurd, area, mkNodeId, mkDeptId, head, parseConfig, some, none, mkLogger, Direction,
   isString, complement, toUpperOrFixed, scalarsOnly,
   mkOk, mkErr, isOk, isErr, unwrapOr, collectErrors,
   isSome, isNone, renderOrderStatus, renderNick,
+  mkPositive, parsePrice, applyDiscount, routes, homePath,
 }

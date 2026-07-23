@@ -210,3 +210,27 @@ The IIFE scopes `base` and `suffix` locally. Without the IIFE, you would need a 
 **The 5-line limit:**
 
 An IIFE longer than 5 lines indicates a concept that deserves a name. Extract a named function. The IIFE is an expression-scope tool, not a general purpose alternative to functions.
+
+---
+
+## Rule 4.6 — No ambient nondeterminism in the pure core
+
+Axiom 4 (referential transparency) says a function's result depends only on its arguments. The clock, the entropy source, and the environment violate that quietly, because nothing in a signature reveals that a body calls them:
+
+```typescript
+const mkId = (prefix: string): string =>
+  `${prefix}-${Date.now()}-${Math.random()}`
+```
+
+`mkId('a')` returns a different string every call. The type `(prefix: string) => string` claims otherwise. Every consequence axiom 4 warns about follows: the function cannot be memoised, its tests must freeze global time to be deterministic, and a caching or deduplication refactor that assumes equal inputs give equal outputs is now wrong.
+
+The offenders are a small, closed set — `Date.now()`, `new Date()` with no argument, `Math.random()`, `crypto.randomUUID()`, `performance.now()`, and `process.env.X`. They are not banned outright; a program that never reads a clock or generates an id does nothing useful. They are reclassified as *effects*, and effects live at the boundary. The mechanism is the one Rule 6.5 already established: pass `now: () => Date` and `randomUuid: () => string` in the `Deps` record and call them through the parameter.
+
+The payoff is concentrated in tests. A frozen clock and a fixed generator are one-line record literals — no `jest.useFakeTimers`, no module mock, no global patching:
+
+```typescript
+const frozen: Clock = { now: () => new Date(0), randomUuid: () => 'test-uuid' }
+expect(mkOrderId(frozen)(customer)).toBe('cust-0-test-uuid')
+```
+
+**Where the raw constructors live.** Exactly one place: the composition root that builds the real `Deps`. That module is a boundary by definition and reads the clock, entropy, and `process.env` directly to wire them in. Everywhere else, the linter's `no-restricted-globals` / `no-restricted-syntax` entries make an ambient read a build failure, so the boundary cannot erode by accident.

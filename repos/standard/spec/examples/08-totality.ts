@@ -1,5 +1,5 @@
 /**
- * Examples for §8 — Partiality, Totality, and Proof (Rules 8.1–8.4)
+ * Examples for §8 — Partiality, Totality, and Proof (Rules 8.1–8.5)
  * See ../CODING_STANDARD.md §8 and ../rationale/08-totality-and-proof.md
  */
 
@@ -220,6 +220,38 @@ if (isUserDto(input)) {
 }
 */
 
+// ─── Rule 8.5 — Total eliminators over hand-rolled guards ────────────────────
+//
+// SHOULD: when both arms yield a value, collapse the ADT with a `match` that
+// requires a handler per variant. Reserve guards for early-return control flow.
+
+const matchOption =
+  <A, B>(onNone: () => B, onSome: (a: A) => B) =>
+  (o: Option<A>): B =>
+    o._tag === 'Some' ? onSome(o.value) : onNone()
+
+const matchResult =
+  <T, E, B>(onErr: (e: E) => B, onOk: (a: T) => B) =>
+  (r: Result<T, E>): B =>
+    r.ok ? onOk(r.value) : onErr(r.error)
+
+// GOOD: value-producing consumption — both handlers required by the type.
+const labelOf = matchOption(
+  () => 'anonymous',
+  (name: string) => name,
+)
+
+const statusText = matchResult(
+  (e: ParseIntError) => `error: ${e.kind}`,
+  (n: number) => `parsed ${n}`,
+)
+
+// Guards remain correct for early return (control flow, not value production):
+const firstChar = (s: Option<string>): Result<string, string> => {
+  if (s._tag === 'None') return err('missing')      // leave the function
+  return ok(s.value.slice(0, 1))                     // golden path, unindented
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 export type { Option, Result, ParseIntError, UserDto, ParseUserError }
 export {
@@ -227,4 +259,5 @@ export {
   head, last, divide, parseIntSafe, lookup,
   mapOption, chainOption, liftA2Option, pipeF,
   parseUserDto,
+  matchOption, matchResult, labelOf, statusText, firstChar,
 }
