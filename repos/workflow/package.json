@@ -1,0 +1,43 @@
+{
+  "name": "@tsfpp/workflow",
+  "version": "1.0.0",
+  "description": "Workflow scaffolding for TSF++ projects: Conventional Commits, Husky hooks, and release-please configuration",
+  "keywords": [
+    "tsfpp",
+    "conventional-commits",
+    "commitlint",
+    "husky",
+    "release-please",
+    "workflow"
+  ],
+  "homepage": "https://github.com/tsfpp/tsfpp#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsfpp/tsfpp.git",
+    "directory": "packages/workflow"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "tsfpp-workflow": "./init.mjs"
+  },
+  "files": [
+    "init.mjs",
+    "files/",
+    "README.md"
+  ],
+  "scripts": {
+    "prepublishOnly": "node --check init.mjs"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "peerDependencies": {
+    "@commitlint/cli": ">=19.0.0",
+    "@commitlint/config-conventional": ">=19.0.0",
+    "husky": ">=9.0.0"
+  }
+}
