@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-07-24
+
+### Changed
+
+- Updated peer dependency ranges to the current TSF++ releases.
+
 ### ⚠ BREAKING CHANGES
 
 - Align all agent, skill, instruction, and prompt guidance with `@tsfpp/prelude` 2.0.0 and `@tsfpp/boundary` 2.0.0. Updated API names: Option combinators `mapO`→`mapOption`, `flatMapO`→`flatMapOption`, `orElse`→`orElseOption`, `getOrElse`→`getOrElseOption`, `traverseArrayO`→`traverseArrayOption`, `sequenceArrayO`→`sequenceArrayOption`; `entriesOfMap`→`entriesOf`; boundary `createHandler`/`createJsonHandler`/`createNodeAdapter`→`mk*`. Bumped peer ranges to `@tsfpp/prelude >=2.0.0`, `@tsfpp/boundary >=2.0.0`, `@tsfpp/standard >=1.3.0`.

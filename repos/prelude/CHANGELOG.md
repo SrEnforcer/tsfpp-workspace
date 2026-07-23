@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-07-24
+
+### Changed
+
+- Updated the package release metadata for the dependency refresh.
+
 ### ⚠ BREAKING CHANGES
 
 - **Consistent ADT-combinator naming (Rule 7.8).** `Result` is now the unsuffixed base ADT; every other ADT's combinators carry that ADT's full type name as a suffix. Renames:
