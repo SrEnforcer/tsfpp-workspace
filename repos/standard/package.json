@@ -6,7 +6,7 @@
   "homepage": "https://github.com/tsfpp/standard#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tsfpp/standard.git"
+    "url": "git+https://github.com/tsfpp/standard.git"
   },
   "keywords": [
     "typescript",

@@ -1,7 +1,7 @@
 {
   "name": "@tsfpp/mcp-server",
   "description": "MCP server exposing TSF++ standards, rules, patterns, and guidance tools.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "scripts": {
     "mcp:serve": "tsx bin/tsfpp-mcp.ts",
@@ -15,14 +15,14 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@tsfpp/boundary": "^2.0.1",
-    "@tsfpp/prelude": "^2.0.1",
+    "@tsfpp/boundary": "^2.0.2",
+    "@tsfpp/prelude": "^2.0.2",
     "@tsfpp/standard": "^1.4.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tsfpp/agents": "^2.0.1",
-    "@tsfpp/eslint-config": "^1.0.2",
+    "@tsfpp/agents": "^2.0.2",
+    "@tsfpp/eslint-config": "^1.0.3",
     "@tsfpp/tsconfig": "^1.0.0",
     "@types/node": "^25.9.1",
     "tsx": "^4.22.3",

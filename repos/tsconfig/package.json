@@ -12,7 +12,7 @@
   "homepage": "https://github.com/tsfpp/tsconfig#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tsfpp/tsconfig.git"
+    "url": "git+https://github.com/tsfpp/tsconfig.git"
   },
   "license": "MIT",
   "exports": {
