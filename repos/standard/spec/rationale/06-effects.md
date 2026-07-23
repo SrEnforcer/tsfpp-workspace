@@ -169,3 +169,17 @@ The decision rule is simple:
 - Use `Promise.allSettled` for "best effort" and partial-success reporting.
 - Use `Promise.all` for strict all-or-nothing semantics.
 - If child operations already return `Promise<Result<A, E>>` and do not reject, `Promise.all` is acceptable because failures are encoded in values, not rejection.
+
+---
+
+## Rule 6.7 — Tagged error unions, not `string` or `Error`
+
+Rule 6.1 puts failure in the type. Rule 6.7 makes that failure something the caller can *act on* exhaustively rather than merely display.
+
+Consider `Result<Confirmation, string>`. The caller knows an order failed, and has a sentence. To do anything except show that sentence — retry only on a declined payment, re-prompt only on a bad address — it must match the sentence text, an untyped comparison the compiler cannot check and a copy-edit can break. And when a fourth failure mode is added, the type `Result<Confirmation, string>` does not change, so no recovery site anywhere lights up. This is the identical defect Rule 1.2 eliminates for ordinary sum types — "a variant was added and a consumer silently missed it" — sneaking back in through the error channel.
+
+Encoding `E` as a discriminated union closes it. Recovery becomes an exhaustive `switch` on `error.kind` with an `absurd` default (Rule 1.2), so adding `{ kind: 'fraud_hold'; ... }` is a compile error at every recovery site until it is handled. The error is now data with structure: `payment_declined` carries a `DeclineCode`, `out_of_stock` carries the `Sku`. Callers branch on the *cause*, and the cause carries exactly the fields the branch needs.
+
+**Why not `Error`.** `Error` is a class, and Rule 1.9 already excludes classes from the domain. Distinguishing causes with `instanceof PaymentError` is the nominal-runtime-check anti-pattern that rule rejects, and `.message` is unstructured prose no better than the bare `string` case. A subclass hierarchy of errors reproduces every problem inheritance brings to data modelling.
+
+**The boundary remap.** Third parties hand back strings, HTTP statuses, and caught `unknown`. Those are legitimate at the adapter, and the adapter's job is to remap them into the domain union as they cross inward — `mapErr` is the one-liner that does it. The stringly-typed failure exists for the width of the adapter and no further; no domain signature carries it.

@@ -39,12 +39,14 @@ From `@tsfpp/prelude`:
 
 - **Function combinators**: `pipe`, `flow`, `comp`, `complement`
 - **Exhaustiveness**: `absurd`
-- **Option**: `some`, `none`, `isSome`, `isNone`, `mapO`, `flatMapO`, `orElse`, `getOrElse`
+- **Option**: `some`, `none`, `isSome`, `isNone`, `mapO`, `flatMapO`, `orElse`, `getOrElse`, `matchOption`
 - **Unit**: `unit`, `Unit`
-- **Result**: `ok`, `err`, `isOk`, `isErr`, `map`, `flatMap`, `flatMapAsync`, `tryCatch`, `tryCatchAsync`, `tap`, `tapErr`
+- **Result**: `ok`, `err`, `isOk`, `isErr`, `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tryCatch`, `tryCatchAsync`, `tap`, `tapErr`, `matchResult`, `getOrElseR`
 - **Logger port**: `LogLevel`, `LogEntry`, `Logger`
-- **Conversions and guards**: `fromNullable`, `isDefined`, `toNullable`, `isRecord`, `fromUnknownString`, `fromUnknownArray`, `fromUnknownArrayOf`, `fromNonEmptyString`, `getTypedField`, `getStringField`, `getNumberField`, `getBooleanField`
+- **Conversions and guards**: `fromNullable`, `isDefined`, `toNullable`, `isRecord`, `fromUnknownString`, `fromUnknownArray`, `fromUnknownArrayOf`, `fromNonEmptyString`, `getTypedField`, `getStringField`, `getNumberField`, `getBooleanField`, `findO`
 - **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
+- **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
+- **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `headNE`, `lastNE`
 - **Collection helpers**: `traverseArray`, `traverseArrayO`, `sequenceArrayO`, `unique`, `intoMap`, `entriesOfMap`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
 - **Immutable list ADT**: `List`, `nil`, `cons`, `singletonList`, `fromArray`, `toArray`, `headList`, `tailList`, `isEmptyList`, `lengthList`, `mapList`, `flatMapList`, `appendList`, `reverseList`, `filterList`, `foldList`, `foldLeftList`, `foldLeftListCurried`, `traverseList`
 

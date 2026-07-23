@@ -1,5 +1,5 @@
 /**
- * Examples for §6 — Effect Management (Rules 6.1–6.6)
+ * Examples for §6 — Effect Management (Rules 6.1–6.7)
  * See ../CODING_STANDARD.md §6 and ../rationale/06-effects.md
  */
 
@@ -224,14 +224,50 @@ const loadUsersAllOrNothing = async (
 const users = await Promise.all(ids.map(id => fetch(`/api/users/${id}`).then(r => r.json())))
 */
 
+// ─── Rule 6.7 — Domain errors are `kind`-tagged unions, not `string`/`Error` ──
+//
+// MUST: the error channel `E` must be a discriminated union so recovery is
+// exhaustive and a new failure mode lights up every call site.
+
+type OrderError =
+  | { readonly kind: 'out_of_stock'; readonly sku: string }
+  | { readonly kind: 'payment_declined'; readonly code: string }
+  | { readonly kind: 'address_invalid'; readonly field: string }
+
+// GOOD: recovery is an exhaustive switch; adding a variant is a compile error here.
+const explainOrderError = (e: OrderError): string => {
+  switch (e.kind) {
+    case 'out_of_stock':     return `${e.sku} is unavailable`
+    case 'payment_declined': return `payment failed: ${e.code}`
+    case 'address_invalid':  return `check ${e.field}`
+    default: {
+      const _exhaustive: never = e // no default fallthrough — Rule 1.2
+      return _exhaustive
+    }
+  }
+}
+
+// Boundary remap: a stringly-typed failure becomes a tagged domain error inward.
+const remapBoundaryError = (raw: string): OrderError =>
+  ({ kind: 'address_invalid', field: raw })
+
+const parseAddress = (raw: string): Result<string, OrderError> =>
+  raw.length > 0 ? ok(raw) : err(remapBoundaryError('address'))
+
+/* BAD: Result<Confirmation, string> — caller can only display the sentence,
+   cannot branch on the cause, and a new failure mode changes no type.
+const placeOrder = (cart: Cart): Result<Confirmation, string> => { ... }
+*/
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 export type {
   Result, Option, User, UserId, UserError, UserNotFound, InvalidPayload,
-  IOError, ApiError, Logger, UserRepoDeps, LoadReport,
+  IOError, ApiError, Logger, UserRepoDeps, LoadReport, OrderError,
 }
 export {
   ok, err, some, none,
   findUser, validateEmail, readFileSafe, fetchResourceSafe,
   findByName, parseUserId, loadUser, getUser,
   loadUsersReport, loadUsersAllOrNothing,
+  explainOrderError, remapBoundaryError, parseAddress,
 }
