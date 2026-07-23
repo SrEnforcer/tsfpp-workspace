@@ -73,6 +73,6 @@ If both commands pass, your project baseline is aligned with TSF++.
 
 ## Next steps
 
-- Read the full rules in `spec/CODING_STANDARD.md`
+- Read the full rules in the `@tsfpp/standard` spec (`spec/CODING_STANDARD.md`)
 - Review rationale documents in `spec/rationale/`
 - Use `spec/examples/` as implementation references

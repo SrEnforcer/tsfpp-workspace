@@ -7,7 +7,7 @@
 
 import {
   fromNullable,
-  getOrElse,
+  getOrElseOption,
   isNone,
   isSome,
   type Result,
@@ -67,7 +67,7 @@ export const parsePaginationQuery = (
   const rawLimit = fromNullable(url.searchParams.get('limit'));
   const rawCursor = fromNullable(url.searchParams.get('cursor'));
 
-  const limit = Number(getOrElse(() => '20')(rawLimit));
+  const limit = Number(getOrElseOption(() => '20')(rawLimit));
 
   if (!Number.isInteger(limit) || limit < 1 || limit > maxLimit) {
     return err(mkValidationError([{
@@ -264,8 +264,8 @@ export const corsHeaders = (
   if (isNone(requestOriginOption)) return {};
   if (!allowedOrigins.includes(requestOriginOption.value)) return {};
 
-  const methods = getOrElse<ReadonlyArray<string>>(() => ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])(fromNullable(opts.allowedMethods));
-  const maxAge = getOrElse<number>(() => 600)(fromNullable(opts.maxAgeSeconds));
+  const methods = getOrElseOption<ReadonlyArray<string>>(() => ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])(fromNullable(opts.allowedMethods));
+  const maxAge = getOrElseOption<number>(() => 600)(fromNullable(opts.maxAgeSeconds));
   const allowedHeadersOption = fromNullable(opts.allowedHeaders);
 
   return {

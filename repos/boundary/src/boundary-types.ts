@@ -11,7 +11,7 @@ import {
   type Option,
   type Result,
   fromNullable,
-  getOrElse,
+  getOrElseOption,
   isOk,
   isNone,
   isSome,
@@ -140,7 +140,7 @@ export const extractLastPathSegment = (url: string): string => {
     .split('/')
     .filter((segment) => segment.length > 0);
 
-  return getOrElse(() => '')(fromNullable(segments.at(-1)));
+  return getOrElseOption(() => '')(fromNullable(segments.at(-1)));
 };
 
 /** Field-level validation issue represented as a path + human-readable constraint failure. */
@@ -203,23 +203,12 @@ export type ApiError =
   | { readonly kind: 'internal'; readonly cause: unknown };
 
 /**
- * Construct a validation API error.
- * @param issues Field-level validation failures.
- * @param message Human-readable summary message.
- * @returns Validation ApiError.
- */
-export const validationError = (
-  issues: ReadonlyArray<FieldIssue>,
-  message: string = 'Validation failed',
-): ApiError => mkValidationError(issues, message);
-
-/**
  * Construct a not-found API error.
  * @param resource Resource category identifier used in stable error codes.
  * @param id Missing resource identifier.
  * @returns Not-found ApiError.
  */
-export const notFoundError = (resource: string, id: string): ApiError =>
+export const mkNotFoundError = (resource: string, id: string): ApiError =>
   ({ kind: 'not_found', resource, id });
 
 /**
@@ -227,7 +216,7 @@ export const notFoundError = (resource: string, id: string): ApiError =>
  * @param detail Conflict reason suitable for client troubleshooting.
  * @returns Conflict ApiError.
  */
-export const conflictError = (detail: string): ApiError =>
+export const mkConflictError = (detail: string): ApiError =>
   ({ kind: 'conflict', detail });
 
 /**
@@ -235,7 +224,7 @@ export const conflictError = (detail: string): ApiError =>
  * @param required Missing capability or permission scope.
  * @returns Permission ApiError.
  */
-export const permissionError = (required: string): ApiError =>
+export const mkPermissionError = (required: string): ApiError =>
   ({ kind: 'permission', required });
 
 /**
@@ -243,7 +232,7 @@ export const permissionError = (required: string): ApiError =>
  * @param scheme Authentication scheme for the `WWW-Authenticate` response header.
  * @returns Unauthenticated ApiError.
  */
-export const unauthenticatedError = (scheme = 'Bearer'): ApiError =>
+export const mkUnauthenticatedError = (scheme = 'Bearer'): ApiError =>
   ({ kind: 'unauthenticated', scheme });
 
 /**
@@ -251,7 +240,7 @@ export const unauthenticatedError = (scheme = 'Bearer'): ApiError =>
  * @param retryAfterSeconds Suggested retry delay in seconds.
  * @returns Rate-limit ApiError.
  */
-export const rateLimitError = (retryAfterSeconds: number): ApiError =>
+export const mkRateLimitError = (retryAfterSeconds: number): ApiError =>
   ({ kind: 'rate_limit', retryAfterSeconds });
 
 /**
@@ -259,7 +248,7 @@ export const rateLimitError = (retryAfterSeconds: number): ApiError =>
  * @param detail Description of the failed precondition.
  * @returns Precondition ApiError.
  */
-export const preconditionError = (detail: string): ApiError =>
+export const mkPreconditionError = (detail: string): ApiError =>
   ({ kind: 'precondition', detail });
 
 /**
@@ -267,7 +256,7 @@ export const preconditionError = (detail: string): ApiError =>
  * @param resource Permanently removed resource category.
  * @returns Gone ApiError.
  */
-export const goneError = (resource: string): ApiError =>
+export const mkGoneError = (resource: string): ApiError =>
   ({ kind: 'gone', resource });
 
 /**
@@ -276,7 +265,7 @@ export const goneError = (resource: string): ApiError =>
  * @param cause Internal diagnostic cause for logs only.
  * @returns Dependency ApiError.
  */
-export const dependencyError = (dependency: string, cause: unknown): ApiError =>
+export const mkDependencyError = (dependency: string, cause: unknown): ApiError =>
   ({ kind: 'dependency', dependency, cause });
 
 /**
@@ -284,7 +273,7 @@ export const dependencyError = (dependency: string, cause: unknown): ApiError =>
  * @param cause Internal diagnostic cause for logs only.
  * @returns Internal ApiError.
  */
-export const internalError = (cause: unknown): ApiError =>
+export const mkInternalError = (cause: unknown): ApiError =>
   ({ kind: 'internal', cause });
 
 /** RFC 9457 payload shape used for all error responses emitted by this package. */
@@ -321,19 +310,19 @@ export const mkProblem = (
   const opts = fromNullable(details.opts);
 
   const problemType = isSome(opts)
-    ? getOrElse(() => 'about:blank')(fromNullable(opts.value.type))
+    ? getOrElseOption(() => 'about:blank')(fromNullable(opts.value.type))
     : 'about:blank';
 
   const problemDetail = isSome(opts)
-    ? getOrElse<string | null>(() => null)(fromNullable(opts.value.detail))
+    ? getOrElseOption<string | null>(() => null)(fromNullable(opts.value.detail))
     : null;
 
   const problemInstance = isSome(opts)
-    ? getOrElse<string | null>(() => null)(fromNullable(opts.value.instance))
+    ? getOrElseOption<string | null>(() => null)(fromNullable(opts.value.instance))
     : null;
 
   const problemErrors = isSome(opts)
-    ? getOrElse<ReadonlyArray<FieldIssue> | null>(() => null)(fromNullable(opts.value.errors))
+    ? getOrElseOption<ReadonlyArray<FieldIssue> | null>(() => null)(fromNullable(opts.value.errors))
     : null;
 
   return {

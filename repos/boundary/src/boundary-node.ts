@@ -8,7 +8,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { buffer } from 'node:stream/consumers';
 
-import { fromNullable, getOrElse, isSome, type Logger } from '@tsfpp/prelude';
+import { fromNullable, getOrElseOption, isSome, type Logger } from '@tsfpp/prelude';
 
 import { type RawHandler } from './boundary-idempotency.js';
 
@@ -51,14 +51,14 @@ const toFetchHost = (
 ): string => {
   if (typeof host === 'string') return host;
   if (Array.isArray(host) && host.length > 0) {
-    return getOrElse(() => 'localhost')(fromNullable(host[0]));
+    return getOrElseOption(() => 'localhost')(fromNullable(host[0]));
   }
   return 'localhost';
 };
 
 const mkRequest = async (req: IncomingMessage): Promise<Request> => {
-  const method = getOrElse(() => 'GET')(fromNullable(req.method));
-  const urlPath = getOrElse(() => '/')(fromNullable(req.url));
+  const method = getOrElseOption(() => 'GET')(fromNullable(req.method));
+  const urlPath = getOrElseOption(() => '/')(fromNullable(req.url));
   const host = toFetchHost(req.headers.host);
   const hasBody = method !== 'GET' && method !== 'HEAD';
   const bodyBuffer = hasBody ? await buffer(req) : null;
@@ -138,11 +138,11 @@ const closeServer = (server: ReturnType<typeof createServer>): Promise<void> =>
  * @param options Adapter configuration.
  * @returns Adapter handle for lifecycle management.
  */
-export const createNodeAdapter = (
+export const mkNodeAdapter = (
   handler: RawHandler,
   options: NodeAdapterOptions,
 ): NodeAdapterHandle => {
-  const host = getOrElse(() => '0.0.0.0')(fromNullable(options.host));
+  const host = getOrElseOption(() => '0.0.0.0')(fromNullable(options.host));
   const server = createServer(bindNodeRequest(handler, options.logger));
 
   const listen = (gracefulShutdown: boolean = true): void => {

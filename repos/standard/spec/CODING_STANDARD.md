@@ -3,7 +3,7 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 1.2.0
+**Version:** 1.3.0
 **Date:** 2026-07-23
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
@@ -11,6 +11,11 @@ Codename TSF++ (tsfpp)
 ---
 
 ## Changelog
+
+### 1.3.0 — 2026-07-23
+- **New Rule 7.8** — ADT-combinator naming convention: `Result` is the base ADT and its combinators are unsuffixed; a combinator specialised to another ADT MUST carry that ADT's full type name as a suffix (`mapOption`, `mapList`, `headNonEmpty`). Abbreviated (`mapO`) and single-letter (`getOrElseR`) suffixes are forbidden.
+- **Rule 7.3 tightened** — `mk` is the canonical smart-constructor prefix. `create*` is no longer sanctioned; use `mk*`. `as*` / `fromX` remain permitted for their specific roles.
+- **`@tsfpp/prelude` 2.0.0** and **`@tsfpp/boundary` 2.0.0** apply the two rules above (breaking renames). See each package CHANGELOG.
 
 ### 1.2.0 — 2026-07-23
 - **New Rule 1.13** — Numeric hazards: `NaN`, `Infinity`, and coercion-based number parsing are forbidden in the core; constrained numerics are branded (`Int`, `Positive`, `NonNegative`) and finiteness is guarded at the boundary.
@@ -1006,10 +1011,18 @@ const maxRetries = 3
 
 **Rationale.** Signals construction with potential validation, distinguishing constructors from ordinary functions.
 
+`mk` is the canonical construction prefix and MUST be used for value and error constructors alike (`mkNodeId`, `mkProblem`, `mkNotFoundError`, `mkHandler`). `as` is reserved for total coercions between representationally-identical types (`asHandle`), and `fromX` for conversions that name their source (`fromString`, `fromNullable`). Other construction prefixes — in particular `create*` — are **not** permitted; a factory that returns a handler or adapter is still a constructor and uses `mk`.
+
 ```typescript
 const mkNodeId = (raw: string): NodeId => ...
 const asHandle = (raw: string): Handle => ...
 const fromString = (raw: string): Option<Direction> => ...
+```
+
+**Don't**
+```typescript
+const createHandler = (deps: Deps): Handler => ...  // use mkHandler
+const notFoundError = (id: string): ApiError => ... // use mkNotFoundError
 ```
 
 ---
@@ -1048,6 +1061,37 @@ const withRetry = ...
 ```
 
 The `@tsfpp/boundary` package uses this convention throughout: `withIdempotency`, `withRequestLog`.
+
+---
+
+### Rule 7.8 — MUST: Suffix ADT-specialised combinators with the ADT's full type name; `Result` is the unsuffixed base
+
+**Rationale.** In a flat prelude (no module namespacing), the same combinator exists for several ADTs — `map` for `Result`, `Option`, `List`. A reader must be able to tell from the name alone which ADT a combinator targets, and must be able to predict the name of the variant they need. That requires one rule with no exceptions, because the failure mode is silent: picking the wrong-ADT combinator either fails to type-check (noise) or, where the shapes coincide, compiles against the wrong intent.
+
+The convention has two parts:
+
+1. **`Result` is the base ADT.** Its combinators are unsuffixed: `map`, `flatMap`, `getOrElse`, `match`, `mapErr`, `tap`, `traverseArray`. `Result` is chosen as the base because effectful, fallible computation is the dominant case in application code, and its combinators are the most frequently written.
+2. **Every other ADT carries its full type name as a suffix.** `Option` → `mapOption`, `flatMapOption`, `getOrElseOption`, `orElseOption`, `matchOption`, `traverseArrayOption`. `List` → `mapList`, `foldList`, `filterList`. `NonEmptyReadonlyArray` → `headNonEmpty`, `lastNonEmpty`.
+
+Abbreviated suffixes (`mapO`, `headNE`) and single-letter suffixes (`getOrElseR`) are forbidden: they are unpredictable (is Option `O` or the first letter of the operation?) and they let the "base" ADT drift between families, which is precisely the inconsistency this rule removes.
+
+**Do**
+```typescript
+import { map, getOrElse, mapOption, getOrElseOption, headNonEmpty } from '@tsfpp/prelude'
+
+const total = pipe(parseAmounts(raw), map(sum))              // Result — base, unsuffixed
+const label = getOrElseOption(() => 'anon')(findName(user))  // Option — full suffix
+const first = headNonEmpty(guaranteedNonEmpty)               // NonEmpty — full suffix
+```
+
+**Don't**
+```typescript
+const label = getOrElse(() => 'anon')(findName(user)) // ambiguous: Result or Option?
+const x = mapO(f)(opt)                                 // abbreviated suffix
+const y = getOrElseR(g)(res)                           // single-letter suffix, base drift
+```
+
+**Scope.** This rule governs *ADT-parametric combinators* — functions that take an ADT and transform or eliminate it. It does not rename data constructors (`some`, `ok`, `cons`), type guards (`isSome`, `isOk` — governed by Rule 7.5), or conversions that already name their source/target (`fromArray`, `toArray`, `fromNullable`).
 
 ---
 
@@ -1563,6 +1607,7 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 - [ ] Sum types have a literal discriminant: `_tag` (prelude) / `kind` (domain).
 - [ ] Every `switch` on a sum type ends in `absurd(x)` or `ts-pattern`'s `.exhaustive()`.
 - [ ] Branded types created only via `mk*` / `as*` / `from*` smart constructors.
+- [ ] Constructors prefixed `mk` (no `create*`); ADT combinators suffixed by full type name, `Result` unsuffixed (Rules 7.3, 7.8).
 - [ ] No `interface` (unless deviation justified).
 - [ ] No `enum`. No `class`. No `this`. No `new` (outside adapter boundary).
 - [ ] No coercion parsing (`Number()`, `parseInt`) or `NaN`/`Infinity` in the core; constrained numerics branded (`Int`/`Positive`/`NonNegative`).
@@ -1589,6 +1634,7 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 - [ ] Body ≤ 40 lines, complexity ≤ 10, nesting ≤ 4.
 - [ ] Pipelines ≤ 8 stages; longer pipelines decomposed and named.
 - [ ] Discriminants accessed via `isOk` / `isSome` / `isErr` / `isNone`, never `result._tag`.
+- [ ] Constructors use `mk*` (not `create*`); ADT combinators suffixed by full type name (`mapOption`, not `mapO`/`getOrElseR`), `Result` unsuffixed (Rules 7.3, 7.8).
 
 ### Tests and docs
 - [ ] Property-based tests cover the laws of every new combinator.

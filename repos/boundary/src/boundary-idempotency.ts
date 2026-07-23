@@ -5,7 +5,7 @@
  * Idempotency middleware and request logging middleware.
  */
 
-import { absurd, fromNullable, getOrElse, isErr, isNone, isSome, tryCatchAsync } from '@tsfpp/prelude';
+import { absurd, fromNullable, getOrElseOption, isErr, isNone, isSome, tryCatchAsync } from '@tsfpp/prelude';
 
 import {
   type IdempotencyKey,
@@ -153,7 +153,7 @@ const mkRequestHash = async (req: Request): Promise<string> => {
 };
 
 const resolvePrincipalId = (req: Request): PrincipalId | null => {
-  const principalValue = getOrElse(() => '')(fromNullable(req.headers.get('x-principal-id')));
+  const principalValue = getOrElseOption(() => '')(fromNullable(req.headers.get('x-principal-id')));
   const principalOption = mkPrincipalId(principalValue);
   return isSome(principalOption) ? principalOption.value : null;
 };

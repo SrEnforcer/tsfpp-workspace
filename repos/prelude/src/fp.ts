@@ -295,38 +295,38 @@ export const fromNonEmptyString = (value: string | undefined): Option<string> =>
 /**
  * Returns Option value or lazy fallback.
  */
-export const getOrElse =
+export const getOrElseOption =
   <A>(onNone: () => A) =>
   (o: Option<A>): A =>
     isSome(o) ? o.value : onNone();
 
 /**
  * Maps the inner value of a Some; passes None through unchanged.
- * @law Identity:    mapO((x) => x)(o) ≡ o
- * @law Composition: mapO(f ∘ g)(o) ≡ mapO(f)(mapO(g)(o))
+ * @law Identity:    mapOption((x) => x)(o) ≡ o
+ * @law Composition: mapOption(f ∘ g)(o) ≡ mapOption(f)(mapOption(g)(o))
  */
-export const mapO =
+export const mapOption =
   <A, B>(f: (a: A) => B) =>
   (o: Option<A>): Option<B> =>
     isSome(o) ? some(f(o.value)) : none;
 
 /**
  * Monadic bind for Option.
- * @law Left identity:  flatMapO(f)(some(a)) ≡ f(a)
- * @law Right identity: flatMapO(some)(o)     ≡ o
- * @law Associativity:  flatMapO(g)(flatMapO(f)(o)) ≡ flatMapO(x => flatMapO(g)(f(x)))(o)
+ * @law Left identity:  flatMapOption(f)(some(a)) ≡ f(a)
+ * @law Right identity: flatMapOption(some)(o)     ≡ o
+ * @law Associativity:  flatMapOption(g)(flatMapOption(f)(o)) ≡ flatMapOption(x => flatMapOption(g)(f(x)))(o)
  */
-export const flatMapO =
+export const flatMapOption =
   <A, B>(f: (a: A) => Option<B>) =>
   (o: Option<A>): Option<B> =>
     isSome(o) ? f(o.value) : none;
 
 /**
  * Returns the first Some or the lazy alternative when None.
- * @law Left identity:  orElse(() => some(b))(some(a)) ≡ some(a)
- * @law Right identity: orElse(() => none)(o)          ≡ o
+ * @law Left identity:  orElseOption(() => some(b))(some(a)) ≡ some(a)
+ * @law Right identity: orElseOption(() => none)(o)          ≡ o
  */
-export const orElse =
+export const orElseOption =
   <A>(onNone: () => Option<A>) =>
   (o: Option<A>): Option<A> =>
     isSome(o) ? o : onNone();
@@ -491,13 +491,13 @@ export const traverseArray =
  * collect the results if all succeed; return None if any element is absent.
  *
  * @example
- * traverseArrayO(fromNullable)([1, 2, 3]) // Some([1, 2, 3])
- * traverseArrayO(fromNullable)([1, null, 3]) // None
+ * traverseArrayOption(fromNullable)([1, 2, 3]) // Some([1, 2, 3])
+ * traverseArrayOption(fromNullable)([1, null, 3]) // None
  *
- * @law traverseArrayO(some)(items) ≡ some(items)
- * @law traverseArrayO(f)([])       ≡ some([])
+ * @law traverseArrayOption(some)(items) ≡ some(items)
+ * @law traverseArrayOption(f)([])       ≡ some([])
  */
-export const traverseArrayO =
+export const traverseArrayOption =
   <A, B>(f: (a: A) => Option<B>) =>
   (items: ReadonlyArray<A>): Option<ReadonlyArray<B>> =>
     items.reduce<Option<ReadonlyArray<B>>>(
@@ -513,17 +513,17 @@ export const traverseArrayO =
  * Collapses an array of Options into an Option of an array.
  * Returns None if any element is None; otherwise Some of all values.
  *
- * Convenience specialisation of `traverseArrayO` for when you already
+ * Convenience specialisation of `traverseArrayOption` for when you already
  * have a `ReadonlyArray<Option<A>>`.
  *
  * @example
- * sequenceArrayO([some(1), some(2), some(3)]) // Some([1, 2, 3])
- * sequenceArrayO([some(1), none, some(3)])     // None
+ * sequenceArrayOption([some(1), some(2), some(3)]) // Some([1, 2, 3])
+ * sequenceArrayOption([some(1), none, some(3)])     // None
  *
- * @law sequenceArrayO(xs) ≡ traverseArrayO(x => x)(xs)
+ * @law sequenceArrayOption(xs) ≡ traverseArrayOption(x => x)(xs)
  */
-export const sequenceArrayO = <A>(items: ReadonlyArray<Option<A>>): Option<ReadonlyArray<A>> =>
-  traverseArrayO<Option<A>, A>((o) => o)(items);
+export const sequenceArrayOption = <A>(items: ReadonlyArray<Option<A>>): Option<ReadonlyArray<A>> =>
+  traverseArrayOption<Option<A>, A>((o) => o)(items);
 
 /**
  * Runs an observer effect for Ok values and returns input Result.
@@ -827,9 +827,9 @@ export const intoMap = <K, V>(entries: ReadonlyArray<readonly [K, V]>): Readonly
  * Preconditions: none.
  * Returns: ReadonlyArray of [K, V] tuples in insertion order.
  *
- * @law intoMap(entriesOfMap(m)) ≡ m  (same key/value pairs, same order)
+ * @law intoMap(entriesOf(m)) ≡ m  (same key/value pairs, same order)
  */
-export const entriesOfMap = <K, V>(map: ReadonlyMap<K, V>): ReadonlyArray<readonly [K, V]> =>
+export const entriesOf = <K, V>(map: ReadonlyMap<K, V>): ReadonlyArray<readonly [K, V]> =>
   Array.from(map.entries(), ([k, v]): readonly [K, V] => [k, v]);
 
 /**
@@ -843,7 +843,7 @@ export const entriesOfMap = <K, V>(map: ReadonlyMap<K, V>): ReadonlyArray<readon
  * Returns: readonly Record with the same key/value pairs.
  *
  * @law toObject(intoMap(entries)) ≡ Object.fromEntries(entries)
- * @law entriesOfMap(m).every(([k, v]) => toObject(m)[k] === v)
+ * @law entriesOf(m).every(([k, v]) => toObject(m)[k] === v)
  */
 export const toObject = <T>(map: ReadonlyMap<string, T>): Readonly<Record<string, T>> =>
   Object.fromEntries(map) as Readonly<Record<string, T>>; // eslint-disable-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.4): fromEntries cannot preserve generic key/value mapping in its current lib typing
@@ -865,7 +865,7 @@ export const assoc =
   <K, V>(key: K, value: V) =>
   (map: ReadonlyMap<K, V>): ReadonlyMap<K, V> =>
     intoMap([
-      ...entriesOfMap(map).filter(([k]) => k !== key),
+      ...entriesOf(map).filter(([k]) => k !== key),
       [key, value],
     ]);
 
@@ -884,7 +884,7 @@ export const assoc =
 export const dissoc =
   <K>(key: K) =>
   <V>(map: ReadonlyMap<K, V>): ReadonlyMap<K, V> =>
-    intoMap(entriesOfMap(map).filter(([k]) => k !== key));
+    intoMap(entriesOf(map).filter(([k]) => k !== key));
 
 /**
  * Looks up a key in a ReadonlyMap, returning an Option.
@@ -1073,27 +1073,27 @@ export const matchOption =
  * their common result type. The error handler comes first, mirroring the
  * `Err`-left / `Ok`-right reading order.
  *
- * @law matchResult(e, o)(err(x))  ≡ e(x)
- * @law matchResult(e, o)(ok(a))   ≡ o(a)
+ * @law match(e, o)(err(x))  ≡ e(x)
+ * @law match(e, o)(ok(a))   ≡ o(a)
  * @example
- * const status = matchResult(
+ * const status = match(
  *   (e: ApiError) => e.kind,
  *   (u: User) => 'ok',
  * );
  */
-export const matchResult =
+export const match =
   <A, E, B>(onErr: (e: E) => B, onOk: (a: A) => B) =>
   (r: Result<A, E>): B =>
     isOk(r) ? onOk(r.value) : onErr(r.error);
 
 /**
  * Unwraps a Result to its success value, computing a fallback from the error.
- * The Result counterpart to Option's `getOrElse`.
+ * The Result counterpart to Option's `getOrElseOption`.
  *
- * @law getOrElseR(f)(ok(a))   ≡ a
- * @law getOrElseR(f)(err(e))  ≡ f(e)
+ * @law getOrElse(f)(ok(a))   ≡ a
+ * @law getOrElse(f)(err(e))  ≡ f(e)
  */
-export const getOrElseR =
+export const getOrElse =
   <A, E>(onErr: (e: E) => A) =>
   (r: Result<A, E>): A =>
     isOk(r) ? r.value : onErr(r.error);
@@ -1133,18 +1133,18 @@ export const findO =
 // `head` on a `ReadonlyArray` must return `Option<A>` because the array may be
 // empty. When a caller has already established non-emptiness, that fact should
 // live in the type, not be re-checked at every use site. `NonEmptyReadonlyArray`
-// makes the empty case unrepresentable, so `headNE` / `lastNE` are total.
+// makes the empty case unrepresentable, so `headNonEmpty` / `lastNonEmpty` are total.
 // ---------------------------------------------------------------------------
 
 /**
  * A readonly array proven to hold at least one element. The leading `A` in the
- * tuple is what makes `headNE` total.
+ * tuple is what makes `headNonEmpty` total.
  */
 export type NonEmptyReadonlyArray<A> = readonly [A, ...ReadonlyArray<A>];
 
 /**
  * Type guard proving an array is non-empty. Narrows to
- * `NonEmptyReadonlyArray<A>`, after which `headNE` / `lastNE` apply.
+ * `NonEmptyReadonlyArray<A>`, after which `headNonEmpty` / `lastNonEmpty` apply.
  */
 export const isNonEmptyArray = <A>(
   xs: ReadonlyArray<A>,
@@ -1165,14 +1165,14 @@ export const mkNonEmpty = <A>(
  * Total head: the first element of a non-empty array, with no `Option`
  * wrapper, because the type guarantees it exists.
  */
-export const headNE = <A>(xs: NonEmptyReadonlyArray<A>): A => xs[0];
+export const headNonEmpty = <A>(xs: NonEmptyReadonlyArray<A>): A => xs[0];
 
 /**
  * Total last: the final element of a non-empty array. Uses `reduce` without an
  * initial value, which is itself total only on non-empty input — exactly the
  * guarantee the type carries.
  */
-export const lastNE = <A>(xs: NonEmptyReadonlyArray<A>): A =>
+export const lastNonEmpty = <A>(xs: NonEmptyReadonlyArray<A>): A =>
   xs.reduce((_prev, curr) => curr);
 
 // ---------------------------------------------------------------------------

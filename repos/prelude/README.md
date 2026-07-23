@@ -39,15 +39,15 @@ From `@tsfpp/prelude`:
 
 - **Function combinators**: `pipe`, `flow`, `comp`, `complement`
 - **Exhaustiveness**: `absurd`
-- **Option**: `some`, `none`, `isSome`, `isNone`, `mapO`, `flatMapO`, `orElse`, `getOrElse`, `matchOption`
+- **Option**: `some`, `none`, `isSome`, `isNone`, `mapOption`, `flatMapOption`, `orElseOption`, `getOrElseOption`, `matchOption`
 - **Unit**: `unit`, `Unit`
-- **Result**: `ok`, `err`, `isOk`, `isErr`, `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tryCatch`, `tryCatchAsync`, `tap`, `tapErr`, `matchResult`, `getOrElseR`
+- **Result**: `ok`, `err`, `isOk`, `isErr`, `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tryCatch`, `tryCatchAsync`, `tap`, `tapErr`, `match`, `getOrElse`
 - **Logger port**: `LogLevel`, `LogEntry`, `Logger`
 - **Conversions and guards**: `fromNullable`, `isDefined`, `toNullable`, `isRecord`, `fromUnknownString`, `fromUnknownArray`, `fromUnknownArrayOf`, `fromNonEmptyString`, `getTypedField`, `getStringField`, `getNumberField`, `getBooleanField`, `findO`
 - **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
 - **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
-- **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `headNE`, `lastNE`
-- **Collection helpers**: `traverseArray`, `traverseArrayO`, `sequenceArrayO`, `unique`, `intoMap`, `entriesOfMap`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
+- **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `headNonEmpty`, `lastNonEmpty`
+- **Collection helpers**: `traverseArray`, `traverseArrayOption`, `sequenceArrayOption`, `unique`, `intoMap`, `entriesOf`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
 - **Immutable list ADT**: `List`, `nil`, `cons`, `singletonList`, `fromArray`, `toArray`, `headList`, `tailList`, `isEmptyList`, `lengthList`, `mapList`, `flatMapList`, `appendList`, `reverseList`, `filterList`, `foldList`, `foldLeftList`, `foldLeftListCurried`, `traverseList`
 
 ## Why a prelude when these libraries exist?
@@ -127,7 +127,9 @@ const doubled = isOk(result) ? ok(result.value * 2) : result;
 
 ### Use `flatMap` for dependent steps, `map` for independent ones
 
-If the next step might itself fail or be absent, use `flatMap` (or `flatMapO`). If it cannot, use `map` (or `mapO`). Mismatching them produces nested `Result<Result<T, E>, E>` or `Option<Option<T>>`, which is almost never what you want.
+If the next step might itself fail or be absent, use `flatMap` (or `flatMapOption`). If it cannot, use `map` (or `mapOption`). Mismatching them produces nested `Result<Result<T, E>, E>` or `Option<Option<T>>`, which is almost never what you want.
+
+> **Naming convention.** `Result` is the base ADT: its combinators are unsuffixed (`map`, `flatMap`, `getOrElse`, `match`). Combinators specialised to another ADT carry that ADT's full type name as a suffix — `mapOption`, `flatMapOption`, `getOrElseOption`, `matchOption`, `mapList`, `headNonEmpty`. There is no abbreviated (`mapO`) or single-letter (`getOrElseR`) form. See Rule 7.8 in the standard.
 
 ```ts
 // map: transformation cannot fail
@@ -137,25 +139,25 @@ const upper = map((s: string) => s.toUpperCase())(name);
 const validated = flatMap(validateEmail)(input);
 ```
 
-### Use `orElse` to keep Option context, `getOrElse` to collapse it
+### Use `orElseOption` to keep Option context, `getOrElseOption` to collapse it
 
-For optional data, use `orElse` when you still want an `Option<A>` after fallback. Use `getOrElse` when you want a concrete `A`.
+For optional data, use `orElseOption` when you still want an `Option<A>` after fallback. Use `getOrElseOption` when you want a concrete `A`.
 
 ```ts
 import {
   fromNonEmptyString,
-  getOrElse,
-  orElse,
+  getOrElseOption,
+  orElseOption,
   some,
 } from '@tsfpp/prelude';
 
 const parsed = fromNonEmptyString(rawName);
 
 // Option -> Option
-const withFallback = orElse(() => some('Anonymous'))(parsed);
+const withFallback = orElseOption(() => some('Anonymous'))(parsed);
 
 // Option -> string
-const value = getOrElse(() => 'Anonymous')(parsed);
+const value = getOrElseOption(() => 'Anonymous')(parsed);
 ```
 
 ### Use `isDefined` for `undefined` filtering
