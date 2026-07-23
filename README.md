@@ -20,4 +20,5 @@ The local SSH key `id_ed25519_tsfpp` authenticates successfully as GitHub user `
 
 - [WORKSPACE.md](WORKSPACE.md) documents the root-first workflow.
 - `scripts/status-all.sh` shows the status of every subtree path.
+- `scripts/pull-all.sh` pulls upstream changes from the child repositories.
 - `scripts/push-all.sh` pushes committed subtree changes back to the child repositories.

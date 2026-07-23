@@ -14,9 +14,16 @@ Work from the repository root.
 2. Push the root repo.
 3. Run `scripts/push-all.sh` to push committed subtree changes back to the child repos.
 
+## Sync flow
+
+1. Run `scripts/pull-all.sh` to import upstream changes from the child repos.
+2. Resolve any merge conflicts in the root workspace.
+3. Commit the updated root state.
+
 ## Helpful commands
 
 - `scripts/status-all.sh` shows status for every subtree path.
+- `scripts/pull-all.sh` pulls upstream changes from the child repos.
 - `scripts/push-all.sh` pushes committed subtree changes back to the child repos.
 
 ## SSH
