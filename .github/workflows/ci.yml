@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commitlint:
+    name: Commitlint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Lint commit messages
+        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Typecheck — prelude
+        run: pnpm --filter @tsfpp/prelude run typecheck
+
+      - name: Typecheck — templates/starter
+        run: pnpm --filter tsfpp-starter run typecheck
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Lint — prelude
+        run: pnpm --filter @tsfpp/prelude run lint
+
+      - name: Lint — eslint-config
+        run: pnpm --filter @tsfpp/eslint-config run lint
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Test — prelude
+        run: pnpm --filter @tsfpp/prelude run test:coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-prelude
+          path: packages/prelude/coverage/
+          retention-days: 14

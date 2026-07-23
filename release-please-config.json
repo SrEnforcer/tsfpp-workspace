@@ -1,0 +1,54 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "0000000000000000000000000000000000000000",
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": false,
+  "changelog-path": "CHANGELOG.md",
+  "changelog-sections": [
+    {
+      "type": "feat",
+      "section": "Features",
+      "hidden": false
+    },
+    {
+      "type": "fix",
+      "section": "Bug Fixes",
+      "hidden": false
+    },
+    {
+      "type": "perf",
+      "section": "Performance",
+      "hidden": false
+    },
+    {
+      "type": "refactor",
+      "section": "Refactoring",
+      "hidden": false
+    },
+    {
+      "type": "docs",
+      "section": "Documentation",
+      "hidden": false
+    }
+  ],
+  "packages": {
+    ".": {
+      "package-name": "tsfpp-spec",
+      "initial-version": "1.0.0"
+    },
+    "packages/prelude": {
+      "package-name": "@tsfpp/prelude",
+      "initial-version": "1.0.0"
+    },
+    "packages/eslint-config": {
+      "package-name": "@tsfpp/eslint-config",
+      "initial-version": "1.0.0"
+    },
+    "packages/tsconfig": {
+      "package-name": "@tsfpp/tsconfig",
+      "initial-version": "1.0.0"
+    }
+  },
+  "pull-request-title-pattern": "chore: release ${scope}",
+  "release-type": "node"
+}

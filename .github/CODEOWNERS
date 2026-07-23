@@ -1,0 +1,21 @@
+# CODEOWNERS
+#
+# Replace @tsfpp with the correct maintainer handle/team if needed.
+
+# Default owner for all files
+* @tsfpp
+
+# Specification and docs
+/spec/ @tsfpp
+/docs/ @tsfpp
+
+# Packages
+/packages/prelude/ @tsfpp
+/packages/eslint-config/ @tsfpp
+/packages/tsconfig/ @tsfpp
+
+# Integrations and workflows
+/integrations/ @tsfpp
+/workflow/ @tsfpp
+/scripts/ @tsfpp
+/.github/ @tsfpp

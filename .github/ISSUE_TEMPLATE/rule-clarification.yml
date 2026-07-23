@@ -1,0 +1,67 @@
+name: Rule Clarification
+about: Ask for clarification on an existing TSF++ rule without proposing a rule change.
+title: "rule: clarify <section/rule-id>"
+labels:
+  - rule
+  - clarification
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template when a rule's intent or practical application is unclear.
+        If you want to change rule behavior or strength, use "Rule Proposal" instead.
+
+  - type: input
+    id: rule_id
+    attributes:
+      label: Rule Identifier
+      description: Section and rule number (for example, 4.5 or 11.3).
+      placeholder: "4.5"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_interpretation
+    attributes:
+      label: Current Interpretation
+      description: How you currently read the rule.
+      placeholder: "I interpret this rule as..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: confusion_point
+    attributes:
+      label: What Is Unclear
+      description: Describe the ambiguity, edge case, or contradiction.
+      placeholder: "This is unclear because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: code_example
+    attributes:
+      label: Minimal Code Example
+      description: Provide a minimal snippet that demonstrates the confusion.
+      render: typescript
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_guidance
+    attributes:
+      label: Expected Guidance
+      description: What clarification would resolve this for your team?
+      placeholder: "We need explicit guidance on..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I verified this is not already covered in spec/examples or spec/rationale.
+          required: true
+        - label: I am not proposing a rule behavior change in this issue.
+          required: true

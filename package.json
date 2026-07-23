@@ -1,0 +1,47 @@
+{
+  "name": "tsfpp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TSF++ — Purely Functional TypeScript coding standard, prelude, tooling, and IDE integrations.",
+  "homepage": "https://github.com/tsfpp/tsfpp#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsfpp/tsfpp.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "pnpm -r --if-present run lint",
+    "test": "pnpm -r --if-present run test",
+    "test:coverage": "pnpm -r --if-present run test:coverage",
+    "build": "pnpm -r --if-present run build",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "clean": "find . -name 'dist' -not -path '*/node_modules/*' -exec rm -rf {} + ; find . -name 'coverage' -not -path '*/node_modules/*' -exec rm -rf {} +"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.0.0",
+    "eslint-plugin-functional": "^7.0.0",
+    "typescript": "^5.7.0"
+  },
+  "keywords": [
+    "typescript",
+    "functional-programming",
+    "algebraic-data-types",
+    "coding-standard",
+    "tsfpp",
+    "adt",
+    "monads",
+    "immutability"
+  ]
+}
