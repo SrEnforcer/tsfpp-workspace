@@ -1,8 +1,8 @@
 # Repositories
 
-This folder will contain one subdirectory per Git repository.
+This folder contains one subtree-managed directory per upstream repository.
 
-Planned layout:
+Current layout:
 
 - `repos/tsfpp`
 - `repos/standard`

@@ -5,20 +5,19 @@ Work from the repository root.
 ## Read and edit
 
 - Open the root in Claude Code.
-- Work inside the submodules under `repos/`.
+- Work inside the subtree directories under `repos/`.
 - Keep changes local to the repo that owns the code.
 
 ## Commit flow
 
-1. Commit changes inside the relevant submodule.
-2. Push that submodule to its own GitHub repo.
-3. Commit the updated submodule pointer in the root repo.
-4. Push the root repo last.
+1. Edit and commit in the root repo.
+2. Push the root repo.
+3. Run `scripts/push-all.sh` to push committed subtree changes back to the child repos.
 
 ## Helpful commands
 
-- `scripts/status-all.sh` shows status for every submodule.
-- `scripts/push-all.sh` pushes submodules that have local changes.
+- `scripts/status-all.sh` shows status for every subtree path.
+- `scripts/push-all.sh` pushes committed subtree changes back to the child repos.
 
 ## SSH
 

@@ -1,16 +1,16 @@
 # tsfpp workspace
 
-This repository is set up as a single workspace root that contains multiple Git repositories so Claude Code can read and edit everything from one place.
+This repository is set up as a single workspace root that contains multiple repositories as subtree-managed directories so Claude Code can read and edit everything from one place.
 
 ## Structure
 
-- `repos/` for the checked-out Git repositories
+- `repos/` for subtree-managed copies of the project repositories
 - `shared/` for code reused across projects, if needed later
 - `docs/` for notes, design decisions, or runbooks
 
-## Why submodules here?
+## Why subtrees here?
 
-Each repository keeps its own history, but they live under one parent workspace so Claude Code can inspect and edit them together.
+Each project lives inside this repository as ordinary tracked files, so cloud tools can read the full workspace from one clone. Changes can still be pushed back to the original child repositories with `git subtree push`.
 
 ## GitHub SSH
 
@@ -19,5 +19,5 @@ The local SSH key `id_ed25519_tsfpp` authenticates successfully as GitHub user `
 ## Workflow helpers
 
 - [WORKSPACE.md](WORKSPACE.md) documents the root-first workflow.
-- `scripts/status-all.sh` shows the status of every submodule.
-- `scripts/push-all.sh` pushes changed submodules from the root.
+- `scripts/status-all.sh` shows the status of every subtree path.
+- `scripts/push-all.sh` pushes committed subtree changes back to the child repositories.
