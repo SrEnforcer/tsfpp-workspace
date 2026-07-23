@@ -1,0 +1,8 @@
+/**
+ * @module index
+ * @packageDocumentation
+ *
+ * Public surface of the `boundary` package.
+ * Re-exports all boundary primitives from boundary.ts.
+ */
+export * from './boundary.js';
