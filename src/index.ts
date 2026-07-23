@@ -1,0 +1,7 @@
+/**
+ * @module index
+ *
+ * Public surface of the `prelude` package.
+ * Re-exports all functional primitives from fp.ts.
+ */
+export * from './fp.js';
