@@ -10,7 +10,7 @@ This repository is the **umbrella** for the TSF++ ecosystem — documentation, a
 
 1. **A specification** — [`@tsfpp/standard`](../standard/spec/CODING_STANDARD.md) — a normative set of rules for writing TypeScript that the compiler can prove correct, the type system can keep total, and reviewers can audit cheaply.
 2. **A reference library** — [`@tsfpp/prelude`](../prelude) — a small, curated functional prelude (`Option`, `Result`, branded types, exhaustiveness witness, and data-last combinators) that adopters can use directly or copy as a template.
-3. **Tooling & integrations** — [`@tsfpp/eslint-config`](../eslint-config), [`@tsfpp/tsconfig`](../tsconfig), [`@tsfpp/workflow`](../workflow), plus the AI-assistant bindings under [`integrations/`](integrations) and the [`templates/starter`](templates/starter) scaffold.
+3. **Tooling & integrations** — [`@tsfpp/eslint-config`](../eslint-config), [`@tsfpp/tsconfig`](../tsconfig), [`@tsfpp/workflow`](../workflow), the AI-assistant bindings in [`@tsfpp/agents`](../agents) (Copilot, Claude, and MCP-driven tooling compiled from universal `ai/` sources), and the [`templates/starter`](templates/starter) scaffold.
 
 The layers are independent. You can adopt the spec without the prelude, the prelude without the integrations, or the integrations as a starting point for your own house style.
 
@@ -96,12 +96,11 @@ This umbrella repository holds the docs, integrations, and starter template:
 
 ```
 docs/                    Guides — getting started, adoption, comparison, SemVer, trunk-based dev
-integrations/copilot/    GitHub Copilot agents, prompts, and instructions
-integrations/claude-code/  (planned) Claude Code equivalents
-integrations/cursor/     (planned) Cursor equivalents
 templates/starter/       Ready-to-clone TSF++ project scaffold
 scripts/                 Repository helper scripts
 ```
+
+AI-assistant tooling (Copilot, Claude, MCP-driven agents, skills, and prompts) lives in the [`@tsfpp/agents`](../agents) sibling repository, which compiles it from universal `ai/` sources.
 
 The specification and the published packages live in their own sibling repositories:
 
@@ -111,6 +110,7 @@ The specification and the published packages live in their own sibling repositor
 ../eslint-config/  @tsfpp/eslint-config — opinionated lint rules
 ../tsconfig/       @tsfpp/tsconfig — strict tsconfig presets
 ../workflow/       @tsfpp/workflow — husky, commitlint, and release-please scaffolding
+../agents/         @tsfpp/agents — AI-assistant tooling (Copilot, Claude, MCP agents/skills/prompts)
 ```
 
 ## Documentation

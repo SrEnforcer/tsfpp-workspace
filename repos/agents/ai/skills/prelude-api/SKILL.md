@@ -20,7 +20,11 @@ All combinators are curried data-last and compose with `pipe`.
 import { pipe, ok, err, some, none, ... } from '@tsfpp/prelude';
 ```
 
-Never import from `ramda` directly. Never import sub-paths.
+Never import sub-paths. Ramda is **not** a dependency (removed in standard v1.1.0): `@tsfpp/prelude` covers the ADTs and core combinators. For collection plumbing the standard *recommends* Remeda, but it is **not** a dependency of these packages — a project may add it if needed; do not assume it is present.
+
+### Naming convention (Rule 7.8)
+
+`Result` is the **base** ADT — its combinators are unsuffixed (`map`, `flatMap`, `getOrElse`, `match`, `mapErr`, `tap`). Every other ADT carries its full type name as a suffix: `mapOption` / `getOrElseOption` / `matchOption` (Option), `mapList` (List), `headNonEmpty` (NonEmpty). There is no abbreviated (`mapO`) or single-letter (`getOrElseR`) form. So bare `getOrElse` collapses a **`Result`**; `getOrElseOption` collapses an `Option`.
 
 ---
 
@@ -35,8 +39,8 @@ For the complete, version-accurate export list:
 
 ### `map` vs `flatMap`
 
-- Transformation **cannot fail** → `map` / `mapO`
-- Transformation **can fail or be absent** → `flatMap` / `flatMapO`
+- Transformation **cannot fail** → `map` / `mapOption`
+- Transformation **can fail or be absent** → `flatMap` / `flatMapOption`
 - Mismatching produces `Result<Result<T,E>,E>` or `Option<Option<T>>` — always wrong.
 
 ```ts
@@ -44,10 +48,10 @@ const upper = map((s: string) => s.toUpperCase())(name);   // cannot fail
 const valid = flatMap(validateEmail)(input);                // can fail
 ```
 
-### `orElse` vs `getOrElse`
+### `orElseOption` vs `getOrElseOption`
 
-- Keep `Option` context → `orElse(() => some(fallback))`
-- Collapse to concrete value → `getOrElse(() => fallback)`
+- Keep `Option` context → `orElseOption(() => some(fallback))`
+- Collapse to concrete value → `getOrElseOption(() => fallback)`
 
 ### `pipe` vs `flow`
 
@@ -153,15 +157,15 @@ const all = traverseArray(parseFoo)(rawItems); // Result<ReadonlyArray<Foo>, E>
 // Never: rawItems.map(parseFoo) — produces ReadonlyArray<Result<Foo,E>>
 ```
 
-### `traverseArrayO` / `sequenceArrayO` — collect only if every element is `Some`
+### `traverseArrayOption` / `sequenceArrayOption` — collect only if every element is `Some`
 
 ```ts
-traverseArrayO(fromNullable)([1, 2, 3]);    // Some([1, 2, 3])
-traverseArrayO(fromNullable)([1, null, 3]); // None
+traverseArrayOption(fromNullable)([1, 2, 3]);    // Some([1, 2, 3])
+traverseArrayOption(fromNullable)([1, null, 3]); // None
 
-// Already have ReadonlyArray<Option<A>>? Use sequenceArrayO directly:
-sequenceArrayO([some(1), some(2)]); // Some([1, 2])
-sequenceArrayO([some(1), none]);    // None
+// Already have ReadonlyArray<Option<A>>? Use sequenceArrayOption directly:
+sequenceArrayOption([some(1), some(2)]); // Some([1, 2])
+sequenceArrayOption([some(1), none]);    // None
 ```
 
 ### `fromUnknownArrayOf` — guard typed arrays from unknown
@@ -179,13 +183,13 @@ const strings = fromUnknownArrayOf(
 Always construct maps with `intoMap`. Never call `new Map()` directly.
 
 ```ts
-import { intoMap, entriesOfMap, assoc, dissoc, lookup } from '@tsfpp/prelude';
+import { intoMap, entriesOf, assoc, dissoc, lookup } from '@tsfpp/prelude';
 
 const m  = intoMap([['a', 1], ['b', 2]]); // ReadonlyMap<string, number>
 const v  = pipe(m, lookup('a'));           // Some(1)
 const m2 = pipe(m, assoc('c', 3));        // insert or replace
 const m3 = pipe(m2, dissoc('a'));          // remove
-const es = entriesOfMap(m);               // ReadonlyArray<readonly [string, number]>
+const es = entriesOf(m);               // ReadonlyArray<readonly [string, number]>
 ```
 
 ---

@@ -20,12 +20,17 @@ Full standard: `node_modules/@tsfpp/standard/spec/CODING_STANDARD.md`
 - `==` `!=` or truthiness checks on non-booleans (`if (str)`, `if (value)`)
 - Optional params `?` — use `Option<T>` or a defaults record
 - `default:` in an exhaustive switch — use `absurd(x)` instead
-- `import from 'ramda'` — use `@tsfpp/prelude`
+- `import from 'ramda'` / `'lodash'` — use `@tsfpp/prelude` (Ramda is not a dep; Remeda is the recommended, optional, collection lib — not a dep either)
 - `new Map()` `new Set()` — use `intoMap` / `intoSet` from `@tsfpp/prelude`
-- `if (x === null)` `if (x !== null)` `if (x === undefined)` `if (x !== undefined)` `if (!x)` `x ?? y` — any nullability check in any form; use `fromNullable` → `Option<T>`, then `isSome` / `isNone` / `getOrElse`
+- `if (x === null)` `if (x !== null)` `if (x === undefined)` `if (x !== undefined)` `if (!x)` `x ?? y` — any nullability check in any form; use `fromNullable` → `Option<T>`, then `isSome` / `isNone` / `getOrElseOption`
 - `try/catch` in core — use `tryCatch` / `tryCatchAsync` from `@tsfpp/prelude`
 - `console.log` `console.error` `console.warn` `console.info` — anywhere except `main.ts` / `server.ts` startup; use the injected `Logger` port from `@tsfpp/prelude`
 - `process.env` outside the config loader — use the typed `Config` record injected as a dependency
+- `Number(x)` `parseInt` `parseFloat` unary `+` in core — parse at the boundary and brand constrained numerics (`Int`/`Positive`/`NonNegative`); `NaN`/`Infinity` never leak inward (Rule 1.13)
+- global `isNaN` / `isFinite` — use `Number.isNaN` / `Number.isFinite` (Rule 1.13)
+- `Date.now()` `new Date()` `Math.random()` `crypto.randomUUID()` in core — inject a clock/entropy port via `Deps` (Rule 4.6)
+- `string` or `Error` as a `Result` error channel — use a `kind`-tagged discriminated union (Rule 6.7)
+- `create*` constructor prefix — use `mk*` (Rule 7.3)
 
 ## Always
 
@@ -33,7 +38,10 @@ Full standard: `node_modules/@tsfpp/standard/spec/CODING_STANDARD.md`
 - `readonly` on every record field and `ReadonlyArray<T>` for arrays
 - Explicit return type on every exported function
 - Sum-type dispatch via `switch` ending in `default: return absurd(x)`
-- Errors as data: `Result<T, E>` — never `throw` in core
+- Errors as data: `Result<T, E>` where `E` is a `kind`-tagged union — never `throw`, `string`, or `Error` in core (Rule 6.7)
+- Collapse `Option`/`Result` with a total `match` / `matchOption` when both arms yield a value (Rule 8.5)
+- `satisfies` (not `as`) to check a literal against a type without widening (Rule 1.14)
+- ADT combinators: `Result` unsuffixed, others suffixed by full type name — `mapOption`, `getOrElseOption`, `headNonEmpty` (Rule 7.8)
 - Pipelines via `pipe` from `@tsfpp/prelude`
 - JSDoc on every exported symbol (`@param`, `@returns`, `@law` where applicable)
 - `// DEVIATION(N.M): <reason>` immediately before any necessary rule violation

@@ -16,7 +16,8 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ### Removed
 
-- Removed the stale vendored copies of `packages/prelude`, `packages/eslint-config`, `packages/tsconfig`, `spec/`, and `workflow/`. These duplicated (at older versions) the canonical sibling repositories; this repository is now the umbrella for docs, integrations, and the starter template only.
+- Removed the stale vendored copies of `packages/prelude`, `packages/eslint-config`, `packages/tsconfig`, `spec/`, and `workflow/`. These duplicated (at older versions) the canonical sibling repositories; this repository is now the umbrella for docs and the starter template.
+- Removed `integrations/copilot/` — a superseded, Ramda-era Copilot integration (referenced the removed `ramda.ts`, a non-existent "Rule 13.1", and old prelude API names). The canonical, current AI-assistant tooling lives in `@tsfpp/agents`, which compiles Copilot, Claude, and MCP output from universal `ai/` sources.
 
 ### Changed
 

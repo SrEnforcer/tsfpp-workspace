@@ -354,7 +354,7 @@ Cross-cutting — applies to all layers. Check for hand-rolled patterns that `@t
 | Anti-pattern | Violation | Should be |
 |---|---|---|
 | `if (x === undefined)` / `if (x !== undefined)` / `if (x === null)` / `if (x !== null)` / `if (!x)` | MUST | `fromNullable(x)` → `Option<T>`; use `isSome` / `isNone` to branch |
-| `x ?? fallback` | MUST | `pipe(x, fromNullable, getOrElse(() => fallback))` |
+| `x ?? fallback` | MUST | `pipe(x, fromNullable, getOrElseOption(() => fallback))` |
 | `try/catch` outside adapter boundary | MUST | `tryCatch` / `tryCatchAsync` |
 | `.map()` on a fallible function | MUST | `traverseArray` |
 | `new Map()` | MUST | `intoMap([...])` |
@@ -362,14 +362,14 @@ Cross-cutting — applies to all layers. Check for hand-rolled patterns that `@t
 | `result._tag === 'Ok'` | MUST | `isOk(result)` |
 | `option._tag === 'Some'` | MUST | `isSome(option)` |
 | `Result<void, E>` | MUST | `Result<Unit, E>` with `ok(unit)` |
-| Manual null-coalescing guard | SHOULD | `getOrElse` / `orElse` |
+| Manual null-coalescing guard | SHOULD | `getOrElseOption` / `orElseOption` |
 | Side effect breaking `pipe` chain | SHOULD | `tap` / `tapErr` |
-| Manual `if/else` for Option fallback | SHOULD | `orElse` / `getOrElse` |
+| Manual `if/else` for Option fallback | SHOULD | `orElseOption` / `getOrElseOption` |
 
 Checklist:
 
-- [ ] No nullability checks in any form — `if (x === undefined)`, `if (x !== undefined)`, `if (x === null)`, `if (x !== null)`, `if (!x)`, `x ?? y` — use `fromNullable` / `getOrElse` / `isSome`
-- [ ] No `x ?? fallback` — use `getOrElse`
+- [ ] No nullability checks in any form — `if (x === undefined)`, `if (x !== undefined)`, `if (x === null)`, `if (x !== null)`, `if (!x)`, `x ?? y` — use `fromNullable` / `getOrElseOption` / `isSome`
+- [ ] No `x ?? fallback` — use `getOrElseOption`
 - [ ] No `try/catch` outside adapter boundaries — use `tryCatch`/`tryCatchAsync`
 - [ ] No `.map()` on fallible function — use `traverseArray`
 - [ ] No `new Map()` / `new Set()` — use `intoMap` / `intoSet`

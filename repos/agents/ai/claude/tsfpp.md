@@ -88,9 +88,9 @@ const findTrack = (id: TrackId): Promise<Result<Track, DbError>> =>
 ```ts
 const result = pipe(
   input,
-  mapO(transform),
-  flatMapO(validate),
-  getOrElse(() => fallback),
+  mapOption(transform),
+  flatMapOption(validate),
+  getOrElseOption(() => fallback),
 )
 ```
 
