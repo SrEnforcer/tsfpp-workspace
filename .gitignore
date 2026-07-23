@@ -1,0 +1,8 @@
+tmp/
+.ai/
+.claude/
+.github/copilot-instructions.md
+.github/agents/
+.github/instructions/
+.github/prompts/
+.github/skills/
