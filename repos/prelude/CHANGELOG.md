@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-07-24
+
+### Changed
+
+- Updated the package release metadata and downstream dependency references to `@tsfpp/eslint-config` 1.0.3.
+
 ## [2.0.1] - 2026-07-24
 
 ### Changed

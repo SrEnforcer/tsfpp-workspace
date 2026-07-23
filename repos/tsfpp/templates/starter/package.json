@@ -11,10 +11,10 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@tsfpp/prelude": "^2.0.1"
+    "@tsfpp/prelude": "^2.0.2"
   },
   "devDependencies": {
-    "@tsfpp/eslint-config": "^1.0.2",
+    "@tsfpp/eslint-config": "^1.0.3",
     "@tsfpp/tsconfig": "^1.0.0",
     "@commitlint/cli": "^19.0.0",
     "@commitlint/config-conventional": "^19.0.0",
