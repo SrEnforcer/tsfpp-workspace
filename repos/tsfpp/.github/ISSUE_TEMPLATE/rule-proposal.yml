@@ -1,0 +1,87 @@
+name: Rule Proposal
+about: Propose a new rule, a rule-level change, or a normative behavior change.
+title: "rule: proposal <section/rule-id or topic>"
+labels:
+  - rule
+  - proposal
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Rule changes affect all adopters. Please provide concrete rationale,
+        migration impact, and trade-off analysis.
+
+  - type: dropdown
+    id: proposal_type
+    attributes:
+      label: Proposal Type
+      options:
+        - New rule
+        - Change existing rule level (for example SHOULD -> MUST)
+        - Change existing rule behavior
+        - Deprecate or remove a rule
+    validations:
+      required: true
+
+  - type: input
+    id: scope
+    attributes:
+      label: Scope
+      description: Rule ID(s) or section(s) affected.
+      placeholder: "6.4"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What failure mode or maintainability problem does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_change
+    attributes:
+      label: Proposed Normative Text
+      description: Draft text in specification language (MUST/SHOULD/MAY).
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Which alternatives were considered and why rejected?
+    validations:
+      required: true
+
+  - type: textarea
+    id: migration_impact
+    attributes:
+      label: Migration Impact
+      description: What would existing adopters need to change?
+      placeholder: "Breaking / non-breaking, expected effort, mitigation path."
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Good/Bad Examples
+      description: Provide concrete examples for spec/examples updates.
+      render: typescript
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I reviewed relevant rationale files and examples before proposing this change.
+          required: true
+        - label: I described trade-offs and migration impact.
+          required: true
+        - label: I understand maintainers may defer this proposal for ecosystem stability.
+          required: true

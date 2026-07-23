@@ -1,0 +1,72 @@
+name: Prelude Bug
+about: Report a bug in @tsfpp/prelude behavior, types, or documented laws.
+title: "prelude: bug <short-description>"
+labels:
+  - prelude
+  - bug
+body:
+  - type: input
+    id: package_version
+    attributes:
+      label: Package Version
+      description: Version of @tsfpp/prelude in use.
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: typescript_version
+    attributes:
+      label: TypeScript Version
+      placeholder: "5.6.x"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Node version, runtime target, and package manager.
+      placeholder: "Node 20, ESM, pnpm 9"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal Reproduction
+      description: A minimal snippet or repository link.
+      render: typescript
+    validations:
+      required: true
+
+  - type: textarea
+    id: laws
+    attributes:
+      label: Law Impact (If Any)
+      description: If this is a law violation, name the law and failing case.
+      placeholder: "Functor identity fails for..."
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I confirmed this behavior against current docs and examples.
+          required: true
+        - label: I provided a minimal reproducible case.
+          required: true
