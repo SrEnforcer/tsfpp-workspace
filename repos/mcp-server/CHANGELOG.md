@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.0.2] - 2026-07-24
+
+### Changed
+
+- Updated TSF++ internal dependency references to the current published releases.
+
 ## [1.0.1] - 2026-05-29
 
 ### Updated

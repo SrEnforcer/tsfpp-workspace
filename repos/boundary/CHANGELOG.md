@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-07-24
+
+### Changed
+
+- Updated internal TSF++ dependency references to the current published releases.
+
 ### ⚠ BREAKING CHANGES
 
 - **Uniform `mk` construction prefix (standard Rule 7.3 / 7.8).** All smart constructors now use the `mk` prefix; the `create*` factories and the unprefixed `*Error` constructors are renamed:

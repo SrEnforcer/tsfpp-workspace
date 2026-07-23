@@ -1,7 +1,4 @@
 allowBuilds:
   esbuild: true
 minimumReleaseAgeExclude:
-  - '@tsfpp/prelude@2.0.1'
-  - '@tsfpp/agents@2.0.1'
   - '@tsfpp/eslint-config@1.0.2'
-  - '@tsfpp/standard@1.4.0'
