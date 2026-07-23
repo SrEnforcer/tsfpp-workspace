@@ -61,7 +61,7 @@ scripts/trunk.sh start feat/my-feature
 
 ### Make commits
 
-Follow Conventional Commits (see `workflow/conventional-commits.md`).
+Follow Conventional Commits (see `./conventional-commits.md`).
 
 ```sh
 scripts/trunk.sh commit feat prelude "add Result.flatMap combinator"
@@ -111,4 +111,4 @@ exposure without accumulating merge debt.
 
 - [trunkbaseddevelopment.com](https://trunkbaseddevelopment.com)
 - `scripts/trunk.sh` — helper automation
-- `workflow/conventional-commits.md` — commit message format
+- `./conventional-commits.md` — commit message format

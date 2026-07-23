@@ -146,44 +146,44 @@ const userIdFromPayload = (payload: unknown): Option<UserId> =>
   isRecord(payload) ? getTypedField(payload, 'userId', isUserId) : none;
 ```
 
-## Collecting optional values with `traverseArrayO` and `sequenceArrayO`
+## Collecting optional values with `traverseArrayOption` and `sequenceArrayOption`
 
-`traverseArrayO` is the Option analogue of `traverseArray`: it maps a function over an array and returns `Some` of all results only if every element produced a `Some`. The moment any element is absent, the whole result is `None`.
+`traverseArrayOption` is the Option analogue of `traverseArray`: it maps a function over an array and returns `Some` of all results only if every element produced a `Some`. The moment any element is absent, the whole result is `None`.
 
 ```ts
-import { traverseArrayO, fromNullable, isSome, isNone } from '@tsfpp/prelude';
+import { traverseArrayOption, fromNullable, isSome, isNone } from '@tsfpp/prelude';
 
 // All present — unwrap the values in one step
-traverseArrayO(fromNullable)([1, 2, 3]); // Some([1, 2, 3])
+traverseArrayOption(fromNullable)([1, 2, 3]); // Some([1, 2, 3])
 
 // Any absent — fail the whole collection
-traverseArrayO(fromNullable)([1, null, 3]); // None
+traverseArrayOption(fromNullable)([1, null, 3]); // None
 ```
 
 This is more useful than a boolean "are all present?" check — you get the unwrapped values when all succeed, not just a `true`.
 
-When you already have a `ReadonlyArray<Option<A>>`, use `sequenceArrayO` directly instead of wrapping in a lambda:
+When you already have a `ReadonlyArray<Option<A>>`, use `sequenceArrayOption` directly instead of wrapping in a lambda:
 
 ```ts
-import { sequenceArrayO, some, none } from '@tsfpp/prelude';
+import { sequenceArrayOption, some, none } from '@tsfpp/prelude';
 
-sequenceArrayO([some(1), some(2), some(3)]); // Some([1, 2, 3])
-sequenceArrayO([some(1), none, some(3)]);     // None
+sequenceArrayOption([some(1), some(2), some(3)]); // Some([1, 2, 3])
+sequenceArrayOption([some(1), none, some(3)]);     // None
 ```
 
-`sequenceArrayO(xs)` is strictly equivalent to `traverseArrayO(x => x)(xs)` — it is just the specialised form for an array you already have.
+`sequenceArrayOption(xs)` is strictly equivalent to `traverseArrayOption(x => x)(xs)` — it is just the specialised form for an array you already have.
 
 A practical pattern: decode an array of raw records, collecting field values only when every record is complete.
 
 ```ts
 import {
-  traverseArrayO,
+  traverseArrayOption,
   none,
   getStringField,
   getNumberField,
   isRecord,
-  flatMapO,
-  mapO,
+  flatMapOption,
+  mapOption,
   type Option,
 } from '@tsfpp/prelude';
 
@@ -193,7 +193,7 @@ const decodePerson = (raw: unknown): Option<Person> => {
   if (!isRecord(raw)) return none;
   const name = getStringField(raw, 'name');
   const age = getNumberField(raw, 'age');
-  return flatMapO((n: string) => mapO((a: number) => ({ name: n, age: a }))(age))(name);
+  return flatMapOption((n: string) => mapOption((a: number) => ({ name: n, age: a }))(age))(name);
 };
 
 // Returns Some([...]) only if every element decodes successfully
@@ -201,19 +201,19 @@ const rawArray: ReadonlyArray<unknown> = [
   { name: 'Ada', age: 36 },
   { name: 'Lin', age: 28 },
 ];
-const people = traverseArrayO(decodePerson)(rawArray);
+const people = traverseArrayOption(decodePerson)(rawArray);
 ```
 
-## Choosing defaults with `orElse` and `getOrElse`
+## Choosing defaults with `orElseOption` and `getOrElseOption`
 
-Use `orElse` when the fallback is still optional, and `getOrElse` when you want a concrete value.
+Use `orElseOption` when the fallback is still optional, and `getOrElseOption` when you want a concrete value.
 
 ```ts
 import {
   fromNonEmptyString,
-  getOrElse,
-  mapO,
-  orElse,
+  getOrElseOption,
+  mapOption,
+  orElseOption,
   some,
 } from '@tsfpp/prelude';
 
@@ -221,7 +221,7 @@ const parseDisplayName = (raw: string | undefined) => fromNonEmptyString(raw);
 
 // Option -> Option: keep optional context
 const withAnonymousFallback = (raw: string | undefined) =>
-  orElse(() => some('Anonymous'))(parseDisplayName(raw));
+  orElseOption(() => some('Anonymous'))(parseDisplayName(raw));
 
 withAnonymousFallback('Ada');
 // Some('Ada')
@@ -230,7 +230,7 @@ withAnonymousFallback('   ');
 
 // Option -> value: collapse to a concrete default
 const displayName = (raw: string | undefined): string =>
-  getOrElse(() => 'Anonymous')(parseDisplayName(raw));
+  getOrElseOption(() => 'Anonymous')(parseDisplayName(raw));
 
 displayName('Lin');
 // 'Lin'
@@ -239,8 +239,8 @@ displayName(undefined);
 
 // You can still keep pipelines before collapsing
 const normalized = (raw: string | undefined): string =>
-  getOrElse(() => 'anonymous')(
-    mapO((name: string) => name.toLowerCase())(parseDisplayName(raw)),
+  getOrElseOption(() => 'anonymous')(
+    mapOption((name: string) => name.toLowerCase())(parseDisplayName(raw)),
   );
 ```
 
@@ -362,7 +362,7 @@ They return fresh instances for updates and compose cleanly with `Option`.
 ```ts
 import {
   isSome,
-  entriesOfMap,
+  entriesOf,
   intoMap,
   lookup,
   assoc,
@@ -376,7 +376,7 @@ const base = intoMap<string, number>([
 
 const withGrace = assoc('Grace', 31)(base);
 const withoutLin = dissoc('Lin')(withGrace);
-const rows = entriesOfMap(withoutLin);
+const rows = entriesOf(withoutLin);
 
 const maybeAge = lookup('Ada')(withoutLin);
 if (isSome(maybeAge)) {

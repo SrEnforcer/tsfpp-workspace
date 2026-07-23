@@ -2,16 +2,16 @@ import { describe, expect, it } from 'vitest';
 import {
   err,
   findO,
-  getOrElseR,
-  headNE,
+  getOrElse,
+  headNonEmpty,
   isFiniteNumber,
   isNone,
   isNonEmptyArray,
   isSome,
-  lastNE,
+  lastNonEmpty,
   mapErr,
   matchOption,
-  matchResult,
+  match,
   mkInt,
   mkNonEmpty,
   mkNonNegative,
@@ -39,8 +39,8 @@ describe('total eliminators', () => {
     expect(matchOption(n, s)(some(21))).toBe(s(21));
   });
 
-  it('matchResult dispatches with the error handler first', () => {
-    const status = matchResult(
+  it('match dispatches with the error handler first', () => {
+    const status = match(
       (e: string) => `err:${e}`,
       (a: number) => `ok:${a}`,
     );
@@ -48,9 +48,9 @@ describe('total eliminators', () => {
     expect(status(err('boom'))).toBe('err:boom');
   });
 
-  it('getOrElseR unwraps or computes from the error', () => {
-    expect(getOrElseR((e: string) => e.length)(ok(9))).toBe(9);
-    expect(getOrElseR((e: string) => e.length)(err('four'))).toBe(4);
+  it('getOrElse unwraps or computes from the error', () => {
+    expect(getOrElse((e: string) => e.length)(ok(9))).toBe(9);
+    expect(getOrElse((e: string) => e.length)(err('four'))).toBe(4);
   });
 });
 
@@ -103,15 +103,15 @@ describe('non-empty arrays', () => {
     expect(isNone(mkNonEmpty([]))).toBe(true);
   });
 
-  it('headNE and lastNE are total on the refined type', () => {
+  it('headNonEmpty and lastNonEmpty are total on the refined type', () => {
     const xs: NonEmptyReadonlyArray<number> = [7, 8, 9];
-    expect(headNE(xs)).toBe(7);
-    expect(lastNE(xs)).toBe(9);
+    expect(headNonEmpty(xs)).toBe(7);
+    expect(lastNonEmpty(xs)).toBe(9);
   });
 
-  it('headNE equals lastNE for a singleton', () => {
+  it('headNonEmpty equals lastNonEmpty for a singleton', () => {
     const xs: NonEmptyReadonlyArray<string> = ['solo'];
-    expect(headNE(xs)).toBe(lastNE(xs));
+    expect(headNonEmpty(xs)).toBe(lastNonEmpty(xs));
   });
 });
 

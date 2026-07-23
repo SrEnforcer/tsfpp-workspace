@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/boundary",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Functional HTTP boundary toolkit with typed handler helpers, Problem Details mapping, pagination, idempotency, and webhook primitives",
   "private": false,
   "license": "MIT",
@@ -46,7 +46,7 @@
     "url": "https://github.com/tsfpp/boundary/issues"
   },
   "dependencies": {
-    "@tsfpp/prelude": "1.6.0"
+    "@tsfpp/prelude": "2.0.0"
   },
   "devDependencies": {
     "@tsfpp/agents": "^1.7.2",

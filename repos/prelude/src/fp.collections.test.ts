@@ -6,7 +6,7 @@ import {
   cons,
   dissoc,
   disj,
-  entriesOfMap,
+  entriesOf,
   err,
   filterList,
   flatMapList,
@@ -30,7 +30,7 @@ import {
   none,
   ok,
   reverseList,
-  sequenceArrayO,
+  sequenceArrayOption,
   singletonList,
   some,
   tailList,
@@ -38,7 +38,7 @@ import {
   toNullable,
   toObject,
   traverseArray,
-  traverseArrayO,
+  traverseArrayOption,
   traverseList,
   unique,
   type Option,
@@ -90,53 +90,53 @@ describe('prelude traverseArray', () => {
   });
 });
 
-describe('prelude traverseArrayO', () => {
+describe('prelude traverseArrayOption', () => {
   it('collects all Some values', () => {
-    const result = traverseArrayO((n: number) => some(n * 2))([1, 2, 3]);
+    const result = traverseArrayOption((n: number) => some(n * 2))([1, 2, 3]);
     expect(isSome(result) && result.value).toEqual([2, 4, 6]);
   });
 
   it('returns some([]) for empty array', () => {
-    const result = traverseArrayO((n: number) => some(n))([]);
+    const result = traverseArrayOption((n: number) => some(n))([]);
     expect(isSome(result) && result.value).toEqual([]);
   });
 
   it('short-circuits on first None, returning None', () => {
-    const result = traverseArrayO((n: number) =>
+    const result = traverseArrayOption((n: number) =>
       n === 2 ? none : some(n),
     )([1, 2, 3]);
     expect(isNone(result)).toBe(true);
   });
 
-  it('satisfies traverseArrayO(some)(items) ≡ some(items)', () => {
-    const result = traverseArrayO((n: number) => some(n))([10, 20, 30]);
+  it('satisfies traverseArrayOption(some)(items) ≡ some(items)', () => {
+    const result = traverseArrayOption((n: number) => some(n))([10, 20, 30]);
     expect(isSome(result) && result.value).toEqual([10, 20, 30]);
   });
 
   it('works with fromNullable as a realistic predicate', () => {
-    expect(isSome(traverseArrayO(fromNullable)([1, 2, 3]))).toBe(true);
-    expect(isNone(traverseArrayO(fromNullable)([1, null, 3]))).toBe(true);
+    expect(isSome(traverseArrayOption(fromNullable)([1, 2, 3]))).toBe(true);
+    expect(isNone(traverseArrayOption(fromNullable)([1, null, 3]))).toBe(true);
   });
 });
 
-describe('prelude sequenceArrayO', () => {
+describe('prelude sequenceArrayOption', () => {
   it('returns Some of all values when all are Some', () => {
-    const result = sequenceArrayO([some(1), some(2), some(3)]);
+    const result = sequenceArrayOption([some(1), some(2), some(3)]);
     expect(isSome(result) && result.value).toEqual([1, 2, 3]);
   });
 
   it('returns some([]) for empty array', () => {
-    const result = sequenceArrayO([]);
+    const result = sequenceArrayOption([]);
     expect(isSome(result) && result.value).toEqual([]);
   });
 
   it('returns None when any element is None', () => {
-    expect(isNone(sequenceArrayO([some(1), none, some(3)]))).toBe(true);
+    expect(isNone(sequenceArrayOption([some(1), none, some(3)]))).toBe(true);
   });
 
-  it('satisfies sequenceArrayO(xs) ≡ traverseArrayO(x => x)(xs)', () => {
+  it('satisfies sequenceArrayOption(xs) ≡ traverseArrayOption(x => x)(xs)', () => {
     const xs = [some(1), some(2), some(3)];
-    expect(sequenceArrayO(xs)).toEqual(traverseArrayO((x: Option<number>) => x)(xs));
+    expect(sequenceArrayOption(xs)).toEqual(traverseArrayOption((x: Option<number>) => x)(xs));
   });
 });
 
@@ -176,13 +176,13 @@ describe('prelude ReadonlyMap helpers', () => {
     expect(map.get('b')).toBe(2);
   });
 
-  it('entriesOfMap preserves insertion order', () => {
+  it('entriesOf preserves insertion order', () => {
     const map = intoMap<string, number>([
       ['a', 1],
       ['b', 2],
       ['c', 3],
     ]);
-    expect(entriesOfMap(map)).toEqual([
+    expect(entriesOf(map)).toEqual([
       ['a', 1],
       ['b', 2],
       ['c', 3],
@@ -192,11 +192,11 @@ describe('prelude ReadonlyMap helpers', () => {
   it('assoc adds a missing key', () => {
     const base = intoMap<string, number>([['a', 1]]);
     const updated = assoc('b', 2)(base);
-    expect(entriesOfMap(updated)).toEqual([
+    expect(entriesOf(updated)).toEqual([
       ['a', 1],
       ['b', 2],
     ]);
-    expect(entriesOfMap(base)).toEqual([['a', 1]]);
+    expect(entriesOf(base)).toEqual([['a', 1]]);
   });
 
   it('assoc updates an existing key and moves it to the end', () => {
@@ -206,7 +206,7 @@ describe('prelude ReadonlyMap helpers', () => {
       ['c', 3],
     ]);
     const updated = assoc('b', 20)(base);
-    expect(entriesOfMap(updated)).toEqual([
+    expect(entriesOf(updated)).toEqual([
       ['a', 1],
       ['c', 3],
       ['b', 20],
@@ -218,8 +218,8 @@ describe('prelude ReadonlyMap helpers', () => {
       ['a', 1],
       ['b', 2],
     ]);
-    expect(entriesOfMap(dissoc('a')(base))).toEqual([['b', 2]]);
-    expect(entriesOfMap(dissoc('x')(base))).toEqual([
+    expect(entriesOf(dissoc('a')(base))).toEqual([['b', 2]]);
+    expect(entriesOf(dissoc('x')(base))).toEqual([
       ['a', 1],
       ['b', 2],
     ]);
@@ -233,13 +233,13 @@ describe('prelude ReadonlyMap helpers', () => {
     expect(isNone(miss)).toBe(true);
   });
 
-  it('satisfies roundtrip law: intoMap(entriesOfMap(m)) ≡ m', () => {
+  it('satisfies roundtrip law: intoMap(entriesOf(m)) ≡ m', () => {
     const base = intoMap<string, number>([
       ['x', 10],
       ['y', 20],
     ]);
-    const roundtrip = intoMap(entriesOfMap(base));
-    expect(entriesOfMap(roundtrip)).toEqual(entriesOfMap(base));
+    const roundtrip = intoMap(entriesOf(base));
+    expect(entriesOf(roundtrip)).toEqual(entriesOf(base));
   });
 
   it('toObject converts a string-keyed map to a plain object', () => {
@@ -265,7 +265,7 @@ describe('prelude ReadonlyMap helpers', () => {
 
     const obj = toObject(base);
     expect(obj['x']).toBe(10);
-    expect(entriesOfMap(base)).toEqual([
+    expect(entriesOf(base)).toEqual([
       ['x', 10],
       ['y', 20],
     ]);

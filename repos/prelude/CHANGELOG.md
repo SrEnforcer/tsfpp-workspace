@@ -10,6 +10,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ⚠ BREAKING CHANGES
+
+- **Consistent ADT-combinator naming (Rule 7.8).** `Result` is now the unsuffixed base ADT; every other ADT's combinators carry that ADT's full type name as a suffix. Renames:
+  - Option: `mapO` → `mapOption`, `flatMapO` → `flatMapOption`, `orElse` → `orElseOption`, `getOrElse` → `getOrElseOption`, `traverseArrayO` → `traverseArrayOption`, `sequenceArrayO` → `sequenceArrayOption`
+  - Result: `matchResult` → `match`, `getOrElseR` → `getOrElse` (note: bare `getOrElse` is now the **Result** eliminator; the Option one is `getOrElseOption`)
+  - Non-empty arrays: `headNE` → `headNonEmpty`, `lastNE` → `lastNonEmpty`
+  - Collections: `entriesOfMap` → `entriesOf`
+  - Unchanged (base `Result` and List families): `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tap`, `tapErr`, `traverseArray`, `matchOption`, `mapList`, and the `*List` family.
+
 ### Features
 
 - add `matchOption` and `matchResult` total eliminators — collapse an ADT to a single result type with a handler per variant, without leaking `_tag` (supports Rule 8.5)

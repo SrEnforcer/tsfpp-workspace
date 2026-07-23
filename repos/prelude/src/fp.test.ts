@@ -2,22 +2,22 @@ import { describe, expect, it } from 'vitest';
 import {
   err,
   flatMap,
-  flatMapO,
+  flatMapOption,
   fromNullable,
   fromUnknownArray,
   fromUnknownArrayOf,
   fromUnknownString,
-  getOrElse,
+  getOrElseOption,
   isDefined,
   isErr,
   isNone,
   isOk,
   isSome,
   map,
-  mapO,
+  mapOption,
   none,
   ok,
-  orElse,
+  orElseOption,
   some,
   unit,
   comp,
@@ -311,45 +311,45 @@ describe('prelude option combinators / construction and extraction', () => {
     expect(fromUnknownArrayOf(isString)(['a', 1])).toEqual(none);
   });
 
-  it('getOrElse returns value for Some', () => {
-    expect(getOrElse(() => 0)(some(5))).toBe(5);
+  it('getOrElseOption returns value for Some', () => {
+    expect(getOrElseOption(() => 0)(some(5))).toBe(5);
   });
 
-  it('getOrElse returns fallback for None', () => {
-    expect(getOrElse(() => 99)(none)).toBe(99);
+  it('getOrElseOption returns fallback for None', () => {
+    expect(getOrElseOption(() => 99)(none)).toBe(99);
   });
 });
 
 describe('prelude option combinators / combinators', () => {
-  it('mapO transforms Some', () => {
-    const result = mapO((n: number) => n * 3)(some(4));
+  it('mapOption transforms Some', () => {
+    const result = mapOption((n: number) => n * 3)(some(4));
     expect(isSome(result) && result.value).toBe(12);
   });
 
-  it('mapO passes None through', () => {
-    expect(isNone(mapO((n: number) => n)(none))).toBe(true);
+  it('mapOption passes None through', () => {
+    expect(isNone(mapOption((n: number) => n)(none))).toBe(true);
   });
 
-  it('mapO satisfies identity law', () => {
+  it('mapOption satisfies identity law', () => {
     const o = some(10);
-    expect(mapO((x: number) => x)(o)).toEqual(o);
+    expect(mapOption((x: number) => x)(o)).toEqual(o);
   });
 
-  it('flatMapO chains Some', () => {
-    const result = flatMapO((n: number) => some(n + 1))(some(9));
+  it('flatMapOption chains Some', () => {
+    const result = flatMapOption((n: number) => some(n + 1))(some(9));
     expect(isSome(result) && result.value).toBe(10);
   });
 
-  it('flatMapO short-circuits None', () => {
-    expect(isNone(flatMapO((n: number) => some(n))(none))).toBe(true);
+  it('flatMapOption short-circuits None', () => {
+    expect(isNone(flatMapOption((n: number) => some(n))(none))).toBe(true);
   });
 
-  it('orElse returns first Some', () => {
-    expect(orElse(() => some(99))(some(1))).toEqual(some(1));
+  it('orElseOption returns first Some', () => {
+    expect(orElseOption(() => some(99))(some(1))).toEqual(some(1));
   });
 
-  it('orElse falls back on None', () => {
-    expect(orElse(() => some(99))(none)).toEqual(some(99));
+  it('orElseOption falls back on None', () => {
+    expect(orElseOption(() => some(99))(none)).toEqual(some(99));
   });
 });
 

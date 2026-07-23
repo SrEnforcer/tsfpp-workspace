@@ -13,7 +13,7 @@ It provides:
 - **API error taxonomy** — `ApiError` discriminated union, smart constructors, exhaustive mapper
 - **Problem Details (RFC 9457)** — `ProblemDetails`, `mkProblem`, `problemResponse`
 - **Response builders** — `okResponse`, `createdResponse`, `acceptedResponse`, `noContentResponse`, `redirectResponse`
-- **Handler helpers** — `createHandler`, `createJsonHandler`, `parseJsonBody`, `parseJsonWithSchema`, `parsePaginationFromRequest`, `mkNextCursor`
+- **Handler helpers** — `mkHandler`, `mkJsonHandler`, `parseJsonBody`, `parseJsonWithSchema`, `parsePaginationFromRequest`, `mkNextCursor`
 - **Pagination** — `Paginated<T>`, `parsePaginationQuery`, `encodeCursor`, `decodeCursor`, `mkPaginated`
 - **Long-running operations** — `Operation<T>`, `mkRunningOp`, `mkSucceededOp`, `mkFailedOp`, `mkCancelledOp`
 - **Bulk operations** — `BulkItem<T>`, `BulkResponse<T>`, `mkBulkOkItem`, `mkBulkErrorItem`, `bulkResponse`
@@ -63,7 +63,7 @@ A complete, production-shaped handler in one file. Parse → validate → use ca
 
 ```ts
 import {
-  createJsonHandler,
+  mkJsonHandler,
   type HandlerFactory,
   type IdempotencyStore,
   type RawHandler,
@@ -99,7 +99,7 @@ type OrderRepository = {
 // ── Handler factory ───────────────────────────────────────────────────────────
 
 export const createOrderHandler: HandlerFactory<{ readonly orders: OrderRepository }> =
-  (deps) => createJsonHandler({
+  (deps) => mkJsonHandler({
     deps,
     routeTemplate: '/v1/orders',
     schema: createOrderBody,
@@ -184,7 +184,7 @@ type ApiError =
   | { kind: 'internal';        cause: unknown };                              // → 500
 ```
 
-Smart constructors: `validationError`, `notFoundError`, `conflictError`, `permissionError`, `unauthenticatedError`, `rateLimitError`, `preconditionError`, `goneError`, `dependencyError`, `internalError`.
+Smart constructors: `mkValidationError`, `mkNotFoundError`, `mkConflictError`, `mkPermissionError`, `mkUnauthenticatedError`, `mkRateLimitError`, `mkPreconditionError`, `mkGoneError`, `mkDependencyError`, `mkInternalError`.
 
 Extend with application-specific variants without modifying `ApiError` — see [Usage idioms](#usage-idioms).
 
@@ -347,7 +347,7 @@ Zod solves one problem precisely: asserting that a runtime value matches a schem
 // Yes — context available for all response paths
 export const handler: RawHandler = async (req) => {
   const ctx = extractContext(req, '/v1/orders/:id');
-  if (someEarlyCondition) return apiErrorToResponse(notFoundError('order', id), ctx);
+  if (someEarlyCondition) return apiErrorToResponse(mkNotFoundError('order', id), ctx);
   // ...
 };
 

@@ -230,7 +230,7 @@ const matchOption =
   (o: Option<A>): B =>
     o._tag === 'Some' ? onSome(o.value) : onNone()
 
-const matchResult =
+const match =
   <T, E, B>(onErr: (e: E) => B, onOk: (a: T) => B) =>
   (r: Result<T, E>): B =>
     r.ok ? onOk(r.value) : onErr(r.error)
@@ -241,7 +241,7 @@ const labelOf = matchOption(
   (name: string) => name,
 )
 
-const statusText = matchResult(
+const statusText = match(
   (e: ParseIntError) => `error: ${e.kind}`,
   (n: number) => `parsed ${n}`,
 )
@@ -259,5 +259,5 @@ export {
   head, last, divide, parseIntSafe, lookup,
   mapOption, chainOption, liftA2Option, pipeF,
   parseUserDto,
-  matchOption, matchResult, labelOf, statusText, firstChar,
+  matchOption, match, labelOf, statusText, firstChar,
 }

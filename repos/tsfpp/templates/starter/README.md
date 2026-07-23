@@ -39,7 +39,7 @@ pnpm test
 
 ## Next steps
 
-1. Read `spec/CODING_STANDARD.md` in the TSF++ repo — especially §1 (types),
+1. Read `CODING_STANDARD.md` in the `@tsfpp/standard` repo — especially §1 (types),
    §2 (immutability), §3 (functions), and §8 (totality).
 2. Model your domain as discriminated unions before writing any logic.
 3. Return `Result<T, E>` from every fallible function.

@@ -52,14 +52,14 @@ Omit the scope for cross-cutting changes.
 
 | Scope           | Applies to |
 |-----------------|------------|
-| `prelude`       | `packages/prelude/` |
-| `eslint-config` | `packages/eslint-config/` |
-| `tsconfig`      | `packages/tsconfig/` |
-| `spec`          | `spec/` — rules, rationale, examples |
+| `prelude`       | `../prelude/` (repo) |
+| `eslint-config` | `../eslint-config/` (repo) |
+| `tsconfig`      | `../tsconfig/` (repo) |
+| `spec`          | `../standard/` (repo) — rules, rationale, examples |
 | `copilot`       | `integrations/copilot/` |
 | `docs`          | `docs/` |
 | `ci`            | `.github/workflows/` |
-| `workflow`      | `workflow/`, `scripts/` |
+| `workflow`      | `scripts/`; scaffolding in `../workflow/` (repo) |
 | `templates`     | `templates/` |
 
 ---
@@ -132,5 +132,5 @@ export default {
 ## Reference
 
 - [Conventional Commits v1.0.0 specification](https://www.conventionalcommits.org/en/v1.0.0/)
-- `workflow/git-trunk-based.md` — branch naming and merge workflow
+- `./git-trunk-based.md` — branch naming and merge workflow
 - `docs/semver-policy.md` — how commit types map to version bumps
