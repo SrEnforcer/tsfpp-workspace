@@ -3,7 +3,7 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 1.3.0
+**Version:** 2.0.0
 **Date:** 2026-07-23
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
@@ -12,18 +12,23 @@ Codename TSF++ (tsfpp)
 
 ## Changelog
 
-### 1.3.0 — 2026-07-23
-- **New Rule 7.8** — ADT-combinator naming convention: `Result` is the base ADT and its combinators are unsuffixed; a combinator specialised to another ADT MUST carry that ADT's full type name as a suffix (`mapOption`, `mapList`, `headNonEmpty`). Abbreviated (`mapO`) and single-letter (`getOrElseR`) suffixes are forbidden.
-- **Rule 7.3 tightened** — `mk` is the canonical smart-constructor prefix. `create*` is no longer sanctioned; use `mk*`. `as*` / `fromX` remain permitted for their specific roles.
-- **`@tsfpp/prelude` 2.0.0** and **`@tsfpp/boundary` 2.0.0** apply the two rules above (breaking renames). See each package CHANGELOG.
+### 2.0.0 — 2026-07-23
 
-### 1.2.0 — 2026-07-23
-- **New Rule 1.13** — Numeric hazards: `NaN`, `Infinity`, and coercion-based number parsing are forbidden in the core; constrained numerics are branded (`Int`, `Positive`, `NonNegative`) and finiteness is guarded at the boundary.
-- **New Rule 1.14** — Prefer the `satisfies` operator over `as` for literal conformance; it proves a value inhabits a type without widening or coercing, closing the most common non-boundary reason to reach for an assertion.
-- **New Rule 4.6** — No ambient nondeterminism in the pure core: `Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`, `performance.now()`, and `process.env` are effects and must be injected, not called (extends the Reader discipline of Rule 6.5).
-- **New Rule 6.7** — Domain error channels must be discriminated unions with a `kind` discriminant, never bare `string` or `Error`; this makes error handling exhaustive at every recovery site.
-- **New Rule 8.5** — Consume `Option` / `Result` through a total eliminator (`matchOption` / `matchResult`) when both arms yield a value; reserve `isOk` / `isNone` guards for early-return control flow.
-- **Prelude** — `@tsfpp/prelude` gains `matchOption`, `matchResult`, `getOrElseR`, `mapErr`, `findO`, the `NonEmptyReadonlyArray` family (`isNonEmptyArray`, `mkNonEmpty`, `headNE`, `lastNE`), and refined numerics (`Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`) in support of Rules 1.13, 6.7, and 8.5.
+**Breaking.** This release adds MUST rules that forbid previously-permitted constructs and reshape the companion-package APIs; adopter code compliant under 1.x may need changes. Per this standard's SemVer policy (a rule change that can break existing adopters is a major bump), these ship together as a major, alongside `@tsfpp/prelude` 2.0.0 and `@tsfpp/boundary` 2.0.0.
+
+New rules:
+- **Rule 1.13** — Numeric hazards: `NaN`, `Infinity`, and coercion-based number parsing are forbidden in the core; constrained numerics are branded (`Int`, `Positive`, `NonNegative`) and finiteness is guarded at the boundary.
+- **Rule 1.14** — Prefer the `satisfies` operator over `as` for literal conformance; it proves a value inhabits a type without widening or coercing.
+- **Rule 4.6** — No ambient nondeterminism in the pure core: `Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`, `performance.now()`, and `process.env` are effects and must be injected, not called (extends the Reader discipline of Rule 6.5).
+- **Rule 6.7** — Domain error channels must be discriminated unions with a `kind` discriminant, never bare `string` or `Error`; this makes error handling exhaustive at every recovery site.
+- **Rule 7.8** — ADT-combinator naming: `Result` is the unsuffixed base; a combinator specialised to another ADT MUST carry that ADT's full type name as a suffix (`mapOption`, `mapList`, `headNonEmpty`). Abbreviated (`mapO`) and single-letter (`getOrElseR`) suffixes are forbidden.
+- **Rule 8.5** — Consume `Option` / `Result` through a total eliminator (`match` / `matchOption`) when both arms yield a value; reserve `isOk` / `isNone` guards for early-return control flow.
+
+Tightened:
+- **Rule 7.3** — `mk` is the canonical smart-constructor prefix. `create*` is no longer sanctioned; use `mk*`. `as*` / `fromX` remain permitted for their specific roles.
+
+Companion packages implement these — see each package CHANGELOG. New prelude exports: `match`, `matchOption`, `getOrElse` (Result eliminator), `mapErr`, `findO`, the `NonEmptyReadonlyArray` family (`isNonEmptyArray`, `mkNonEmpty`, `headNonEmpty`, `lastNonEmpty`), and refined numerics (`Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`).
+
 - **Appendix B** expanded with `no-restricted-globals` / `no-restricted-syntax` entries enforcing Rules 1.13 and 4.6.
 - **Appendix E** updated with the new checklist items.
 
