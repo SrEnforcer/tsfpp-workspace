@@ -75,7 +75,7 @@ Every exported `function`, `const` (callable or significant), `type`, and `inter
  * @param name - <domain constraint, not the type>
  * @returns <meaning of the return value, not its type>
  *
- * @law identity — mapO(x => x)(opt) ≡ opt
+ * @law identity — mapOption(x => x)(opt) ≡ opt
  *
  * @example
  * mkUserId('usr-00123') // => some(UserId('usr-00123'))

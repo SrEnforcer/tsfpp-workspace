@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### ⚠ BREAKING CHANGES
+
+- Align all agent, skill, instruction, and prompt guidance with `@tsfpp/prelude` 2.0.0 and `@tsfpp/boundary` 2.0.0. Updated API names: Option combinators `mapO`→`mapOption`, `flatMapO`→`flatMapOption`, `orElse`→`orElseOption`, `getOrElse`→`getOrElseOption`, `traverseArrayO`→`traverseArrayOption`, `sequenceArrayO`→`sequenceArrayOption`; `entriesOfMap`→`entriesOf`; boundary `createHandler`/`createJsonHandler`/`createNodeAdapter`→`mk*`. Bumped peer ranges to `@tsfpp/prelude >=2.0.0`, `@tsfpp/boundary >=2.0.0`, `@tsfpp/standard >=1.3.0`.
+
+### Features
+
+- Cover the standard's new rules across the coding-standard skill and base instructions: 1.13 (numeric hazards / branded numerics), 1.14 (`satisfies` over `as`), 4.6 (no ambient nondeterminism — inject via `Deps`), 6.7 (`kind`-tagged error unions), 7.8 (ADT-combinator suffix convention — `Result` base), 8.5 (total `match` eliminators).
+- Document the Rule 7.8 naming convention in the prelude skill and instructions; add the new prelude 2.0.0 exports (`match`, `mapErr`, `findO`, `headNonEmpty`/`lastNonEmpty`, `mkInt`/`mkPositive`/`mkNonNegative`, `isFiniteNumber`).
+
+### Fixed
+
+- Corrected Ramda framing (removed in standard v1.1.0; not a dependency) and clarified that Remeda is a *recommended, optional* collection library, not a dependency.
+- Normalized all TSF++ spec references to `node_modules/@tsfpp/standard/spec/CODING_STANDARD.md`.
+
 ## [1.9.0] - 2026-05-28
 
 ### Features

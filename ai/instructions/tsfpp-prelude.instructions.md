@@ -15,21 +15,25 @@ import {
   some, none, ok, err, unit,
   // Type guards
   isSome, isNone, isOk, isErr,
-  // Option combinators
-  mapO, flatMapO, orElse, getOrElse, fromNullable, toNullable,
-  // Result combinators
-  map, flatMap, flatMapAsync, tap, tapErr,
+  // Option combinators + eliminators
+  mapOption, flatMapOption, orElseOption, getOrElseOption, matchOption, fromNullable, toNullable,
+  // Result combinators + eliminators (base ADT — unsuffixed)
+  map, flatMap, flatMapAsync, mapErr, tap, tapErr, match, getOrElse,
   // Async adapters
   tryCatch, tryCatchAsync,
   // Unknown decoding
   isRecord, fromUnknownString, fromUnknownArray, fromUnknownArrayOf, fromNonEmptyString,
   getStringField, getNumberField, getBooleanField, getTypedField,
   // ReadonlyMap
-  intoMap, entriesOfMap, assoc, dissoc, lookup,
+  intoMap, entriesOf, assoc, dissoc, lookup,
   // ReadonlySet
   intoSet, conj, disj, member,
-  // Traversal
-  traverseArray, traverseArrayO, sequenceArrayO, unique,
+  // Traversal + array search
+  traverseArray, traverseArrayOption, sequenceArrayOption, findO, unique,
+  // Non-empty arrays
+  isNonEmptyArray, mkNonEmpty, headNonEmpty, lastNonEmpty,
+  // Refined numerics (Rule 1.13)
+  isFiniteNumber, mkInt, mkPositive, mkNonNegative,
   // Pipe
   pipe, flow, comp, complement,
   // Utilities
@@ -38,10 +42,13 @@ import {
   type Logger, type LogEntry, type LogLevel,
   // Types
   type Option, type Result, type Unit, type Brand, type UnknownRecord,
+  type NonEmptyReadonlyArray, type Int, type Positive, type NonNegative,
 } from '@tsfpp/prelude'
 ```
 
-Never `import from 'ramda'`.
+Ramda is not a dependency (removed in standard v1.1.0); never `import from 'ramda'`. Remeda is the *recommended*, optional, collection library — not a dependency of `@tsfpp/prelude`.
+
+**Naming (Rule 7.8):** `Result` is the base ADT (unsuffixed: `map`, `getOrElse`, `match`); every other ADT is suffixed by its full type name (`mapOption`, `getOrElseOption`, `matchOption`, `headNonEmpty`). No `mapO` / `getOrElseR` forms. For the complete, version-accurate export list call `get_api_surface({ package: '@tsfpp/prelude' })`.
 
 ## Option\<A\>
 
@@ -52,10 +59,10 @@ const b: Option<number> = none
 if (isSome(opt)) opt.value    // safe
 if (isNone(opt)) return ...   // early exit
 
-pipe(opt, mapO(n => n + 1))
-pipe(opt, flatMapO(n => n > 0 ? some(n) : none))
-pipe(opt, getOrElse(() => 0))          // collapse to value
-pipe(opt, orElse(() => some(fallback))) // keep Option context
+pipe(opt, mapOption(n => n + 1))
+pipe(opt, flatMapOption(n => n > 0 ? some(n) : none))
+pipe(opt, getOrElseOption(() => 0))          // collapse to value
+pipe(opt, orElseOption(() => some(fallback))) // keep Option context
 
 const opt = fromNullable(maybeNull)    // null | undefined → Option<T>
 ```
@@ -137,8 +144,8 @@ const all = traverseArray(parseFoo)(rawItems)  // Result<ReadonlyArray<Foo>, E>
 // Never: rawItems.map(parseFoo) — produces ReadonlyArray<Result<Foo,E>>
 
 // Option traversal — None if any element is None
-traverseArrayO(fromNullable)([1, 2, 3])    // Some([1, 2, 3])
-traverseArrayO(fromNullable)([1, null, 3]) // None
+traverseArrayOption(fromNullable)([1, 2, 3])    // Some([1, 2, 3])
+traverseArrayOption(fromNullable)([1, null, 3]) // None
 
 // Guard typed arrays from unknown
 const strings = fromUnknownArrayOf((v): v is string => typeof v === 'string')(raw)
@@ -152,7 +159,7 @@ const m  = intoMap([['a', 1], ['b', 2]])
 const v  = pipe(m, lookup('a'))           // Some(1)
 const m2 = pipe(m, assoc('c', 3))
 const m3 = pipe(m2, dissoc('a'))
-const es = entriesOfMap(m)                // ReadonlyArray<readonly [string, number]>
+const es = entriesOf(m)                // ReadonlyArray<readonly [string, number]>
 ```
 
 ## ReadonlySet
