@@ -13,7 +13,7 @@
   "homepage": "https://github.com/tsfpp/tsfpp#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tsfpp/tsfpp.git",
+    "url": "git+https://github.com/tsfpp/tsfpp.git",
     "directory": "packages/workflow"
   },
   "license": "MIT",
