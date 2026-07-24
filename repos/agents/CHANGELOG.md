@@ -10,6 +10,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Aligned guidance with `@tsfpp/standard` 2.0.0: bumped the peer range to `>=2.0.0` and updated the coding-standard skill's version marker to v2.0.0 (the rule content already covers 1.13/1.14/4.6/6.7/7.8/8.5).
+
 ## [2.0.2] - 2026-07-24
 
 ### Changed

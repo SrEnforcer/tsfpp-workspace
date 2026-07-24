@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- Widened the `@tsfpp/standard` dependency range to `^2.0.0` so the server serves the standard's 2.0.0 ruleset (Rules 1.13, 1.14, 4.6, 6.7, 7.8, 8.5). The previous `^1.4.0` caret excluded 2.0.0.
+
 ## [1.0.3] - 2026-07-24
 
 ### Changed

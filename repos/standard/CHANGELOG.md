@@ -10,6 +10,27 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-23
+
+### ⚠ BREAKING CHANGES
+
+- New MUST rules forbid previously-permitted constructs; adopter code compliant under 1.x may need changes. Per the SemVer policy documented for this standard (a rule change that can break adopters is a major bump), these ship as a major release, alongside `@tsfpp/prelude` 2.0.0 and `@tsfpp/boundary` 2.0.0.
+
+### Added
+
+- **Rule 1.13** — Numeric hazards: `NaN`/`Infinity` and coercion-based parsing forbidden in the core; brand constrained numerics (`Int`/`Positive`/`NonNegative`); guard finiteness at the boundary.
+- **Rule 1.14** — Prefer `satisfies` over `as` for literal conformance.
+- **Rule 4.6** — No ambient nondeterminism in the pure core (`Date.now`/`new Date`/`Math.random`/`crypto.randomUUID`/`performance.now`/`process.env` are effects — inject via `Deps`).
+- **Rule 6.7** — Domain error channels must be `kind`-tagged discriminated unions, never bare `string`/`Error`.
+- **Rule 7.8** — ADT-combinator naming: `Result` is the unsuffixed base; other ADTs are suffixed by full type name (`mapOption`, `headNonEmpty`); no abbreviated/single-letter forms.
+- **Rule 8.5** — Consume `Option`/`Result` through a total `match` eliminator when both arms yield a value.
+- Appendix B: `no-restricted-globals` / `no-restricted-syntax` enforcing Rules 1.13 and 4.6. Appendix E and the review checklist updated.
+
+### Changed
+
+- **Rule 7.3 tightened** — `mk` is the canonical smart-constructor prefix; `create*` is no longer sanctioned.
+- Rationale (§1, §4, §6, §7, §8) and rule-by-rule examples added/updated for every new rule.
+
 ## [1.4.0] - 2026-05-18
 
 ### Added

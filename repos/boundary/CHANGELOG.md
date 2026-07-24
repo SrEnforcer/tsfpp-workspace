@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Widened the `@tsfpp/standard` dev dependency range to `^2.0.0` (was `^1.4.0`, which the caret excluded from 2.0.0).
+
 ## [2.0.2] - 2026-07-24
 
 ### Changed
