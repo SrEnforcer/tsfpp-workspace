@@ -95,7 +95,7 @@ export const parseJsonWithSchema = async <Body>(
  * @param params Handler configuration.
  * @returns Raw fetch-compatible handler.
  */
-export const createHandler = <Deps>(params: {
+export const mkHandler = <Deps>(params: {
   readonly deps: Deps;
   readonly routeTemplate: string;
   readonly handle: (input: HandlerInput<Deps>) => Promise<Result<Response, ApiError>>;
@@ -113,13 +113,13 @@ export const createHandler = <Deps>(params: {
  * @param params JSON handler configuration.
  * @returns Raw fetch-compatible handler.
  */
-export const createJsonHandler = <Deps, Body>(params: {
+export const mkJsonHandler = <Deps, Body>(params: {
   readonly deps: Deps;
   readonly routeTemplate: string;
   readonly schema: JsonSchema<Body>;
   readonly handle: (input: JsonHandlerInput<Deps, Body>) => Promise<Result<Response, ApiError>>;
 }): RawHandler =>
-  createHandler({
+  mkHandler({
     deps: params.deps,
     routeTemplate: params.routeTemplate,
     handle: async ({ deps, req, ctx }) => {

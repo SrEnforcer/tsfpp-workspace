@@ -5,7 +5,7 @@
  * Webhook signature generation and verification.
  */
 
-import { fromNullable, getOrElse } from '@tsfpp/prelude';
+import { fromNullable, getOrElseOption } from '@tsfpp/prelude';
 
 import { type WebhookEventId } from './boundary-types.js';
 
@@ -74,7 +74,7 @@ export const verifyWebhook = async (args: {
   readonly body: string;
   readonly maxAgeSeconds?: number;
 }): Promise<boolean> => {
-  const maxAgeSeconds = getOrElse<number>(() => 300)(fromNullable(args.maxAgeSeconds));
+  const maxAgeSeconds = getOrElseOption<number>(() => 300)(fromNullable(args.maxAgeSeconds));
 
   const timestamp = Number(args.headers['x-webhook-timestamp']);
   if (!Number.isFinite(timestamp)) return false;
@@ -85,7 +85,7 @@ export const verifyWebhook = async (args: {
   const parts = args.headers['x-webhook-signature'].split('=');
   if (parts.length !== 2 || parts[0] !== 'v1') return false;
 
-  const receivedHex = getOrElse<string>(() => '')(fromNullable(parts[1]));
+  const receivedHex = getOrElseOption<string>(() => '')(fromNullable(parts[1]));
   const expectedHex = await hmacSha256(args.secret, `${timestamp}.${args.body}`);
 
   if (receivedHex.length !== expectedHex.length) return false;

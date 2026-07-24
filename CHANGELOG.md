@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-- No unreleased changes yet.
+### ⚠ BREAKING CHANGES
+
+- **Uniform `mk` construction prefix (standard Rule 7.3 / 7.8).** All smart constructors now use the `mk` prefix; the `create*` factories and the unprefixed `*Error` constructors are renamed:
+  - Handlers/adapters: `createHandler` → `mkHandler`, `createJsonHandler` → `mkJsonHandler`, `createNodeAdapter` → `mkNodeAdapter`
+  - API errors: `notFoundError` → `mkNotFoundError`, `conflictError` → `mkConflictError`, `permissionError` → `mkPermissionError`, `unauthenticatedError` → `mkUnauthenticatedError`, `rateLimitError` → `mkRateLimitError`, `preconditionError` → `mkPreconditionError`, `goneError` → `mkGoneError`, `dependencyError` → `mkDependencyError`, `internalError` → `mkInternalError`
+  - `validationError` is removed; use `mkValidationError` (previously the concrete-variant builder), which returns a `ValidationError` assignable to `ApiError`.
+- **Prelude 2.0.0 dependency.** Bumped `@tsfpp/prelude` to `2.0.0`; the Option eliminator is now `getOrElseOption` (was `getOrElse`).
 
 ## [1.2.0] - 2026-05-20
 
