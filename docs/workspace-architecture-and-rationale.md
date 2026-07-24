@@ -90,6 +90,24 @@ Use `scripts/pull-all.sh` when upstream repos have moved ahead.
 That script brings the latest child-repo commits into the root workspace so the
 workspace remains a faithful mirror of upstream reality.
 
+One subtle complication: Git subtree reconciliation is based on commit ancestry,
+not file timestamps or a human sense of "newer" content. If both sides changed
+the same areas independently, `pull-all` can still raise merge conflicts.
+
+To reduce this, `scripts/pull-all.sh` now runs a preflight check per subtree:
+
+- it fetches each child remote
+- it compares the local subtree split commit with the remote `main` head
+- it classifies each repo as in-sync, remote-ahead, local-ahead, or diverged
+- it aborts before merging if any subtree is diverged
+
+When preflight reports divergence, use this order:
+
+1. run `scripts/push-all.sh` to publish local subtree history to child remotes
+2. rerun `scripts/pull-all.sh` to import any remaining upstream updates
+
+This keeps pull operations predictable and avoids conflict-heavy mid-run merges.
+
 ### Commit in the root
 
 Make changes in the root workspace and commit there first.
