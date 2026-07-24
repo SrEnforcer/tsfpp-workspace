@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/prelude",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "Functional prelude for TypeScript with Option, Result, and core combinators",
   "private": false,
   "license": "MIT",
@@ -45,7 +45,7 @@
     "url": "https://github.com/tsfpp/prelude/issues"
   },
   "devDependencies": {
-    "@tsfpp/eslint-config": "^1.0.1",
+    "@tsfpp/eslint-config": "^1.0.3",
     "@tsfpp/tsconfig": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",

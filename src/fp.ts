@@ -295,38 +295,38 @@ export const fromNonEmptyString = (value: string | undefined): Option<string> =>
 /**
  * Returns Option value or lazy fallback.
  */
-export const getOrElse =
+export const getOrElseOption =
   <A>(onNone: () => A) =>
   (o: Option<A>): A =>
     isSome(o) ? o.value : onNone();
 
 /**
  * Maps the inner value of a Some; passes None through unchanged.
- * @law Identity:    mapO((x) => x)(o) ≡ o
- * @law Composition: mapO(f ∘ g)(o) ≡ mapO(f)(mapO(g)(o))
+ * @law Identity:    mapOption((x) => x)(o) ≡ o
+ * @law Composition: mapOption(f ∘ g)(o) ≡ mapOption(f)(mapOption(g)(o))
  */
-export const mapO =
+export const mapOption =
   <A, B>(f: (a: A) => B) =>
   (o: Option<A>): Option<B> =>
     isSome(o) ? some(f(o.value)) : none;
 
 /**
  * Monadic bind for Option.
- * @law Left identity:  flatMapO(f)(some(a)) ≡ f(a)
- * @law Right identity: flatMapO(some)(o)     ≡ o
- * @law Associativity:  flatMapO(g)(flatMapO(f)(o)) ≡ flatMapO(x => flatMapO(g)(f(x)))(o)
+ * @law Left identity:  flatMapOption(f)(some(a)) ≡ f(a)
+ * @law Right identity: flatMapOption(some)(o)     ≡ o
+ * @law Associativity:  flatMapOption(g)(flatMapOption(f)(o)) ≡ flatMapOption(x => flatMapOption(g)(f(x)))(o)
  */
-export const flatMapO =
+export const flatMapOption =
   <A, B>(f: (a: A) => Option<B>) =>
   (o: Option<A>): Option<B> =>
     isSome(o) ? f(o.value) : none;
 
 /**
  * Returns the first Some or the lazy alternative when None.
- * @law Left identity:  orElse(() => some(b))(some(a)) ≡ some(a)
- * @law Right identity: orElse(() => none)(o)          ≡ o
+ * @law Left identity:  orElseOption(() => some(b))(some(a)) ≡ some(a)
+ * @law Right identity: orElseOption(() => none)(o)          ≡ o
  */
-export const orElse =
+export const orElseOption =
   <A>(onNone: () => Option<A>) =>
   (o: Option<A>): Option<A> =>
     isSome(o) ? o : onNone();
@@ -491,13 +491,13 @@ export const traverseArray =
  * collect the results if all succeed; return None if any element is absent.
  *
  * @example
- * traverseArrayO(fromNullable)([1, 2, 3]) // Some([1, 2, 3])
- * traverseArrayO(fromNullable)([1, null, 3]) // None
+ * traverseArrayOption(fromNullable)([1, 2, 3]) // Some([1, 2, 3])
+ * traverseArrayOption(fromNullable)([1, null, 3]) // None
  *
- * @law traverseArrayO(some)(items) ≡ some(items)
- * @law traverseArrayO(f)([])       ≡ some([])
+ * @law traverseArrayOption(some)(items) ≡ some(items)
+ * @law traverseArrayOption(f)([])       ≡ some([])
  */
-export const traverseArrayO =
+export const traverseArrayOption =
   <A, B>(f: (a: A) => Option<B>) =>
   (items: ReadonlyArray<A>): Option<ReadonlyArray<B>> =>
     items.reduce<Option<ReadonlyArray<B>>>(
@@ -513,17 +513,17 @@ export const traverseArrayO =
  * Collapses an array of Options into an Option of an array.
  * Returns None if any element is None; otherwise Some of all values.
  *
- * Convenience specialisation of `traverseArrayO` for when you already
+ * Convenience specialisation of `traverseArrayOption` for when you already
  * have a `ReadonlyArray<Option<A>>`.
  *
  * @example
- * sequenceArrayO([some(1), some(2), some(3)]) // Some([1, 2, 3])
- * sequenceArrayO([some(1), none, some(3)])     // None
+ * sequenceArrayOption([some(1), some(2), some(3)]) // Some([1, 2, 3])
+ * sequenceArrayOption([some(1), none, some(3)])     // None
  *
- * @law sequenceArrayO(xs) ≡ traverseArrayO(x => x)(xs)
+ * @law sequenceArrayOption(xs) ≡ traverseArrayOption(x => x)(xs)
  */
-export const sequenceArrayO = <A>(items: ReadonlyArray<Option<A>>): Option<ReadonlyArray<A>> =>
-  traverseArrayO<Option<A>, A>((o) => o)(items);
+export const sequenceArrayOption = <A>(items: ReadonlyArray<Option<A>>): Option<ReadonlyArray<A>> =>
+  traverseArrayOption<Option<A>, A>((o) => o)(items);
 
 /**
  * Runs an observer effect for Ok values and returns input Result.
@@ -827,9 +827,9 @@ export const intoMap = <K, V>(entries: ReadonlyArray<readonly [K, V]>): Readonly
  * Preconditions: none.
  * Returns: ReadonlyArray of [K, V] tuples in insertion order.
  *
- * @law intoMap(entriesOfMap(m)) ≡ m  (same key/value pairs, same order)
+ * @law intoMap(entriesOf(m)) ≡ m  (same key/value pairs, same order)
  */
-export const entriesOfMap = <K, V>(map: ReadonlyMap<K, V>): ReadonlyArray<readonly [K, V]> =>
+export const entriesOf = <K, V>(map: ReadonlyMap<K, V>): ReadonlyArray<readonly [K, V]> =>
   Array.from(map.entries(), ([k, v]): readonly [K, V] => [k, v]);
 
 /**
@@ -843,7 +843,7 @@ export const entriesOfMap = <K, V>(map: ReadonlyMap<K, V>): ReadonlyArray<readon
  * Returns: readonly Record with the same key/value pairs.
  *
  * @law toObject(intoMap(entries)) ≡ Object.fromEntries(entries)
- * @law entriesOfMap(m).every(([k, v]) => toObject(m)[k] === v)
+ * @law entriesOf(m).every(([k, v]) => toObject(m)[k] === v)
  */
 export const toObject = <T>(map: ReadonlyMap<string, T>): Readonly<Record<string, T>> =>
   Object.fromEntries(map) as Readonly<Record<string, T>>; // eslint-disable-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.4): fromEntries cannot preserve generic key/value mapping in its current lib typing
@@ -865,7 +865,7 @@ export const assoc =
   <K, V>(key: K, value: V) =>
   (map: ReadonlyMap<K, V>): ReadonlyMap<K, V> =>
     intoMap([
-      ...entriesOfMap(map).filter(([k]) => k !== key),
+      ...entriesOf(map).filter(([k]) => k !== key),
       [key, value],
     ]);
 
@@ -884,7 +884,7 @@ export const assoc =
 export const dissoc =
   <K>(key: K) =>
   <V>(map: ReadonlyMap<K, V>): ReadonlyMap<K, V> =>
-    intoMap(entriesOfMap(map).filter(([k]) => k !== key));
+    intoMap(entriesOf(map).filter(([k]) => k !== key));
 
 /**
  * Looks up a key in a ReadonlyMap, returning an Option.
@@ -1041,3 +1041,189 @@ export type Logger = {
   readonly warn:  (entry: LogEntry) => void;
   readonly error: (entry: LogEntry) => void;
 };
+
+// ---------------------------------------------------------------------------
+// Total eliminators — CODING_STANDARD.md Rule 8.5
+//
+// A `match` collapses an ADT to a single result type by supplying a handler
+// for every variant. Unlike `isOk` / `isSome` guards (which drive early-return
+// control flow), a `match` is an expression: it forces both arms to be written
+// and both to produce the same type, so a caller cannot fall through a case.
+// This is the exhaustiveness axiom applied to the two-variant prelude ADTs,
+// without leaking the `_tag` discriminant into consumer code (Rule 1.11).
+// ---------------------------------------------------------------------------
+
+/**
+ * Total eliminator for Option. Supplies a handler for each variant and returns
+ * their common result type. Prefer this over chained `isSome` guards when both
+ * branches yield a value (Rule 8.5).
+ *
+ * @law matchOption(n, s)(none)     ≡ n()
+ * @law matchOption(n, s)(some(a))  ≡ s(a)
+ * @example
+ * const render = matchOption(() => 'anonymous', (u: User) => u.name);
+ */
+export const matchOption =
+  <A, B>(onNone: () => B, onSome: (a: A) => B) =>
+  (o: Option<A>): B =>
+    isSome(o) ? onSome(o.value) : onNone();
+
+/**
+ * Total eliminator for Result. Supplies a handler for each variant and returns
+ * their common result type. The error handler comes first, mirroring the
+ * `Err`-left / `Ok`-right reading order.
+ *
+ * @law match(e, o)(err(x))  ≡ e(x)
+ * @law match(e, o)(ok(a))   ≡ o(a)
+ * @example
+ * const status = match(
+ *   (e: ApiError) => e.kind,
+ *   (u: User) => 'ok',
+ * );
+ */
+export const match =
+  <A, E, B>(onErr: (e: E) => B, onOk: (a: A) => B) =>
+  (r: Result<A, E>): B =>
+    isOk(r) ? onOk(r.value) : onErr(r.error);
+
+/**
+ * Unwraps a Result to its success value, computing a fallback from the error.
+ * The Result counterpart to Option's `getOrElseOption`.
+ *
+ * @law getOrElse(f)(ok(a))   ≡ a
+ * @law getOrElse(f)(err(e))  ≡ f(e)
+ */
+export const getOrElse =
+  <A, E>(onErr: (e: E) => A) =>
+  (r: Result<A, E>): A =>
+    isOk(r) ? r.value : onErr(r.error);
+
+/**
+ * Maps the error channel of a Result, leaving the success channel untouched.
+ * The canonical tool for Rule 6.7: remap a boundary error (e.g. a Zod message
+ * or a raw `unknown`) into a tagged domain error union as it crosses inward.
+ *
+ * @law mapErr(f)(ok(a))       ≡ ok(a)
+ * @law mapErr(f)(err(e))      ≡ err(f(e))
+ * @law mapErr(identity)       ≡ identity            (identity)
+ * @law mapErr(g)(mapErr(f)(r)) ≡ mapErr(x => g(f(x)))(r)  (fusion)
+ */
+export const mapErr =
+  <A, E, F>(f: (e: E) => F) =>
+  (r: Result<A, E>): Result<A, F> =>
+    isErr(r) ? err(f(r.error)) : r;
+
+/**
+ * Total array search: returns the first element satisfying the predicate as
+ * `Some`, or `None` if there is no match. Replaces `Array.prototype.find`,
+ * whose `A | undefined` result reintroduces the partiality `Option` removes
+ * (Rule 6.3).
+ *
+ * @law findO(() => true)(xs)  ≡ headArray(xs)
+ * @law findO(() => false)(xs) ≡ none
+ */
+export const findO =
+  <A>(pred: (a: A) => boolean) =>
+  (xs: ReadonlyArray<A>): Option<A> =>
+    fromNullable(xs.find(pred));
+
+// ---------------------------------------------------------------------------
+// Non-empty arrays — correctness by construction (Rule 1.1 / Rule 8.1)
+//
+// `head` on a `ReadonlyArray` must return `Option<A>` because the array may be
+// empty. When a caller has already established non-emptiness, that fact should
+// live in the type, not be re-checked at every use site. `NonEmptyReadonlyArray`
+// makes the empty case unrepresentable, so `headNonEmpty` / `lastNonEmpty` are total.
+// ---------------------------------------------------------------------------
+
+/**
+ * A readonly array proven to hold at least one element. The leading `A` in the
+ * tuple is what makes `headNonEmpty` total.
+ */
+export type NonEmptyReadonlyArray<A> = readonly [A, ...ReadonlyArray<A>];
+
+/**
+ * Type guard proving an array is non-empty. Narrows to
+ * `NonEmptyReadonlyArray<A>`, after which `headNonEmpty` / `lastNonEmpty` apply.
+ */
+export const isNonEmptyArray = <A>(
+  xs: ReadonlyArray<A>,
+): xs is NonEmptyReadonlyArray<A> => xs.length > 0;
+
+/**
+ * Smart constructor lifting a possibly-empty array into `Option` of a
+ * non-empty one. The sole gateway into `NonEmptyReadonlyArray` (Rule 1.3).
+ *
+ * @law isSome(mkNonEmpty(xs)) ≡ xs.length > 0
+ */
+export const mkNonEmpty = <A>(
+  xs: ReadonlyArray<A>,
+): Option<NonEmptyReadonlyArray<A>> =>
+  isNonEmptyArray(xs) ? some(xs) : none;
+
+/**
+ * Total head: the first element of a non-empty array, with no `Option`
+ * wrapper, because the type guarantees it exists.
+ */
+export const headNonEmpty = <A>(xs: NonEmptyReadonlyArray<A>): A => xs[0];
+
+/**
+ * Total last: the final element of a non-empty array. Uses `reduce` without an
+ * initial value, which is itself total only on non-empty input — exactly the
+ * guarantee the type carries.
+ */
+export const lastNonEmpty = <A>(xs: NonEmptyReadonlyArray<A>): A =>
+  xs.reduce((_prev, curr) => curr);
+
+// ---------------------------------------------------------------------------
+// Refined numerics — no numeric hazards (Rule 1.13)
+//
+// `number` includes `NaN`, `Infinity`, and `-Infinity`, none of which satisfy
+// the ordinary numeric laws (`NaN !== NaN`; `Infinity + 1 === Infinity`). They
+// are illegal states the bare type fails to exclude. These brands push the
+// finiteness / sign / integrality check to a smart constructor once, so the
+// core consumes a value on which arithmetic reasoning is sound.
+// ---------------------------------------------------------------------------
+
+/** A `number` proven to be finite, an integer. */
+export type Int = Brand<number, 'Int'>;
+
+/** A `number` proven to be finite and strictly greater than zero. */
+export type Positive = Brand<number, 'Positive'>;
+
+/** A `number` proven to be finite and greater than or equal to zero. */
+export type NonNegative = Brand<number, 'NonNegative'>;
+
+/**
+ * Guard for a usable real number: finite (excludes `NaN`, `±Infinity`).
+ * Prefer this over the global `isFinite`, which coerces its argument.
+ */
+export const isFiniteNumber = (value: number): boolean => Number.isFinite(value);
+
+/**
+ * Smart constructor for `Int`. `Some` iff `value` is a finite integer.
+ * @law isSome(mkInt(n)) ≡ Number.isInteger(n)
+ */
+export const mkInt = (value: number): Option<Int> =>
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): smart-constructor body, brand applied after Number.isInteger guard
+  Number.isInteger(value) ? some(value as Int) : none;
+
+/**
+ * Smart constructor for `Positive`. `Some` iff `value` is finite and `> 0`.
+ * @law isSome(mkPositive(n)) ≡ Number.isFinite(n) && n > 0
+ */
+export const mkPositive = (value: number): Option<Positive> =>
+  Number.isFinite(value) && value > 0
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): smart-constructor body, brand applied after finiteness/sign guard
+    ? some(value as Positive)
+    : none;
+
+/**
+ * Smart constructor for `NonNegative`. `Some` iff `value` is finite and `>= 0`.
+ * @law isSome(mkNonNegative(n)) ≡ Number.isFinite(n) && n >= 0
+ */
+export const mkNonNegative = (value: number): Option<NonNegative> =>
+  Number.isFinite(value) && value >= 0
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): smart-constructor body, brand applied after finiteness/sign guard
+    ? some(value as NonNegative)
+    : none;

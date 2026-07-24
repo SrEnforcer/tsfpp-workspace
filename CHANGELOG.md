@@ -10,7 +10,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-No changes yet.
+### ⚠ BREAKING CHANGES
+
+- **Consistent ADT-combinator naming (Rule 7.8).** `Result` is now the unsuffixed base ADT; every other ADT's combinators carry that ADT's full type name as a suffix. Renames:
+  - Option: `mapO` → `mapOption`, `flatMapO` → `flatMapOption`, `orElse` → `orElseOption`, `getOrElse` → `getOrElseOption`, `traverseArrayO` → `traverseArrayOption`, `sequenceArrayO` → `sequenceArrayOption`
+  - Result: `matchResult` → `match`, `getOrElseR` → `getOrElse` (note: bare `getOrElse` is now the **Result** eliminator; the Option one is `getOrElseOption`)
+  - Non-empty arrays: `headNE` → `headNonEmpty`, `lastNE` → `lastNonEmpty`
+  - Collections: `entriesOfMap` → `entriesOf`
+  - Unchanged (base `Result` and List families): `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tap`, `tapErr`, `traverseArray`, `matchOption`, `mapList`, and the `*List` family.
+
+### Features
+
+- add `matchOption` and `matchResult` total eliminators — collapse an ADT to a single result type with a handler per variant, without leaking `_tag` (supports Rule 8.5)
+- add `getOrElseR`, the Result counterpart to Option's `getOrElse`
+- add `mapErr` to map the error channel of a `Result` — the canonical tool for remapping a boundary error into a tagged domain error (supports Rule 6.7)
+- add `findO`, a total array search returning `Option<A>` in place of `Array.prototype.find`'s `A | undefined`
+- add `NonEmptyReadonlyArray<A>` with `isNonEmptyArray`, `mkNonEmpty`, and total `headNE` / `lastNE`
+- add refined numeric brands `Int`, `Positive`, `NonNegative` with `mkInt` / `mkPositive` / `mkNonNegative` smart constructors and the `isFiniteNumber` guard (supports Rule 1.13)
 
 ## [1.7.0] - 2026-05-29
 
