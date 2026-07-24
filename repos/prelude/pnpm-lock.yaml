@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@tsfpp/eslint-config':
-        specifier: ^1.0.2
-        version: 1.0.2(@typescript-eslint/eslint-plugin@8.59.2(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
+        specifier: ^1.0.3
+        version: 1.0.3(@typescript-eslint/eslint-plugin@8.59.2(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@tsfpp/tsconfig':
         specifier: ^1.0.0
         version: 1.0.0(typescript@5.9.3)
@@ -440,8 +440,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@tsfpp/eslint-config@1.0.2':
-    resolution: {integrity: sha512-+02ADawolUg9sR+TfIl5urc71CSTtykwEETonGh/Fw5d8vImWD7ciNij1HDFNU/tYrjCdgdH44edfrsBWa3wHw==}
+  '@tsfpp/eslint-config@1.0.3':
+    resolution: {integrity: sha512-cUV0DXum2dLM4xyLRXU/i0ubb0IpgUoHLa9TBnq5+YSAwc5W1V0zUccME2Al5nYU+av4jkwD4CfywAGSIxVjbw==}
     engines: {node: '>=18.18.0'}
     peerDependencies:
       '@tanstack/eslint-plugin-query': '>=5.0.0'
@@ -1504,7 +1504,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.3':
     optional: true
 
-  '@tsfpp/eslint-config@1.0.2(@typescript-eslint/eslint-plugin@8.59.2(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
+  '@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.2(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/eslint-plugin': 8.59.2(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@typescript-eslint/parser': 8.59.2(eslint@9.39.4)(typescript@5.9.3)
