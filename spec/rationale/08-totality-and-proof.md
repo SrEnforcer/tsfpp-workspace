@@ -107,3 +107,30 @@ A parser returns typed data (or typed error). This makes boundary processing sin
 - Core layer: consume `DomainType`, never raw input shapes.
 
 This reduces duplicated checks and improves local reasoning. Every function after the parse boundary can rely on domain invariants by construction.
+
+---
+
+## Rule 8.5 — Total eliminators over hand-rolled guards
+
+A guard and a `match` both let you handle both variants of an `Option` or `Result`. Only one of them *forces* you to.
+
+```typescript
+// Guard: the None arm is optional as far as the compiler is concerned
+const label = isSome(name) ? name.value : /* nothing here still type-checks in many shapes */
+
+// match: both handlers are required by the type, and both must return B
+const label = matchOption(() => 'anonymous', (n: string) => n)(name)
+```
+
+`matchOption(onNone, onSome)` and `matchResult(onErr, onOk)` are eliminators: their type demands a handler per variant and a common result type, so a missing arm is not a review-catchable oversight but a compile error. That is axiom 5 (exhaustiveness) applied to the two-variant prelude ADTs, in the same spirit as the `never` assertion for n-ary unions. A second benefit falls out for free: the discriminant never appears at the call site, so Rule 1.11 is satisfied by construction rather than by discipline.
+
+The rule is a `SHOULD`, not a `MUST`, because guards are genuinely better for one shape: early-return control flow. When the intent is "bail out of the whole function on `None`, then proceed on the golden path" (Rule 4.4), a guard clause keeps the happy path unindented and reads more directly than a `match` whose `onSome` would swallow the rest of the body:
+
+```typescript
+const process = (input: Option<string>): Result<Output, Err> => {
+  if (isNone(input)) return err('missing input')   // leave the function
+  return ok(transform(input.value))                // golden path, not nested
+}
+```
+
+The dividing line: if both arms *produce a value* that the surrounding expression consumes, reach for the eliminator; if one arm *exits* and the other continues, keep the guard.

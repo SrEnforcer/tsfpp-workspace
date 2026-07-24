@@ -3,14 +3,29 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 1.1.0
-**Date:** 2026-05-15
+**Version:** 1.3.0
+**Date:** 2026-07-23
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
 
 ---
 
 ## Changelog
+
+### 1.3.0 — 2026-07-23
+- **New Rule 7.8** — ADT-combinator naming convention: `Result` is the base ADT and its combinators are unsuffixed; a combinator specialised to another ADT MUST carry that ADT's full type name as a suffix (`mapOption`, `mapList`, `headNonEmpty`). Abbreviated (`mapO`) and single-letter (`getOrElseR`) suffixes are forbidden.
+- **Rule 7.3 tightened** — `mk` is the canonical smart-constructor prefix. `create*` is no longer sanctioned; use `mk*`. `as*` / `fromX` remain permitted for their specific roles.
+- **`@tsfpp/prelude` 2.0.0** and **`@tsfpp/boundary` 2.0.0** apply the two rules above (breaking renames). See each package CHANGELOG.
+
+### 1.2.0 — 2026-07-23
+- **New Rule 1.13** — Numeric hazards: `NaN`, `Infinity`, and coercion-based number parsing are forbidden in the core; constrained numerics are branded (`Int`, `Positive`, `NonNegative`) and finiteness is guarded at the boundary.
+- **New Rule 1.14** — Prefer the `satisfies` operator over `as` for literal conformance; it proves a value inhabits a type without widening or coercing, closing the most common non-boundary reason to reach for an assertion.
+- **New Rule 4.6** — No ambient nondeterminism in the pure core: `Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`, `performance.now()`, and `process.env` are effects and must be injected, not called (extends the Reader discipline of Rule 6.5).
+- **New Rule 6.7** — Domain error channels must be discriminated unions with a `kind` discriminant, never bare `string` or `Error`; this makes error handling exhaustive at every recovery site.
+- **New Rule 8.5** — Consume `Option` / `Result` through a total eliminator (`matchOption` / `matchResult`) when both arms yield a value; reserve `isOk` / `isNone` guards for early-return control flow.
+- **Prelude** — `@tsfpp/prelude` gains `matchOption`, `matchResult`, `getOrElseR`, `mapErr`, `findO`, the `NonEmptyReadonlyArray` family (`isNonEmptyArray`, `mkNonEmpty`, `headNE`, `lastNE`), and refined numerics (`Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`) in support of Rules 1.13, 6.7, and 8.5.
+- **Appendix B** expanded with `no-restricted-globals` / `no-restricted-syntax` entries enforcing Rules 1.13 and 4.6.
+- **Appendix E** updated with the new checklist items.
 
 ### 1.1.0 — 2026-05-15
 - Removed all references to Ramda. The canonical companion is now `@tsfpp/prelude`; Remeda is noted as the recommended collection-plumbing library where the prelude is intentionally silent.
@@ -366,6 +381,65 @@ type Result<A, E> = { readonly kind: 'ok'; ... } | { readonly kind: 'err'; ... }
 
 ---
 
+### Rule 1.13 — MUST: Forbid numeric hazards; brand constrained numerics and guard finiteness at the boundary
+
+**Rationale.** `number` is not the set of numbers. It contains `NaN`, `Infinity`, and `-Infinity`, and none of them obeys the laws the rest of the code assumes: `NaN !== NaN` breaks reflexivity of equality, `NaN` poisons every arithmetic expression it touches, and comparisons against `±Infinity` silently pass guards that were written for real magnitudes. A `NaN` is precisely an illegal state that the type `number` fails to exclude (axiom 1), and it enters through coercion: `Number('abc')`, `parseInt(undefined)`, `+someString`, and `JSON.parse` of a malformed field all yield `NaN` with no signal. This mirrors JPL-10's prohibition on relying on unconstrained numeric behaviour and MISRA C's rules on the use of floating-point.
+
+Two obligations follow. First, coercion-based parsing (`Number(x)`, `parseInt`, `parseFloat`, unary `+`) is forbidden in the core; convert at the boundary through a smart constructor that guards with `Number.isFinite` / `Number.isInteger` and returns `Option` or `Result`. Second, where a numeric domain has an invariant (a count is a non-negative integer, a price is positive), encode it as a branded refinement rather than a bare `number`.
+
+**Do**
+```typescript
+import { type Option, mkPositive, mkInt, type Positive } from '@tsfpp/prelude'
+
+// Constrained domain quantity — the brand carries the invariant
+const parsePrice = (raw: string): Option<Positive> =>
+  mkPositive(Number.parseFloat(raw)) // parse confined to the boundary; NaN → None
+
+const applyDiscount = (price: Positive, pct: number): number =>
+  price * (1 - pct)   // no NaN guard needed here — the type already excludes it
+```
+
+**Don't**
+```typescript
+const price = Number(raw)          // NaN on bad input, propagated as a valid `number`
+const total = price * quantity     // NaN silently poisons every downstream sum
+if (price > 0) { ... }             // NaN > 0 is false — the guard passes the wrong way for -0, misses NaN entirely
+```
+
+**Guards.** Use `Number.isNaN` and `Number.isFinite`, never the global `isNaN` / `isFinite`, which coerce their argument (`isNaN('x')` is `true` for reasons unrelated to the number). The prelude exposes `isFiniteNumber` for the common case.
+
+**Exception.** Coercion is permitted *inside* a smart constructor whose body immediately guards the result, documented with `// DEVIATION(1.13)` where the coercion is not self-evidently a boundary parse.
+
+---
+
+### Rule 1.14 — SHOULD: Prefer the `satisfies` operator over `as` for literal conformance
+
+**Rationale.** A large share of `as` casts outside smart constructors are not coercions at all — they are a programmer asserting "this literal matches that type." `as` is the wrong tool for that intent: it *widens or narrows by assertion*, silently accepting a value that does **not** conform and discarding the precise inferred type. `satisfies` expresses the same intent soundly: it checks the value against the type, fails to compile if it does not conform, and preserves the narrow literal type for downstream inference. It is the sanctioned answer to most reasons a reviewer sees `as` reached for, and it never appears in the forbidden-constructs table because it cannot lie.
+
+**Do**
+```typescript
+const routes = {
+  home: '/',
+  profile: '/u/:id',
+} satisfies Record<string, `/${string}`>
+
+// `routes.home` keeps the literal type '/', not the widened `string`
+```
+
+**Don't**
+```typescript
+const routes = {
+  home: '/',
+  profile: '/u/:id',
+} as Record<string, `/${string}`>
+// Asserts conformance without checking it; also widens each value to the template type,
+// losing the literal that made the table useful.
+```
+
+**Note.** `satisfies` does not replace smart constructors. It proves a *statically known literal* conforms to a type; it does nothing for `unknown` runtime input, which still requires parsing (Rule 8.4). Where both apply, parse first, then let inference carry the typed value.
+
+---
+
 ## 2 — Immutability
 
 ### Rule 2.1 — MUST: Declare all bindings with `const`; `let` and `var` are forbidden
@@ -666,6 +740,38 @@ if (value) { ... }  // 0, '', NaN are falsy but may be valid
 
 ---
 
+### Rule 4.6 — MUST: No ambient nondeterminism in the pure core; the clock, randomness, and the environment are effects and must be injected
+
+**Rationale.** Referential transparency (axiom 4) says a function's output depends only on its inputs. `Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`, `performance.now()`, and `process.env.X` each read hidden ambient state, so a function that calls them returns a different value on the second call with the same arguments — its signature lies about what it depends on. These are the constructs that turn into Heisenbugs, unreproducible test failures, and "works on my machine": the defect class axiom 4 exists to eliminate. They are not forbidden — every real program needs the clock and a source of entropy — but they are *effects*, and an effect belongs at the boundary, threaded in as a value, never called from the middle of pure logic.
+
+The mechanism is the Reader-style `Deps` record already established by Rule 6.5: the core receives `now: () => Date` and `randomUuid: () => string` as fields and calls them through the parameter, so a test injects a fixed clock and a seeded generator with no mocking framework.
+
+**Do**
+```typescript
+type Clock = { readonly now: () => Date; readonly randomUuid: () => string }
+
+const mkOrderId = (deps: Clock) => (customer: CustomerId): OrderId =>
+  asOrderId(`${customer}-${deps.now().getTime()}-${deps.randomUuid()}`)
+
+// Production wires the real effects at the boundary:
+const clock: Clock = { now: () => new Date(), randomUuid: () => crypto.randomUUID() }
+// Tests wire deterministic ones:
+const frozen: Clock = { now: () => new Date(0), randomUuid: () => 'test-uuid' }
+```
+
+**Don't**
+```typescript
+const mkOrderId = (customer: CustomerId): OrderId =>
+  asOrderId(`${customer}-${Date.now()}-${crypto.randomUUID()}`)
+// Same inputs, different output every call. Untestable without freezing global time.
+```
+
+**Enforcement.** Appendix B forbids these globals in source via `no-restricted-globals` / `no-restricted-syntax`. The wiring site — the single adapter module that constructs the real `Deps` — carries a `// DEVIATION(4.6)` and is the only place the raw constructors appear.
+
+**Exception.** The composition root (`main.ts`, the server bootstrap, a CLI entry) is a boundary and MAY read the clock, entropy, and `process.env` directly to build the `Deps` it injects. Config loading is governed additionally by `CONFIG_CODING_STANDARD.md`.
+
+---
+
 ## 5 — Composition and Call Sites
 
 ### Rule 5.1 — MUST: Use `pipe` (left-to-right) for multi-step transformations; limit pipeline depth to 8 stages
@@ -833,6 +939,54 @@ const users = await Promise.all(ids.map(fetchUser))
 
 ---
 
+### Rule 6.7 — MUST: Domain error channels must be discriminated unions with a `kind` discriminant, never bare `string` or `Error`
+
+**Rationale.** Rule 6.1 moves failure into the type; this rule makes that failure *exhaustively handleable*. A `Result<T, string>` tells the caller only *that* it failed, in prose. The caller cannot branch on the failure without string-matching — a fragile, untyped switch the compiler cannot check — and adding a new failure mode changes no type, so no recovery site lights up. That is exactly the "we added a case and forgot to handle it" defect that axiom 5 (exhaustiveness) exists to prevent, reintroduced through the error channel. Encoding `E` as a discriminated union (per Rule 1.1, with a `kind` discriminant per Rule 1.12) restores it: recovery sites `switch` on `error.kind` with an `absurd` default, and a new error variant becomes a compile error at every place that must now consider it.
+
+**Do**
+```typescript
+type OrderError =
+  | { readonly kind: 'out_of_stock'; readonly sku: Sku }
+  | { readonly kind: 'payment_declined'; readonly code: DeclineCode }
+  | { readonly kind: 'address_invalid'; readonly field: string }
+
+const placeOrder = (cart: Cart): Result<Confirmation, OrderError> => { ... }
+
+// Recovery is exhaustive and type-checked:
+const explain = (e: OrderError): string => {
+  switch (e.kind) {
+    case 'out_of_stock':     return `${e.sku} is unavailable`
+    case 'payment_declined': return `payment failed: ${e.code}`
+    case 'address_invalid':  return `check ${e.field}`
+    default:                 return absurd(e)
+  }
+}
+```
+
+**Don't**
+```typescript
+const placeOrder = (cart: Cart): Result<Confirmation, string> => { ... }
+// Caller can only display the string or re-parse it. No exhaustiveness, no recovery
+// logic the compiler can verify, and a new failure mode is invisible to every caller.
+
+const placeOrder = (cart: Cart): Result<Confirmation, Error> => { ... }
+// `Error` is a nominal class (Rule 1.9) whose `message` is unstructured prose;
+// `instanceof` subclass checks to distinguish causes are the anti-pattern this rule closes.
+```
+
+**Remapping at boundaries.** A raw failure from a third party (a Zod message, a caught `unknown`, an HTTP status) is remapped into the domain union as it crosses inward, using the prelude's `mapErr`. The stringly-typed error lives only in the adapter, never in a domain signature.
+
+```typescript
+import { mapErr } from '@tsfpp/prelude'
+
+const parseBody = (raw: unknown): Result<Order, OrderError> =>
+  pipe(parseWithZod(raw), mapErr((msg): OrderError => ({ kind: 'address_invalid', field: msg })))
+```
+
+**Exception.** `Result<T, string>` is tolerable in throwaway scripts and at the outermost validation edge *before* the remap, with a `// DEVIATION(6.7)` where it appears in a signature that outlives the boundary.
+
+---
+
 ## 7 — Naming
 
 ### Rule 7.1 — MUST: Types and type aliases in PascalCase
@@ -857,10 +1011,18 @@ const maxRetries = 3
 
 **Rationale.** Signals construction with potential validation, distinguishing constructors from ordinary functions.
 
+`mk` is the canonical construction prefix and MUST be used for value and error constructors alike (`mkNodeId`, `mkProblem`, `mkNotFoundError`, `mkHandler`). `as` is reserved for total coercions between representationally-identical types (`asHandle`), and `fromX` for conversions that name their source (`fromString`, `fromNullable`). Other construction prefixes — in particular `create*` — are **not** permitted; a factory that returns a handler or adapter is still a constructor and uses `mk`.
+
 ```typescript
 const mkNodeId = (raw: string): NodeId => ...
 const asHandle = (raw: string): Handle => ...
 const fromString = (raw: string): Option<Direction> => ...
+```
+
+**Don't**
+```typescript
+const createHandler = (deps: Deps): Handler => ...  // use mkHandler
+const notFoundError = (id: string): ApiError => ... // use mkNotFoundError
 ```
 
 ---
@@ -899,6 +1061,37 @@ const withRetry = ...
 ```
 
 The `@tsfpp/boundary` package uses this convention throughout: `withIdempotency`, `withRequestLog`.
+
+---
+
+### Rule 7.8 — MUST: Suffix ADT-specialised combinators with the ADT's full type name; `Result` is the unsuffixed base
+
+**Rationale.** In a flat prelude (no module namespacing), the same combinator exists for several ADTs — `map` for `Result`, `Option`, `List`. A reader must be able to tell from the name alone which ADT a combinator targets, and must be able to predict the name of the variant they need. That requires one rule with no exceptions, because the failure mode is silent: picking the wrong-ADT combinator either fails to type-check (noise) or, where the shapes coincide, compiles against the wrong intent.
+
+The convention has two parts:
+
+1. **`Result` is the base ADT.** Its combinators are unsuffixed: `map`, `flatMap`, `getOrElse`, `match`, `mapErr`, `tap`, `traverseArray`. `Result` is chosen as the base because effectful, fallible computation is the dominant case in application code, and its combinators are the most frequently written.
+2. **Every other ADT carries its full type name as a suffix.** `Option` → `mapOption`, `flatMapOption`, `getOrElseOption`, `orElseOption`, `matchOption`, `traverseArrayOption`. `List` → `mapList`, `foldList`, `filterList`. `NonEmptyReadonlyArray` → `headNonEmpty`, `lastNonEmpty`.
+
+Abbreviated suffixes (`mapO`, `headNE`) and single-letter suffixes (`getOrElseR`) are forbidden: they are unpredictable (is Option `O` or the first letter of the operation?) and they let the "base" ADT drift between families, which is precisely the inconsistency this rule removes.
+
+**Do**
+```typescript
+import { map, getOrElse, mapOption, getOrElseOption, headNonEmpty } from '@tsfpp/prelude'
+
+const total = pipe(parseAmounts(raw), map(sum))              // Result — base, unsuffixed
+const label = getOrElseOption(() => 'anon')(findName(user))  // Option — full suffix
+const first = headNonEmpty(guaranteedNonEmpty)               // NonEmpty — full suffix
+```
+
+**Don't**
+```typescript
+const label = getOrElse(() => 'anon')(findName(user)) // ambiguous: Result or Option?
+const x = mapO(f)(opt)                                 // abbreviated suffix
+const y = getOrElseR(g)(res)                           // single-letter suffix, base drift
+```
+
+**Scope.** This rule governs *ADT-parametric combinators* — functions that take an ADT and transform or eliminate it. It does not rename data constructors (`some`, `ok`, `cons`), type guards (`isSome`, `isOk` — governed by Rule 7.5), or conversions that already name their source/target (`fromArray`, `toArray`, `fromNullable`).
 
 ---
 
@@ -986,6 +1179,40 @@ const greet = (raw: unknown): string => {
   if (!isValidUser(raw)) return 'invalid'
   // What's the type of `raw` here? Still unknown. Every field access is a cast.
   return `Hello, ${(raw as { name: string }).name}`
+}
+```
+
+---
+
+### Rule 8.5 — SHOULD: Eliminate `Option` / `Result` through a total `match` when both arms yield a value; reserve guards for early-return control flow
+
+**Rationale.** The exhaustiveness axiom (axiom 5) wants both variants of an ADT accounted for at every consumption site. `isOk` / `isNone` guards *permit* exhaustiveness but do not *enforce* it: a reader must confirm by eye that the `else` was written and that both branches return. A total eliminator — `matchOption(onNone, onSome)`, `matchResult(onErr, onOk)` — makes the omission unrepresentable: it is a single expression that does not type-check unless a handler is supplied for each variant and both produce the common result type. It also honours Rule 1.11 by construction, since the discriminant never appears at the call site.
+
+The rule is scoped deliberately. When the consumption *produces a value* (mapping a `Result` to a response, collapsing an `Option` to a label), `match` is the right shape. When the consumption is *control flow* — bail out early on `None`, then continue in the golden path (Rule 4.4) — a guard clause reads better and `match` would force an awkward nesting. Prefer the eliminator for the former; keep guards for the latter.
+
+**Do**
+```typescript
+import { matchResult } from '@tsfpp/prelude'
+
+// Value-producing consumption — both arms return, exhaustiveness enforced
+const toResponse = matchResult(
+  (e: OrderError) => problem(e),
+  (c: Confirmation) => ok200(c),
+)
+```
+
+**Don't**
+```typescript
+// Re-deriving the match by hand: nothing forces the None branch to exist,
+// and a later edit can drop it without a compile error.
+const label = isSome(name) ? name.value : /* forgot to handle None → undefined */ undefined!
+```
+
+**Guard clauses remain correct for early return:**
+```typescript
+const process = (input: Option<string>): Result<Output, Err> => {
+  if (isNone(input)) return err('missing input')   // control flow, not value production
+  return ok(transform(input.value))
 }
 ```
 
@@ -1093,6 +1320,10 @@ Pre-push MAY additionally run the full test suite. CI re-runs all gates without 
 - [ ] Branded types created only via smart constructors
 - [ ] Discriminant convention respected (`_tag` for prelude, `kind` for domain)
 - [ ] `unknown` parsed to typed values at the boundary (Rule 8.4)
+- [ ] No coercion parsing or `NaN`/`Infinity` leakage in the core; constrained numerics branded (Rule 1.13)
+- [ ] No ambient clock/entropy/env in the core; injected via `Deps` (Rule 4.6)
+- [ ] Domain error channels are `kind`-tagged unions, not `string`/`Error` (Rule 6.7)
+- [ ] `Option`/`Result` collapsed via `match` where both arms yield a value (Rule 8.5)
 
 A condensed quick-reference card is provided in Appendix E.
 
@@ -1169,6 +1400,10 @@ src/
 | `default` in exhaustive switch | 4.1 | MUST NOT (use `never` assertion) |
 | Direct `_tag` access outside the prelude | 1.11 | MUST NOT |
 | Optional parameters (`?`) outside boundary records | 3.7 | MUST NOT |
+| Coercion parsing in the core (`Number()`, `parseInt`, `parseFloat`, unary `+`) | 1.13 | MUST NOT |
+| Global `isNaN` / `isFinite` (coercing) | 1.13 | MUST NOT (use `Number.isNaN` / `Number.isFinite`) |
+| Ambient nondeterminism in the core (`Date.now`, `new Date`, `Math.random`, `crypto.randomUUID`, `process.env`) | 4.6 | MUST NOT (inject via `Deps`) |
+| Bare `string` or `Error` as a domain error channel | 6.7 | MUST NOT (use a `kind`-tagged union) |
 
 ---
 
@@ -1262,6 +1497,20 @@ export default [
       'functional/no-classes': 'error',                            // Rule 1.9
       'functional/no-this-expressions': 'error',                   // Rule 1.9
 
+      // --- Numeric hazards (Rule 1.13) & ambient nondeterminism (Rule 4.6) ---
+      'no-restricted-globals': ['error',                           // Rule 1.13, 4.6
+        { name: 'isNaN', message: 'Use Number.isNaN — the global coerces its argument (Rule 1.13).' },
+        { name: 'isFinite', message: 'Use Number.isFinite — the global coerces its argument (Rule 1.13).' },
+        { name: 'parseInt', message: 'Coercion parsing is forbidden in the core; parse at the boundary via a smart constructor (Rule 1.13).' },
+        { name: 'parseFloat', message: 'Coercion parsing is forbidden in the core; parse at the boundary via a smart constructor (Rule 1.13).' }
+      ],
+      'no-restricted-syntax': ['error',                            // Rule 4.6
+        { selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']", message: 'Date.now() is an effect; inject `now: () => Date` via Deps (Rule 4.6).' },
+        { selector: "CallExpression[callee.object.name='Math'][callee.property.name='random']", message: 'Math.random() is an effect; inject a seeded generator via Deps (Rule 4.6).' },
+        { selector: "NewExpression[callee.name='Date'][arguments.length=0]", message: 'new Date() reads the ambient clock; inject `now: () => Date` via Deps (Rule 4.6).' },
+        { selector: "MemberExpression[object.object.name='process'][object.property.name='env']", message: 'process.env is ambient input; load config at the boundary and inject it (Rule 4.6 / CONFIG_CODING_STANDARD.md).' }
+      ],
+
       // --- General hygiene ---
       'no-console': 'warn',
       'prefer-const': 'error',                                     // Rule 2.1
@@ -1354,12 +1603,14 @@ Libraries explicitly **not** recommended for this standard:
 A one-page version of Rule 10.4 for printout or PR template inclusion.
 
 ### Type discipline
-- [ ] No `any`. No `as` outside smart constructors. No `!`.
+- [ ] No `any`. No `as` outside smart constructors. No `!`. Prefer `satisfies` for literal conformance.
 - [ ] Sum types have a literal discriminant: `_tag` (prelude) / `kind` (domain).
 - [ ] Every `switch` on a sum type ends in `absurd(x)` or `ts-pattern`'s `.exhaustive()`.
 - [ ] Branded types created only via `mk*` / `as*` / `from*` smart constructors.
+- [ ] Constructors prefixed `mk` (no `create*`); ADT combinators suffixed by full type name, `Result` unsuffixed (Rules 7.3, 7.8).
 - [ ] No `interface` (unless deviation justified).
 - [ ] No `enum`. No `class`. No `this`. No `new` (outside adapter boundary).
+- [ ] No coercion parsing (`Number()`, `parseInt`) or `NaN`/`Infinity` in the core; constrained numerics branded (`Int`/`Positive`/`NonNegative`).
 
 ### Data shape
 - [ ] All records `readonly`, all arrays `ReadonlyArray`.
@@ -1369,10 +1620,12 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 
 ### Effects and errors
 - [ ] Failure encoded as `Result<A, E>`. Absence as `Option<A>`.
+- [ ] Error channel `E` is a `kind`-tagged union, not `string`/`Error`; boundary errors remapped with `mapErr`.
+- [ ] `Option`/`Result` collapsed via `matchOption` / `matchResult` when both arms yield a value.
 - [ ] No `throw` in core. `tryCatch` / `tryCatchAsync` at adapters.
 - [ ] Async returns `Promise<Result<A, E>>`, not `Promise<A>`.
 - [ ] `Promise.allSettled` chosen over `Promise.all` when partial failure matters.
-- [ ] Dependencies injected as `Deps` parameter, not imported.
+- [ ] Dependencies injected as `Deps` parameter, not imported. Clock/entropy/env never read ambiently in the core.
 - [ ] `unknown` parsed to a typed value at the boundary, not propagated.
 
 ### Composition and shape
@@ -1381,6 +1634,7 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 - [ ] Body ≤ 40 lines, complexity ≤ 10, nesting ≤ 4.
 - [ ] Pipelines ≤ 8 stages; longer pipelines decomposed and named.
 - [ ] Discriminants accessed via `isOk` / `isSome` / `isErr` / `isNone`, never `result._tag`.
+- [ ] Constructors use `mk*` (not `create*`); ADT combinators suffixed by full type name (`mapOption`, not `mapO`/`getOrElseR`), `Result` unsuffixed (Rules 7.3, 7.8).
 
 ### Tests and docs
 - [ ] Property-based tests cover the laws of every new combinator.

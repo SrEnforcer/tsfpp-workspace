@@ -1,5 +1,5 @@
 /**
- * Examples for §4 — Control Flow (Rules 4.1–4.5)
+ * Examples for §4 — Control Flow (Rules 4.1–4.6)
  * See ../CODING_STANDARD.md §4 and ../rationale/04-control-flow.md
  */
 
@@ -184,10 +184,38 @@ if (value)      { ... }   // false for null, undefined, 0, NaN, ""
 if (arr.length) { ... }   // acceptable in JS idiom but explicit form is clearer
 */
 
+// ─── Rule 4.6 — No ambient nondeterminism in the core; inject the clock/entropy ─
+//
+// MUST: Date.now(), new Date(), Math.random(), crypto.randomUUID() are effects.
+// Thread them in through a Deps record so the core stays referentially transparent.
+
+type Clock = {
+  readonly now: () => Date
+  readonly randomUuid: () => string
+}
+
+// GOOD: same inputs + same deps ⇒ same output. Trivially testable with a frozen clock.
+const mkReceiptId = (deps: Clock) => (customer: string): string =>
+  `${customer}-${deps.now().getTime()}-${deps.randomUuid()}`
+
+// Production wires the real effects at the boundary (the one place they may be read):
+const systemClock: Clock = {
+  now: () => new Date(),                 // DEVIATION(4.6): composition-root boundary
+  randomUuid: () => globalThis.crypto.randomUUID(), // DEVIATION(4.6): composition-root boundary
+}
+
+// Tests wire deterministic ones — no fake timers, no module mocks:
+const frozenClock: Clock = { now: () => new Date(0), randomUuid: () => 'test-uuid' }
+
+/* BAD: reads the ambient clock and entropy from inside pure logic.
+const mkReceiptId = (customer: string): string =>
+  `${customer}-${Date.now()}-${Math.random()}` // different every call; untestable
+*/
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
-export type { Direction, MoveEvent, Employee, EmailAddress, ParsedEmail, ValidationError }
+export type { Direction, MoveEvent, Employee, EmailAddress, ParsedEmail, ValidationError, Clock }
 export {
   describeEvent, isMoving, employees, activeNames, totalActiveSalary, firstActive,
   allSkills, formatCount, displayName, parseEmail, isNonEmpty, isPositive, isPresent,
-  formatOptional,
+  formatOptional, mkReceiptId, systemClock, frozenClock,
 }
