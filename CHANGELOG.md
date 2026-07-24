@@ -10,22 +10,32 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-07-24
+
+### Changed
+
+- Updated the package release metadata and downstream dependency references to `@tsfpp/eslint-config` 1.0.3.
+
+## [2.0.1] - 2026-07-24
+
+### Changed
+
+- Updated the package release metadata for the dependency refresh.
+
 ### ⚠ BREAKING CHANGES
 
-- **Consistent ADT-combinator naming (Rule 7.8).** `Result` is now the unsuffixed base ADT; every other ADT's combinators carry that ADT's full type name as a suffix. Renames:
+- **Consistent ADT-combinator naming (standard Rule 7.8).** `Result` is now the unsuffixed base ADT; every other ADT's combinators carry that ADT's full type name as a suffix. Renames of existing 1.x exports:
   - Option: `mapO` → `mapOption`, `flatMapO` → `flatMapOption`, `orElse` → `orElseOption`, `getOrElse` → `getOrElseOption`, `traverseArrayO` → `traverseArrayOption`, `sequenceArrayO` → `sequenceArrayOption`
-  - Result: `matchResult` → `match`, `getOrElseR` → `getOrElse` (note: bare `getOrElse` is now the **Result** eliminator; the Option one is `getOrElseOption`)
-  - Non-empty arrays: `headNE` → `headNonEmpty`, `lastNE` → `lastNonEmpty`
   - Collections: `entriesOfMap` → `entriesOf`
-  - Unchanged (base `Result` and List families): `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tap`, `tapErr`, `traverseArray`, `matchOption`, `mapList`, and the `*List` family.
+  - **Note:** the bare name `getOrElse` still exists but now refers to the new **Result** eliminator (below); code that used the 1.x Option `getOrElse` must move to `getOrElseOption`.
+  - Unchanged: `map`, `flatMap`, `flatMapAsync`, `tap`, `tapErr`, `traverseArray`, `mapList`, and the `*List` family.
 
 ### Features
 
-- add `matchOption` and `matchResult` total eliminators — collapse an ADT to a single result type with a handler per variant, without leaking `_tag` (supports Rule 8.5)
-- add `getOrElseR`, the Result counterpart to Option's `getOrElse`
-- add `mapErr` to map the error channel of a `Result` — the canonical tool for remapping a boundary error into a tagged domain error (supports Rule 6.7)
+- add total eliminators `match` (Result) and `matchOption` (Option) — collapse an ADT to a single result type with a handler per variant, without leaking `_tag` (supports Rule 8.5)
+- add `getOrElse`, the Result eliminator (computes a fallback from the error); `mapErr` to map a `Result`'s error channel — the canonical tool for remapping a boundary error into a tagged domain error (supports Rule 6.7)
 - add `findO`, a total array search returning `Option<A>` in place of `Array.prototype.find`'s `A | undefined`
-- add `NonEmptyReadonlyArray<A>` with `isNonEmptyArray`, `mkNonEmpty`, and total `headNE` / `lastNE`
+- add `NonEmptyReadonlyArray<A>` with `isNonEmptyArray`, `mkNonEmpty`, and total `headNonEmpty` / `lastNonEmpty`
 - add refined numeric brands `Int`, `Positive`, `NonNegative` with `mkInt` / `mkPositive` / `mkNonNegative` smart constructors and the `isFiniteNumber` guard (supports Rule 1.13)
 
 ## [1.7.0] - 2026-05-29

@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/prelude",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Functional prelude for TypeScript with Option, Result, and core combinators",
   "private": false,
   "license": "MIT",
@@ -39,7 +39,7 @@
   "homepage": "https://github.com/tsfpp/prelude#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tsfpp/prelude.git"
+    "url": "git+https://github.com/tsfpp/prelude.git"
   },
   "bugs": {
     "url": "https://github.com/tsfpp/prelude/issues"
