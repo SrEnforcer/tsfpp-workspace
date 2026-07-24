@@ -1,8 +1,11 @@
 allowBuilds:
   esbuild: true
+# Exclude our own internal packages from the minimum-release-age supply-chain
+# check. Package-name-only (no @version) is intentional: it covers every
+# resolved version, so these entries never need editing on a version bump.
 minimumReleaseAgeExclude:
-  - '@tsfpp/agents@2.0.2'
-  - '@tsfpp/boundary@2.0.2'
-  - '@tsfpp/eslint-config@1.0.3'
-  - '@tsfpp/prelude@2.0.2'
-  - '@tsfpp/standard@1.4.0'
+  - '@tsfpp/agents'
+  - '@tsfpp/boundary'
+  - '@tsfpp/eslint-config'
+  - '@tsfpp/prelude'
+  - '@tsfpp/standard'
