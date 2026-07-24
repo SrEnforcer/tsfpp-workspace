@@ -99,9 +99,9 @@ To reduce this, `scripts/pull-all.sh` now runs a preflight check per subtree:
 - it fetches each child remote
 - it compares the local subtree split commit with the remote `main` head
 - it classifies each repo as in-sync, remote-ahead, local-ahead, or diverged
-- it aborts before merging if any subtree is diverged
+- it aborts before merging if any subtree is local-ahead or diverged
 
-When preflight reports divergence, use this order:
+When preflight reports local-ahead or divergence, use this order:
 
 1. run `scripts/push-all.sh` to publish local subtree history to child remotes
 2. rerun `scripts/pull-all.sh` to import any remaining upstream updates
