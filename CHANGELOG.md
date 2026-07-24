@@ -8,6 +8,18 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ---
 
+## [1.0.3] — 2026-07-24
+
+### Changed
+
+- Updated package metadata for the next publish after downstream dependency bumps.
+
+## [1.0.2] — 2026-07-24
+
+### Changed
+
+- Updated package metadata for the next publish after dependency reference bumps.
+
 ## [1.0.1] — 2026-05-15
 
 ### Changed
