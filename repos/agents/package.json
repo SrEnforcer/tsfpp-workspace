@@ -40,7 +40,7 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@tsfpp/standard":     ">=1.4.0",
+    "@tsfpp/standard":     ">=2.0.0",
     "@tsfpp/prelude":      ">=2.0.2",
     "@tsfpp/boundary":     ">=2.0.2",
     "@tsfpp/eslint-config":">=1.0.3",

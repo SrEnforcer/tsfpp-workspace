@@ -17,7 +17,7 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@tsfpp/boundary": "^2.0.2",
     "@tsfpp/prelude": "^2.0.2",
-    "@tsfpp/standard": "^1.4.0",
+    "@tsfpp/standard": "^2.0.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

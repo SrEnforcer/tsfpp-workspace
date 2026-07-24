@@ -9,9 +9,9 @@ description: >
   conflict.
 ---
 
-# TSF++ coding standard — v1.3.0
+# TSF++ coding standard — v2.0.0
 
-Standard version: 1.3.0 (2026-07-23). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
+Standard version: 2.0.0 (2026-07-23). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
 
 ---
 
