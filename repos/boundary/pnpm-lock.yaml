@@ -9,18 +9,18 @@ importers:
   .:
     dependencies:
       '@tsfpp/prelude':
-        specifier: 2.0.0
-        version: 2.0.0
+        specifier: 2.0.2
+        version: 2.0.2
     devDependencies:
       '@tsfpp/agents':
-        specifier: ^1.7.2
-        version: 1.7.2(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@7.3.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.0)(@tsfpp/standard@1.3.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))
+        specifier: ^2.0.0
+        version: 2.0.0(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.2)(@tsfpp/standard@2.0.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))
       '@tsfpp/eslint-config':
         specifier: ^1.0.3
-        version: 1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@7.3.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
+        version: 1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@tsfpp/standard':
-        specifier: ^1.3.0
-        version: 1.3.0
+        specifier: ^2.0.0
+        version: 2.0.0
       '@tsfpp/tsconfig':
         specifier: ^1.0.0
         version: 1.0.0(typescript@5.9.3)
@@ -40,8 +40,8 @@ importers:
         specifier: ^9.39.4
         version: 9.39.4
       eslint-plugin-functional:
-        specifier: ^7.3.0
-        version: 7.3.0(eslint@9.39.4)(typescript@5.9.3)
+        specifier: ^9.0.0
+        version: 9.0.5(eslint@9.39.4)(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -453,16 +453,20 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@tsfpp/agents@1.7.2':
-    resolution: {integrity: sha512-+HNTezumGqZW6TyImekLT+c+8be7MiSXdyCJp2nRd9p5Iy0w+StFMFwg/wouw/HN09rMJ0MgDZ/iV3vzjBONRw==}
+  '@tsfpp/agents@2.0.0':
+    resolution: {integrity: sha512-cp3h/vWN0bypnKNzb/BH/ycSNix/sGtsPQBFXwUXe7d2cRIP9qf/ShJTJTJbw5PHvkAJth/nzIPhdFSU53saIQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
     peerDependencies:
-      '@tsfpp/boundary': '>=1.0.0'
+      '@tsfpp/boundary': '>=2.0.0'
       '@tsfpp/eslint-config': '>=1.0.0'
-      '@tsfpp/prelude': '>=1.0.0'
-      '@tsfpp/standard': '>=1.0.0'
+      '@tsfpp/mcp-server': '>=1.0.0'
+      '@tsfpp/prelude': '>=2.0.0'
+      '@tsfpp/standard': '>=1.3.0'
       '@tsfpp/tsconfig': '>=1.0.0'
+    peerDependenciesMeta:
+      '@tsfpp/mcp-server':
+        optional: true
 
   '@tsfpp/boundary@1.1.0':
     resolution: {integrity: sha512-O4PmGq6JxKbFi3NLgkFlwAQ4ORRdcxmWsEfA7d6Ju19hmsbZyAtKu2pSgy3yg2LOab7USbnRShiy2mCTlmiGlA==}
@@ -495,12 +499,12 @@ packages:
     resolution: {integrity: sha512-9qBmQe+eUbkOd+RbL1HWTnAyYQeEHQu2MKcYzHelwsOIXdZkWadwahbX3j0Xs7de7idWpWFUD25rBBgK5Zz7fA==}
     engines: {node: '>=18.0.0'}
 
-  '@tsfpp/prelude@2.0.0':
-    resolution: {integrity: sha512-mm58vyNvhSaMpK6aF/mdWFCDJiCohnJRXvBqvcWOwrhvEchLCm/xmXN69eJNM/MOW8c6/C6Lkm+pdXK8le91qA==}
+  '@tsfpp/prelude@2.0.2':
+    resolution: {integrity: sha512-lLdqFXP4KchS0Vo56naAW3Rorq7RBQmRffxEDmCAJ6+DBJ8xy9CFWdycOT1SYb3C4P8/p89hmIZpQf9KVqrYaw==}
     engines: {node: '>=18.0.0'}
 
-  '@tsfpp/standard@1.3.0':
-    resolution: {integrity: sha512-NABVRrdLRHy2fP+1YBPlxXGkqLFMI11YdQE34CaHbigRFF6wWUtXaesT1FMaT6r8v24rada6gacf24kNqImMxw==}
+  '@tsfpp/standard@2.0.0':
+    resolution: {integrity: sha512-Pkvrwdjt7rum2LNCp3b2SrKsxeHDECl+QS6qcQfXtZbCPliayYnEWk14Y5UfcV9jr2PDJwMgoL3JQCV3W78x0w==}
 
   '@tsfpp/tsconfig@1.0.0':
     resolution: {integrity: sha512-LJ3sLHDpJv08SQoC7SQRTNwCDHzWa0kju4XymkssJppIPahAZazCs5kS40U+fz1p8rUiLmvtangUQnvQf/X41g==}
@@ -757,11 +761,11 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  eslint-plugin-functional@7.3.0:
-    resolution: {integrity: sha512-8Pdor4hgH196ulx937RYs3eYDXlrOHQ7LA6v+vmKyK+aU62JmrlNLcTnloR0kmTp1rk5+dAcjZoCD7oegWXZzA==}
+  eslint-plugin-functional@9.0.5:
+    resolution: {integrity: sha512-RYbNpGkGu5mSN7xlezyeE7TE3S9rsliAS5FOorZoxn7126UTslcQnoVOIAOA6fMOlz6dNG3x3cd3tuzrHM6mRA==}
     engines: {node: '>=v18.18.0'}
     peerDependencies:
-      eslint: ^9.0.0
+      eslint: ^9.0.0 || ^10.0.0
       typescript: '>=4.7.4'
     peerDependenciesMeta:
       typescript:
@@ -1552,31 +1556,31 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.4':
     optional: true
 
-  '@tsfpp/agents@1.7.2(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@7.3.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.0)(@tsfpp/standard@1.3.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))':
+  '@tsfpp/agents@2.0.0(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.2)(@tsfpp/standard@2.0.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))':
     dependencies:
       '@tsfpp/boundary': 1.1.0
-      '@tsfpp/eslint-config': 1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@7.3.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
-      '@tsfpp/prelude': 2.0.0
-      '@tsfpp/standard': 1.3.0
+      '@tsfpp/eslint-config': 1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
+      '@tsfpp/prelude': 2.0.2
+      '@tsfpp/standard': 2.0.0
       '@tsfpp/tsconfig': 1.0.0(typescript@5.9.3)
 
   '@tsfpp/boundary@1.1.0':
     dependencies:
       '@tsfpp/prelude': 1.3.0
 
-  '@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@7.3.0(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
+  '@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/eslint-plugin': 8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@typescript-eslint/parser': 8.59.4(eslint@9.39.4)(typescript@5.9.3)
       eslint: 9.39.4
-      eslint-plugin-functional: 7.3.0(eslint@9.39.4)(typescript@5.9.3)
+      eslint-plugin-functional: 9.0.5(eslint@9.39.4)(typescript@5.9.3)
       typescript: 5.9.3
 
   '@tsfpp/prelude@1.3.0': {}
 
-  '@tsfpp/prelude@2.0.0': {}
+  '@tsfpp/prelude@2.0.2': {}
 
-  '@tsfpp/standard@1.3.0': {}
+  '@tsfpp/standard@2.0.0': {}
 
   '@tsfpp/tsconfig@1.0.0(typescript@5.9.3)':
     dependencies:
@@ -1885,7 +1889,7 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-plugin-functional@7.3.0(eslint@9.39.4)(typescript@5.9.3):
+  eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3):
     dependencies:
       '@typescript-eslint/utils': 8.59.4(eslint@9.39.4)(typescript@5.9.3)
       deepmerge-ts: 7.1.5

@@ -49,7 +49,7 @@
     "@tsfpp/prelude": "2.0.2"
   },
   "devDependencies": {
-    "@tsfpp/agents": "^2.0.2",
+    "@tsfpp/agents": "^2.0.0",
     "@tsfpp/eslint-config": "^1.0.3",
     "@tsfpp/standard": "^2.0.0",
     "@tsfpp/tsconfig": "^1.0.0",
