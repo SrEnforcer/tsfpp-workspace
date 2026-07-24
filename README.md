@@ -6,13 +6,13 @@ A strict functional TypeScript coding standard, modeled after the JSF++ Air Vehi
 
 ## What this is
 
-TSF++ is **three things in one repository**:
+This repository is the **umbrella** for the TSF++ ecosystem — documentation, adoption guides, integrations, and the starter template. The specification and the packages live in their own sibling repositories, each independently versioned and released:
 
-1. **A specification** — [`spec/CODING_STANDARD.md`](spec/CODING_STANDARD.md) — a normative set of rules for writing TypeScript that the compiler can prove correct, the type system can keep total, and reviewers can audit cheaply.
-2. **A reference library** — [`@tsfpp/prelude`](packages/prelude) — a small, curated functional prelude (`Option`, `Result`, branded types, exhaustiveness witness, curated Ramda re-exports) that adopters can use directly or copy as a template.
-3. **Integrations** — opinionated configs and AI-assistant bindings for ESLint, `tsconfig`, GitHub Copilot, and (planned) Cursor and Claude Code.
+1. **A specification** — [`@tsfpp/standard`](../standard/spec/CODING_STANDARD.md) — a normative set of rules for writing TypeScript that the compiler can prove correct, the type system can keep total, and reviewers can audit cheaply.
+2. **A reference library** — [`@tsfpp/prelude`](../prelude) — a small, curated functional prelude (`Option`, `Result`, branded types, exhaustiveness witness, and data-last combinators) that adopters can use directly or copy as a template.
+3. **Tooling & integrations** — [`@tsfpp/eslint-config`](../eslint-config), [`@tsfpp/tsconfig`](../tsconfig), [`@tsfpp/workflow`](../workflow), the AI-assistant bindings in [`@tsfpp/agents`](../agents) (Copilot, Claude, and MCP-driven tooling compiled from universal `ai/` sources), and the [`templates/starter`](templates/starter) scaffold.
 
-The three layers are independent. You can adopt the spec without the prelude, the prelude without the integrations, or the integrations as a starting point for your own house style.
+The layers are independent. You can adopt the spec without the prelude, the prelude without the integrations, or the integrations as a starting point for your own house style.
 
 ## Why it exists
 
@@ -28,7 +28,7 @@ Concretely, the standard forbids the constructs that historically generate the m
 
 …and mandates the constructs that replace them: discriminated unions with exhaustive matching, `Option` / `Result` for partiality and failure, branded types with smart constructors, and curried data-last combinators.
 
-The full ruleset is in [`spec/CODING_STANDARD.md`](spec/CODING_STANDARD.md). The rationale behind individual rules lives in [`spec/rationale/`](spec/rationale).
+The full ruleset is in [`@tsfpp/standard`](../standard/spec/CODING_STANDARD.md). The rationale behind individual rules lives in [`spec/rationale/`](../standard/spec/rationale).
 
 ## Is this for you?
 
@@ -92,15 +92,25 @@ Add a new variant to `Shape`, watch the compiler refuse to build until every con
 
 ## Repository layout
 
+This umbrella repository holds the docs, integrations, and starter template:
+
 ```
-spec/                    The standard — rules, philosophy, per-rule rationale and examples
-packages/prelude/        @tsfpp/prelude — reference functional prelude
-packages/eslint-config/  @tsfpp/eslint-config — opinionated lint rules
-packages/tsconfig/       @tsfpp/tsconfig — strict tsconfig presets
-integrations/copilot/    GitHub Copilot agents, prompts, and instructions
-integrations/claude-code/  (planned) Claude Code equivalents
-integrations/cursor/     (planned) Cursor equivalents
-workflow/                Trunk-based development guide and Conventional Commits setup
+docs/                    Guides — getting started, adoption, comparison, SemVer, trunk-based dev
+templates/starter/       Ready-to-clone TSF++ project scaffold
+scripts/                 Repository helper scripts
+```
+
+AI-assistant tooling (Copilot, Claude, MCP-driven agents, skills, and prompts) lives in the [`@tsfpp/agents`](../agents) sibling repository, which compiles it from universal `ai/` sources.
+
+The specification and the published packages live in their own sibling repositories:
+
+```
+../standard/       @tsfpp/standard — rules, philosophy, per-rule rationale and examples
+../prelude/        @tsfpp/prelude — reference functional prelude
+../eslint-config/  @tsfpp/eslint-config — opinionated lint rules
+../tsconfig/       @tsfpp/tsconfig — strict tsconfig presets
+../workflow/       @tsfpp/workflow — husky, commitlint, and release-please scaffolding
+../agents/         @tsfpp/agents — AI-assistant tooling (Copilot, Claude, MCP agents/skills/prompts)
 ```
 
 ## Documentation
@@ -118,7 +128,7 @@ TSF++ is a **standard with a small reference prelude**, not a competitor to the 
 
 - **fp-ts** — a comprehensive FP library with category-theoretic abstractions (Functor, Monad, Applicative typeclasses). TSF++ is intentionally smaller and avoids typeclass encoding; it borrows shapes (`Option`, `Either`) and laws but stops there. fp-ts is compatible with TSF++ rules.
 - **Effect** — a runtime and effect system. TSF++ does not prescribe a runtime; it only requires that effects be *typed* (e.g. `Promise<Result<T, E>>`), not how they are scheduled. Effect is compatible with TSF++ at the application layer.
-- **Ramda** — TSF++ uses Ramda combinators directly, re-exported through the prelude. The prelude is the only sanctioned import path for Ramda (Rule 13.1).
+- **Remeda** — TSF++ uses Remeda for immutable, typed collection plumbing (`groupBy`, `partition`, `pick`, `sortBy`) alongside the prelude, which owns the ADTs and core combinators. (Ramda was removed as a dependency in standard v1.1.0.)
 
 If you already use one of the libraries above, TSF++ formalizes the *discipline* around how you use it.
 
@@ -130,11 +140,11 @@ TSF++ was drafted with substantial AI assistance and curated, reviewed, and iter
 
 The specification and each published package follow SemVer independently:
 
-- `spec/` — major bump for any rule change that can break existing adopters' code.
+- `@tsfpp/standard` — major bump for any rule change that can break existing adopters' code.
 - `@tsfpp/prelude` — major bump for any change to ADT shape, combinator arity, argument order, or documented algebraic law.
 - `@tsfpp/eslint-config` — major bump for any rule severity increase from `warn` to `error`, or any new `error`-level rule.
 
-The spec changelog lives at [`spec/CHANGELOG.md`](spec/CHANGELOG.md). Per-package changelogs live under each package directory and are generated automatically by [release-please](https://github.com/googleapis/release-please) from Conventional Commits.
+Each repository owns its own `CHANGELOG.md`, generated automatically by [release-please](https://github.com/googleapis/release-please) from Conventional Commits.
 
 ## Contributing
 

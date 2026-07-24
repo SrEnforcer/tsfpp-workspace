@@ -33,19 +33,7 @@
   ],
   "packages": {
     ".": {
-      "package-name": "tsfpp-spec",
-      "initial-version": "1.0.0"
-    },
-    "packages/prelude": {
-      "package-name": "@tsfpp/prelude",
-      "initial-version": "1.0.0"
-    },
-    "packages/eslint-config": {
-      "package-name": "@tsfpp/eslint-config",
-      "initial-version": "1.0.0"
-    },
-    "packages/tsconfig": {
-      "package-name": "@tsfpp/tsconfig",
+      "package-name": "tsfpp",
       "initial-version": "1.0.0"
     }
   },

@@ -1,11 +1,11 @@
 # Changelog
 
-All notable changes to the TSF++ monorepo are documented in this file.
+All notable changes to the TSF++ umbrella repository are documented in this file.
 
-This root changelog covers cross-cutting changes: repository structure,
-tooling, CI, and coordinated multi-package releases. Individual package
-changelogs live in `packages/*/CHANGELOG.md`. The specification has its own
-changelog at `spec/CHANGELOG.md`.
+This repository holds the project docs, integrations, and starter template.
+The specification and the published packages live in their own sibling
+repositories (`@tsfpp/standard`, `@tsfpp/prelude`, `@tsfpp/eslint-config`,
+`@tsfpp/tsconfig`, `@tsfpp/workflow`), each with its own changelog.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning follows the policy documented in `docs/semver-policy.md`.
@@ -14,7 +14,16 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ## [Unreleased]
 
-_Changes staged but not yet released._
+### Removed
+
+- Removed the stale vendored copies of `packages/prelude`, `packages/eslint-config`, `packages/tsconfig`, `spec/`, and `workflow/`. These duplicated (at older versions) the canonical sibling repositories; this repository is now the umbrella for docs and the starter template.
+- Removed `integrations/copilot/` — a superseded, Ramda-era Copilot integration (referenced the removed `ramda.ts`, a non-existent "Rule 13.1", and old prelude API names). The canonical, current AI-assistant tooling lives in `@tsfpp/agents`, which compiles Copilot, Claude, and MCP output from universal `ai/` sources.
+
+### Changed
+
+- Migrated the two unique workflow guides (`conventional-commits.md`, `git-trunk-based.md`) into `docs/`.
+- `templates/starter` now depends on the published `@tsfpp/*` packages instead of `workspace:*` links.
+- Updated README, release-please config, and pnpm workspace to reflect the umbrella-only structure.
 
 ---
 
