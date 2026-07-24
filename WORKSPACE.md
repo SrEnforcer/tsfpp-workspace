@@ -22,9 +22,12 @@ Work from the repository root.
 
 ## Helpful commands
 
-- `scripts/status-all.sh` shows status for every subtree path.
+- `scripts/status-all.sh` shows git status for every subtree path.
 - `scripts/pull-all.sh` pulls upstream changes from the child repos.
 - `scripts/push-all.sh` pushes committed subtree changes back to the child repos.
+- `scripts/check-releases.sh` (read-only) reports which packages need publishing
+  (local version vs npm) and flags any internal dependency pinned to an exact
+  version. Run it before a release round.
 
 ## SSH
 
