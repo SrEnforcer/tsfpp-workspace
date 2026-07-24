@@ -21,6 +21,8 @@ The local SSH key `id_ed25519_tsfpp` authenticates successfully as GitHub user `
 - [WORKSPACE.md](WORKSPACE.md) documents the root-first workflow.
 - [docs/workspace-architecture-and-rationale.md](docs/workspace-architecture-and-rationale.md) explains the dependency graph, pinning policy, and publish order.
 - `scripts/status-all.sh` shows the status of every subtree path.
+- `scripts/workspace-ops.sh` is the single-entry helper for safe sync workflows.
 - `scripts/pull-all.sh` pulls upstream changes from the child repositories.
 - `scripts/push-all.sh` pushes committed subtree changes back to the child repositories.
 - `scripts/check-releases.sh` reports which packages need publishing and flags exact version pins (read-only).
+- `.github/prompts/workspace-ops.prompt.md` is a reusable Copilot prompt for the same safe workflow.

@@ -1,5 +1,8 @@
 # Workspace Architecture and Rationale
 
+Operational companion: see `docs/workspace-operations-cheat-sheet.md` for the
+step-by-step runbook used during daily sync, publish, and divergence recovery.
+
 This workspace is intentionally shaped as a single entry point for a family of
 related npm packages and supporting repositories.
 
