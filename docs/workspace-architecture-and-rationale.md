@@ -144,6 +144,70 @@ If a package publishes a new version, the following may also need to move:
 
 The workspace exists partly so those coupled changes can be edited together.
 
+## The concrete dependency graph
+
+Only a handful of edges actually exist between the internal packages. This is
+the whole graph:
+
+```mermaid
+flowchart TD
+  standard[standard]
+  prelude[prelude]
+  boundary[boundary]
+  mcpserver[mcp-server]
+  agents[agents]
+
+  prelude --> boundary
+  prelude --> mcpserver
+  boundary --> mcpserver
+  standard -. dev/reference .-> boundary
+  standard -. serves rules .-> mcpserver
+  standard -. peer .-> agents
+  prelude -. peer .-> agents
+  boundary -. peer .-> agents
+```
+
+Solid arrows are runtime `dependencies` (they gate publish order); dotted arrows
+are `devDependencies` or `peerDependencies` (they do not block a publish, they
+just want to resolve).
+
+`eslint-config`, `tsconfig`, and `workflow` are leaf tooling — everything may
+depend on them, they depend on nothing internal, and they change rarely.
+
+**Publish order** falls straight out of the solid arrows:
+
+1. `standard` and `prelude` — no internal runtime deps, publish first (either order)
+2. `boundary` — needs `prelude`
+3. `mcp-server` — needs `boundary` + `prelude` + `standard`
+4. `agents` — last (its peers just document the others; nothing it references should be unpublished)
+
+## Pinning policy — keep it lenient
+
+Exact version pins are the main source of release friction: an exact pin forces
+an edit + republish in the consumer every time the provider ships *any* release,
+even a patch. Because this family follows SemVer strictly (a breaking change is
+always a major bump), that friction buys nothing.
+
+The policy is therefore:
+
+- **Internal runtime `dependencies` use a caret range** (`^2.0.0`), not an exact
+  version. The consumer's code targets the provider's whole major line, so it
+  should accept every compatible release automatically. It only needs a manual
+  change when the provider goes to a new major — which would require a code
+  change anyway.
+- **`devDependencies` / `peerDependencies` use `^` or `>=` ranges**, same reasoning.
+- **`minimumReleaseAgeExclude` entries are package-name-only** (`'@tsfpp/prelude'`),
+  never version-pinned (`'@tsfpp/prelude@2.0.2'`). A name-only entry covers every
+  resolved version, so it never needs editing on a version bump, and it can never
+  go stale (which is exactly how `@tsfpp/standard@1.4.0` lingered after standard
+  moved to 2.0.0).
+
+The net effect: after this policy, publishing a new provider version normally
+requires **no** edit to consumers at all — their ranges already accept it, and
+their release-age excludes already cover it. Consumers only need a real change
+when the provider's *API* changes (a major bump), which is the only time a
+change is genuinely warranted.
+
 ## Publish order and release-age policy
 
 Publishing in this workspace is not only about semver and dependency ranges.

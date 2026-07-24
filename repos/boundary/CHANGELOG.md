@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Loosened the `@tsfpp/prelude` runtime dependency to `^2.0.0` (was an exact `2.0.2` pin) so patch/minor prelude releases no longer require a boundary republish.
 - Widened the `@tsfpp/standard` dev dependency range to `^2.0.0` (was `^1.4.0`, which the caret excluded from 2.0.0).
 
 ## [2.0.2] - 2026-07-24

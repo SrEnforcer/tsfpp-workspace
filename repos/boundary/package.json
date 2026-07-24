@@ -46,7 +46,7 @@
     "url": "https://github.com/tsfpp/boundary/issues"
   },
   "dependencies": {
-    "@tsfpp/prelude": "2.0.2"
+    "@tsfpp/prelude": "^2.0.0"
   },
   "devDependencies": {
     "@tsfpp/agents": "^2.0.0",
