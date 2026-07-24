@@ -144,6 +144,59 @@ If a package publishes a new version, the following may also need to move:
 
 The workspace exists partly so those coupled changes can be edited together.
 
+## Publish order and release-age policy
+
+Publishing in this workspace is not only about semver and dependency ranges.
+It is also constrained by pnpm supply-chain policy.
+
+Several package repos use `pnpm-workspace.yaml` to enforce a minimum release age
+for dependencies. That means a package can fail `npm publish` or even
+`npm publish --dry-run` if one of its dependencies was published too recently,
+even when the version exists on npm already.
+
+In practice, this means the publish workflow has two checks:
+
+- is the required sibling version already published?
+- is that published version allowed by the local `minimumReleaseAge` policy?
+
+For internal TSF++ releases, the policy exceptions belong in the package repo's
+own `pnpm-workspace.yaml`.
+
+The important operational detail is that `minimumReleaseAgeExclude` should be
+documented and maintained carefully. In this workspace, package-name exclusions
+are the safer default for freshly published internal packages because they cover
+all resolved variants of that package during lockfile verification.
+
+Example:
+
+- `@tsfpp/prelude` may be published successfully
+- `@tsfpp/boundary` may still fail publish checks immediately afterward
+- the fix is not another version bump, but updating the local
+  `minimumReleaseAgeExclude` entries so pnpm allows the just-published internal
+  package through the verification step
+
+This is part of the release choreography, not an incidental local-machine
+problem.
+
+## Publish order matters
+
+Because several packages depend on newly published sibling versions, release
+order matters.
+
+The general rule is:
+
+- publish foundational packages before dependents
+- then rebuild lockfiles and publish checks in the dependents
+- only publish a dependent package after both npm availability and local
+  release-age policy allow the new graph
+
+For example, if `boundary` depends on `prelude@2.0.2`, then publishing
+`agents` first does not unblock `boundary`. `boundary` remains blocked until
+`prelude@2.0.2` is published and accepted by the local pnpm policy.
+
+So the dependency graph does not only determine version bumps; it also
+determines release order.
+
 ## Why version bumps sometimes cascade
 
 Several TSF++ packages depend on one another.
