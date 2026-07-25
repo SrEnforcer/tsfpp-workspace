@@ -48,6 +48,19 @@ const upper = map((s: string) => s.toUpperCase())(name);   // cannot fail
 const valid = flatMap(validateEmail)(input);                // can fail
 ```
 
+### `Result` vs `Validation` (Rule 6.8)
+
+- Next step needs the previous step's value → `Result` (short-circuits on first `Err`)
+- Independent checks, caller must see every failure → `Validation` (accumulates)
+
+```ts
+// Reports EVERY bad field, not just the first:
+const v = sequenceStructValidation({ name: parseName(raw), email: parseEmail(raw) });
+```
+
+`Validation` has no `flatMap` by design — independence is what licenses accumulation.
+Cross back with `validationToResult` / `resultToValidation`.
+
 ### `orElseOption` vs `getOrElseOption`
 
 - Keep `Option` context → `orElseOption(() => some(fallback))`

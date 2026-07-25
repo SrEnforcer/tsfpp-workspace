@@ -30,6 +30,9 @@ import {
   intoSet, conj, disj, member,
   // Traversal + array search
   traverseArray, traverseArrayOption, sequenceArrayOption, findO, unique,
+  // Validation — accumulating failure (Rule 6.8)
+  valid, invalid, invalidAll, isValid, isInvalid, mapValidation, matchValidation,
+  traverseArrayValidation, sequenceStructValidation, validationToResult, resultToValidation,
   // Non-empty arrays
   isNonEmptyArray, mkNonEmpty, headNonEmpty, lastNonEmpty,
   // Refined numerics (Rule 1.13)
@@ -42,7 +45,7 @@ import {
   type Logger, type LogEntry, type LogLevel,
   // Types
   type Option, type Result, type Unit, type Brand, type UnknownRecord,
-  type NonEmptyReadonlyArray, type Int, type Positive, type NonNegative,
+  type NonEmptyReadonlyArray, type Int, type Positive, type NonNegative, type Validation,
 } from '@tsfpp/prelude'
 ```
 
