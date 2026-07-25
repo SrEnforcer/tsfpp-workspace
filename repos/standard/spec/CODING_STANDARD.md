@@ -3,7 +3,7 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 2.0.0
+**Version:** 3.0.0
 **Date:** 2026-07-23
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
@@ -11,6 +11,14 @@ Codename TSF++ (tsfpp)
 ---
 
 ## Changelog
+
+### 3.0.0 — 2026-07-25
+
+**Breaking.** Adds a MUST rule that can make previously-compliant validation code non-compliant, so it ships as a major (consistent with how Rule 6.7 was handled in 2.0.0).
+
+- **New Rule 6.8** — Use `Validation<E, A>` when independent checks must all be reported; reserve `Result` for dependent steps that short-circuit. `Result`'s `flatMap`/`traverseArray` stop at the first failure, which structurally cannot produce the plural `errors` array that RFC 9457 problem details and `@tsfpp/boundary`'s `issues: ReadonlyArray<FieldIssue>` both promise.
+- **`@tsfpp/prelude` 2.1.0** implements the ADT: `Validation`, `valid`, `invalid`, `invalidAll`, `isValid`, `isInvalid`, `mapValidation`, `mapErrorsValidation`, `apValidation`, `matchValidation`, `traverseArrayValidation`, `sequenceArrayValidation`, `sequenceStructValidation`, `validationToResult`, `resultToValidation`.
+- **Rule 8.2 is now actually enforced in the reference implementation** — `@tsfpp/prelude` gained a `fast-check` property-based law suite covering the functor/monad/traversal/refinement laws its `@law` annotations assert. Previously those laws were documented but never machine-checked, which was an unrecorded violation of this standard's own mandatory rule.
 
 ### 2.0.0 — 2026-07-23
 
@@ -989,6 +997,49 @@ const parseBody = (raw: unknown): Result<Order, OrderError> =>
 ```
 
 **Exception.** `Result<T, string>` is tolerable in throwaway scripts and at the outermost validation edge *before* the remap, with a `// DEVIATION(6.7)` where it appears in a signature that outlives the boundary.
+
+---
+
+### Rule 6.8 — MUST: Use `Validation<E, A>` when independent checks must all be reported; reserve `Result` for dependent steps that short-circuit
+
+**Rationale.** `Result` is monadic, so `flatMap` and `traverseArray` stop at the first `Err` and skip every later step. That is exactly right when a step *depends* on its predecessor — there is no point charging a card for an order that failed to parse. Short-circuiting is not a limitation there; it is the semantics.
+
+It is the wrong shape when the checks are *independent*. Validating a submitted form field-by-field is the canonical case: reporting "email is invalid", and only after the user fixes it revealing "postcode is invalid", is a worse product and a worse API than reporting both at once. A `Result`-based traversal structurally cannot produce that answer — it has already returned.
+
+`Validation<E, A>` is the applicative counterpart: combining two failures concatenates their errors instead of discarding the second. It deliberately has **no** `flatMap`, because independence is the very thing that licenses accumulation — a monadic bind would have to choose one error to carry forward.
+
+This matters at the HTTP boundary in particular. RFC 9457 problem details expose an `errors` array and `@tsfpp/boundary` models validation failure as `issues: ReadonlyArray<FieldIssue>` — both *plural*. Producing them from a short-circuiting traversal is not possible without hand-rolled accumulation at every call site.
+
+**Do**
+```typescript
+import { sequenceStructValidation, mapErrorsValidation, validationToResult } from '@tsfpp/prelude'
+
+// Independent field checks — the caller gets every failure at once.
+const parseSignup = (raw: UnknownRecord): Validation<FieldIssue, Signup> =>
+  sequenceStructValidation({
+    name:  parseName(raw),
+    email: parseEmail(raw),
+    age:   parseAge(raw),
+  })
+```
+
+**Don't**
+```typescript
+// Short-circuits: the user fixes `name`, resubmits, and only then learns
+// `email` was also wrong. The API promised an `errors` array and delivered one.
+const parseSignup = (raw: UnknownRecord): Result<Signup, FieldIssue> =>
+  pipe(parseName(raw), flatMap(() => parseEmail(raw)), flatMap(() => parseAge(raw)))
+```
+
+**Choosing between them.**
+
+| Question | Answer |
+|---|---|
+| Does the next step consume the previous step's value? | `Result` — short-circuit is correct |
+| Are the checks independent, and must the caller see all failures? | `Validation` — accumulate |
+| Does the response shape carry a *list* of errors (RFC 9457 `errors`, form fields)? | `Validation` |
+
+**Crossing back.** The domain core normally speaks `Result`; `Validation` appears where a batch of independent checks runs. Convert at that seam with `validationToResult` / `resultToValidation`. Per Rule 6.7 the accumulated `E` must still be a `kind`-tagged union, not a bare `string`.
 
 ---
 

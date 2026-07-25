@@ -10,6 +10,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-25
+
+### Features
+
+- add the accumulating **`Validation<E, A>`** ADT (standard Rule 6.8), the applicative counterpart to `Result`: combining failures concatenates their errors instead of discarding all but the first. Exports `valid`, `invalid`, `invalidAll`, `isValid`, `isInvalid`, `mapValidation`, `mapErrorsValidation`, `apValidation`, `matchValidation`, `traverseArrayValidation`, `sequenceArrayValidation`, `sequenceStructValidation`, `validationToResult`, `resultToValidation`.
+  - The `Invalid` variant carries a `NonEmptyReadonlyArray`, so "invalid with no reason" is unrepresentable.
+  - `sequenceStructValidation` validates a record of independent fields and reports **every** failure — the shape an RFC 9457 `errors` array and `@tsfpp/boundary`'s `issues: ReadonlyArray<FieldIssue>` both expect.
+  - Deliberately has no `flatMap`: independence is what licenses accumulation.
+
+### Testing
+
+- add a **`fast-check` property-based law suite** (`fp.laws.test.ts`, `validation.test.ts`) satisfying standard Rule 8.2, which mandates property-based testing for core pure functions. The ~80 `@law` annotations in `fp.ts` were previously documented but never machine-checked. Now verified over generated input: Option/Result functor + monad laws, `mapErr` identity/fusion, traversal success/length/order, `pipe`/`flow`/`comp` relationships, `unique` idempotence, List round-trip and `reverseList` involution, and refinement predicates (`mkInt`/`mkPositive`/`mkNonNegative` never admit `NaN` or infinity). Suite: 216 tests.
+
 ## [2.0.2] - 2026-07-24
 
 ### Changed
