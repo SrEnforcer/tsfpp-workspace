@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-07-25
+
+### ⚠ BREAKING CHANGES
+
+- New MUST rule can make previously-compliant validation code non-compliant; ships as a major, consistent with the SemVer policy and with how Rule 6.7 was handled in 2.0.0.
+
+### Added
+
+- **Rule 6.8** — Use `Validation<E, A>` when independent checks must all be reported; reserve `Result` for dependent steps that short-circuit. Includes a decision table and the `validationToResult` / `resultToValidation` seam. Implemented by `@tsfpp/prelude` 2.1.0.
+
+### Changed
+
+- Rule 8.2 (mandatory property-based testing) is now genuinely enforced in the reference implementation: `@tsfpp/prelude` ships a `fast-check` law suite verifying the algebraic laws its `@law` annotations assert. Previously those laws were prose only — an unrecorded violation of this standard's own MUST rule.
+
 ## [2.0.0] - 2026-07-23
 
 ### ⚠ BREAKING CHANGES
