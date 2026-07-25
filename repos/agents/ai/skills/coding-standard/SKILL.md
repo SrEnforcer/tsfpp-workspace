@@ -9,9 +9,9 @@ description: >
   conflict.
 ---
 
-# TSF++ coding standard — v2.0.0
+# TSF++ coding standard — v3.0.0
 
-Standard version: 2.0.0 (2026-07-23). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
+Standard version: 3.0.0 (2026-07-25). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
 
 ---
 
@@ -57,6 +57,7 @@ Critical rules always in context:
 - 4.6 — No ambient clock/entropy/env in core — inject via `Deps`
 - 6.3 — No `null`/`undefined` — use `Option<A>`
 - 6.7 — Error channels are `kind`-tagged unions, never `string`/`Error`
+- 6.8 — Independent checks that must all be reported use `Validation` (accumulates); dependent steps use `Result` (short-circuits)
 - 7.8 — `Result` combinators unsuffixed; other ADTs suffixed by full type name (`mapOption`, `headNonEmpty`)
 - 8.5 — Collapse `Option`/`Result` with a total `match` when both arms yield a value
 

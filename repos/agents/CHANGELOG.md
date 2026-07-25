@@ -10,9 +10,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-25
+
+### Features
+
+- Teach standard Rule 6.8 (`Validation` accumulates independent failures; `Result` short-circuits dependent steps) across the coding-standard skill, base instructions, and the prelude skill/instructions; add the `@tsfpp/prelude` 2.1.0 `Validation` exports.
+
 ### Changed
 
-- Aligned guidance with `@tsfpp/standard` 2.0.0: bumped the peer range to `>=2.0.0` and updated the coding-standard skill's version marker to v2.0.0 (the rule content already covers 1.13/1.14/4.6/6.7/7.8/8.5).
+- Coding-standard skill marker → v3.0.0; peer ranges → `@tsfpp/standard >=3.0.0`, `@tsfpp/prelude >=2.1.0`.
+- Earlier in this cycle: aligned guidance with `@tsfpp/standard` 2.0.0 (peer range `>=2.0.0`, skill marker v2.0.0; the rule content already covered 1.13/1.14/4.6/6.7/7.8/8.5).
 
 ## [2.0.2] - 2026-07-24
 

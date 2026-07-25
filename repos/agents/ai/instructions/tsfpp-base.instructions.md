@@ -40,6 +40,7 @@ Full standard: `node_modules/@tsfpp/standard/spec/CODING_STANDARD.md`
 - Sum-type dispatch via `switch` ending in `default: return absurd(x)`
 - Errors as data: `Result<T, E>` where `E` is a `kind`-tagged union — never `throw`, `string`, or `Error` in core (Rule 6.7)
 - Collapse `Option`/`Result` with a total `match` / `matchOption` when both arms yield a value (Rule 8.5)
+- `Validation<E, A>` (not `Result`) when independent checks must ALL be reported — form/request-body fields, anything feeding an RFC 9457 `errors` array. `Result` short-circuits on the first failure (Rule 6.8)
 - `satisfies` (not `as`) to check a literal against a type without widening (Rule 1.14)
 - ADT combinators: `Result` unsuffixed, others suffixed by full type name — `mapOption`, `getOrElseOption`, `headNonEmpty` (Rule 7.8)
 - Pipelines via `pipe` from `@tsfpp/prelude`
