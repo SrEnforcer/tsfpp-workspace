@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/prelude",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Functional prelude for TypeScript with Option, Result, and core combinators",
   "private": false,
   "license": "MIT",
@@ -52,6 +52,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.0.0",
     "eslint-plugin-functional": "^9.0.4",
+    "fast-check": "^4.9.0",
     "typescript": "^5.7.0",
     "vitest": "^3.2.4"
   },

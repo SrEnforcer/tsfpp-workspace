@@ -47,6 +47,7 @@ From `@tsfpp/prelude`:
 - **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
 - **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
 - **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `headNonEmpty`, `lastNonEmpty`
+- **Validation (error-accumulating)**: `Validation`, `valid`, `invalid`, `invalidAll`, `isValid`, `isInvalid`, `mapValidation`, `mapErrorsValidation`, `apValidation`, `matchValidation`, `traverseArrayValidation`, `sequenceArrayValidation`, `sequenceStructValidation`, `validationToResult`, `resultToValidation`
 - **Collection helpers**: `traverseArray`, `traverseArrayOption`, `sequenceArrayOption`, `unique`, `intoMap`, `entriesOf`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
 - **Immutable list ADT**: `List`, `nil`, `cons`, `singletonList`, `fromArray`, `toArray`, `headList`, `tailList`, `isEmptyList`, `lengthList`, `mapList`, `flatMapList`, `appendList`, `reverseList`, `filterList`, `foldList`, `foldLeftList`, `foldLeftListCurried`, `traverseList`
 
@@ -159,6 +160,30 @@ const withFallback = orElseOption(() => some('Anonymous'))(parsed);
 // Option -> string
 const value = getOrElseOption(() => 'Anonymous')(parsed);
 ```
+
+### Use `Validation` when the caller needs every error, `Result` when it needs the first
+
+`Result` short-circuits: `flatMap` and `traverseArray` stop at the first `Err`. That is correct when a
+step depends on its predecessor. It is wrong for independent checks — a form where the user fixes one
+field only to discover the next was also broken.
+
+`Validation` is the applicative counterpart: combining failures concatenates their errors. It has no
+`flatMap` by design, because independence is what licenses accumulation (standard Rule 6.8).
+
+```ts
+import { sequenceStructValidation, isInvalid } from '@tsfpp/prelude';
+
+const parsed = sequenceStructValidation({
+  name:  parseName(raw),   // Validation<FieldIssue, string>
+  email: parseEmail(raw),  // Validation<FieldIssue, Email>
+});
+
+if (isInvalid(parsed)) {
+  return problemResponse(parsed.errors); // EVERY field issue, not just the first
+}
+```
+
+Cross back into short-circuit domain code with `validationToResult` / `resultToValidation`.
 
 ### Use `isDefined` for `undefined` filtering
 
