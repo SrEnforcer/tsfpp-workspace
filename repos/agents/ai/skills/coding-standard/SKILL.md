@@ -9,9 +9,9 @@ description: >
   conflict.
 ---
 
-# TSF++ coding standard — v4.0.0
+# TSF++ coding standard — v4.1.0
 
-Standard version: 4.0.0 (2026-07-25). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
+Standard version: 4.1.0 (2026-07-25). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
 
 ---
 
@@ -63,6 +63,8 @@ Critical rules always in context:
 - 6.8 — Independent checks that must all be reported use `Validation` (accumulates); dependent steps use `Result` (short-circuits)
 - 7.8 — `Result` combinators unsuffixed; other ADTs suffixed by full type name (`mapOption`, `headNonEmpty`)
 - 8.5 — Collapse `Option`/`Result` with a total `match` when both arms yield a value
+- 11.5 — Dependencies point INWARD only; core imports no adapter/transport/`node:*` — define a port, inject at the root
+- 11.6 — No module-level side effects; importing a module only defines bindings
 
 ## Size limits
 

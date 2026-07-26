@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/agents",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Workspace AI tooling for TSF++ projects: universal ai sources, generated compatibility output, and reusable prompts",
   "keywords": [
     "tsfpp",
@@ -40,10 +40,10 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "@tsfpp/standard":     ">=4.0.0",
+    "@tsfpp/standard":     ">=4.1.0",
     "@tsfpp/prelude":      ">=2.2.0",
     "@tsfpp/boundary":     ">=2.0.2",
-    "@tsfpp/eslint-config":">=1.0.3",
+    "@tsfpp/eslint-config":">=1.1.0",
     "@tsfpp/tsconfig":     ">=1.0.0",
     "@tsfpp/mcp-server":   ">=1.0.3"
   },
