@@ -161,3 +161,20 @@ The `no-restricted-imports` ESLint rule can enforce barrel-only imports in CI:
 ```
 
 This flags any import that bypasses a barrel by referencing a PascalCase file directly or a `.ts` extension explicitly.
+
+
+---
+
+## Rules 11.5 and 11.6 — the architecture rules
+
+The first four rules in §11 govern how a module is *shaped*. These two govern how modules may *depend on each other*, and that difference matters more than it looks.
+
+**Why layering is a correctness rule, not a taste rule.** Every other rule in this standard can be satisfied one function at a time. Layering cannot, and neither can the axiom it protects. Purity is not a property of a function in isolation — it is a property of a function *and everything it transitively imports*. A domain module whose functions are individually immaculate becomes entirely effectful the moment one line at the top reads `import { db } from '../adapters/postgres'`. Nothing in the module changed; its transitive closure did. That is why the dependency direction has to be normative and machine-checked rather than left to review: it is the only rule whose violation cannot be seen by reading the function in front of you.
+
+**Why the direction is normative but the names are not.** "Core / use case / boundary / shell" is one vocabulary; hexagonal architecture says "domain / application / ports / adapters"; Clean Architecture draws concentric circles. The standard does not care which words a project uses, because the words are not the constraint. The constraint is that the import graph is acyclic and points inward, so that the innermost layer can be reasoned about without knowing anything about the outermost. A project that renames the layers and preserves the direction is compliant; a project that keeps the names and lets the core import an adapter is not.
+
+**Why ports invert the dependency rather than removing it.** The core genuinely needs data it cannot compute — a customer record, the current time. Rule 6.5's answer is that the core declares the *shape* of what it needs (a function type) and the composition root supplies the implementation. The dependency still exists, but it now points inward: the adapter depends on the core's port definition, not the reverse. This is the whole trick, and it is why Rule 11.5 and Rule 6.5 are the same idea observed at two scales.
+
+**Why import purity (11.6) is worse than it looks.** Rule 4.6 forbids reading the clock inside a function. Rule 11.6 forbids it at module top level, and the top-level case is strictly more damaging: it executes before any caller exists, in an order determined by the module graph rather than by the program, so it cannot be injected, stubbed, or deferred. A test that freezes time in `beforeEach` has already lost — the value was captured at import. The symptom is characteristically confusing, because adding an unrelated import elsewhere can change which value gets captured. Tree-shaking suffers for the same reason (Rule 11.4 already notes it): a bundler cannot prove that removing a module with import-time effects is safe.
+
+The composition root is exempt from both rules for the same reason it is exempt from Rule 4.6 — it is the program's entry point rather than a dependency of one, and wiring is precisely its job.

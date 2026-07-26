@@ -22,6 +22,12 @@ so they remain readable without affecting compilation.
 | [10-documentation-and-review.ts](./10-documentation-and-review.ts) | §10 — Rules 10.1–10.4 |
 | [11-module-organisation.ts](./11-module-organisation.ts) | §11 — Rules 11.1–11.4 |
 
+### Complete worked example
+
+| File | Covers |
+|------|--------|
+| [reference-service.md](./reference-service.md) | **A full vertical slice** — one feature from untrusted HTTP body to typed response, across all five layers, showing where each rule lands. Start here if the per-section fragments leave you asking "but what does a whole TSF++ program look like?" |
+
 ## How to read these files
 
 Each rule is marked with a comment header:

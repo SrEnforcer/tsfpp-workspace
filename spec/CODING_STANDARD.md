@@ -3,7 +3,7 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 3.0.0
+**Version:** 4.1.0
 **Date:** 2026-07-23
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
@@ -11,6 +11,23 @@ Codename TSF++ (tsfpp)
 ---
 
 ## Changelog
+
+### 4.1.0 — 2026-07-25
+
+Additive: two rules that formalise an architecture the codebase already followed but the standard never stated. Nothing previously compliant becomes non-compliant, so this is a minor.
+
+- **New Rule 11.5** — Layer boundaries: organise into core / use case / boundary / shell / composition root, with dependencies pointing **inward only**. Purity is not enforceable one file at a time — a single outward import makes an entire module effectful however carefully each function was written — so the layering is the enforcement mechanism for the axioms rather than an aesthetic preference. Machine-checkable via `no-restricted-imports` zones (Appendix B) and `@tsfpp/eslint-config/layered`.
+- **New Rule 11.6** — Import purity: modules must be side-effect free at import time. A top-level ambient read is strictly worse than the in-function reads Rule 4.6 forbids: it runs before any caller exists, in module-graph order, and cannot be injected, stubbed, or deferred.
+- Both rules are demonstrated end to end in the new [reference service](./examples/reference-service.md).
+
+### 4.0.0 — 2026-07-25
+
+**Breaking.** Adds a MUST rule that reclassifies previously-permitted comparisons, so it ships as a major (consistent with 2.0.0 and 3.0.0).
+
+- **New Rule 4.7** — Never compare non-primitive values with `===`/`!==` expecting structural equality; pass an explicit `Eq<A>`. `===` on any non-primitive is *reference* equality in TypeScript, so `{ id: 1 } === { id: 1 }` is `false` regardless of `readonly`. Also covers ordering: `.sort()` without a comparator sorts by string coercion. `===` remains correct for primitives, branded primitives, and string-literal discriminants (`s.kind === 'circle'` is unaffected).
+- **PHILOSOPHY corrected** — the claim that "with immutable values, identity and equality coincide" was true of ML-family languages but **false as written for TypeScript**. It now states what immutability actually buys (the *right* to treat equal-by-contents values as interchangeable) and points at Rule 4.7 for the operational gap.
+- **`@tsfpp/prelude` 2.2.0** implements the abstractions: `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `ordNumber`/`ordString`/`ordBoolean`, `eqNumber`/`eqString`/`eqBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`.
+- **Bug fix** — `unique`'s documentation claimed it "uses structural equality (`===`)". `===` is *not* structural equality; the function is reference-based and its documented "each element appears exactly once" law is false for objects. Corrected, with a pointer to `uniqueWith`.
 
 ### 3.0.0 — 2026-07-25
 
@@ -785,6 +802,48 @@ const mkOrderId = (customer: CustomerId): OrderId =>
 
 ---
 
+### Rule 4.7 — MUST: Never compare non-primitive values with `===`/`!==` expecting structural equality; pass an explicit `Eq<A>`
+
+**Rationale.** Rule 4.5 governs *how* to compare; this rule governs *what comparison means*. In an ML-family language, immutable values are compared by structure, which is why this standard's philosophy says that with immutable values "identity and equality coincide". **In TypeScript that is false.** `===` on any non-primitive compares references, and no amount of `readonly` changes it:
+
+```typescript
+{ id: 1 } === { id: 1 }   // false
+```
+
+The failure is silent and survives review, because the code reads correctly and *is* correct for primitives — which is exactly what a test written with numbers reports. It then propagates into every operation that quietly assumes structural equality: deduplication, membership, cache keys, memoisation, change detection, and React dependency arrays.
+
+TypeScript cannot infer the right notion of equality for a domain type — is a `User` equal by `id`, or by every field? — so the standard's answer is to make the choice explicit at the call site rather than let `===` decide by accident.
+
+**Do**
+```typescript
+import { eqBy, eqStructural, eqNumber, uniqueWith, elemWith, sortWith, ordBy, ordNumber } from '@tsfpp/prelude'
+
+// Entity equality is identity of the key, not of every field.
+const eqUser = eqBy((u: User) => u.id, eqNumber)
+
+const distinct = uniqueWith(eqUser)(users)
+const present  = elemWith(eqUser)(target)(users)
+const byAge    = sortWith(ordBy((u: User) => u.age, ordNumber))(users)
+```
+
+**Don't**
+```typescript
+users.includes(target)                     // === — never matches a fresh object
+unique(users)                              // reference-based; duplicates survive
+if (prevProps.filter === nextProps.filter) // always false for a record; re-renders forever
+```
+
+**`===` remains correct and required for:**
+- primitives (`string`, `number`, `boolean`, `bigint`, `symbol`, `null`, `undefined`) and branded primitives,
+- string-literal discriminants — `s.kind === 'circle'` is the exhaustiveness idiom of Rule 4.1 and is unaffected,
+- deliberate *identity* checks, where reference equality is the question being asked (document the intent).
+
+**Ordering.** The same argument applies to comparison. `Array.prototype.sort` without a comparator sorts by string coercion (`[10, 9]` sorts to `[10, 9]`), and Rule 2.3's "sort a copy" guidance presumes you already have a comparator. Use an `Ord<A>` — `sortWith(ord)` sorts a copy and satisfies Rule 2.3 by construction.
+
+**Numeric precondition.** An `Ord<number>` assumes finite values (Rule 1.13): `NaN` is unordered, so every comparison against it is `false` and it would sort as "equal" to everything. Brand at the boundary with `mkInt` / `mkPositive` / `mkNonNegative` and the precondition holds by construction.
+
+---
+
 ## 5 — Composition and Call Sites
 
 ### Rule 5.1 — MUST: Use `pipe` (left-to-right) for multi-step transformations; limit pipeline depth to 8 stages
@@ -1380,6 +1439,9 @@ Pre-push MAY additionally run the full test suite. CI re-runs all gates without 
 - [ ] No ambient clock/entropy/env in the core; injected via `Deps` (Rule 4.6)
 - [ ] Domain error channels are `kind`-tagged unions, not `string`/`Error` (Rule 6.7)
 - [ ] `Option`/`Result` collapsed via `match` where both arms yield a value (Rule 8.5)
+- [ ] Non-primitive comparison goes through an explicit `Eq`/`Ord`, never bare `===` or `.includes()` (Rule 4.7)
+- [ ] Dependencies point inward only; core imports no adapter, transport, or `node:*` (Rule 11.5)
+- [ ] No module-level side effects — importing a module only defines bindings (Rule 11.6)
 
 A condensed quick-reference card is provided in Appendix E.
 
@@ -1431,6 +1493,79 @@ src/
 **Rationale.** A single import path per package is a contract the package can evolve internally. Reaching past the barrel breaks that contract.
 
 **Note on tree-shaking.** Barrel re-exports composed of `export * from './x'` and `export { foo } from './y'` are statically analysable and tree-shake correctly under any modern bundler (esbuild, rollup, Vite). What does *not* tree-shake well: barrel files that perform module-level side effects, or that re-export through dynamic patterns. Keep barrels as flat lists of re-exports.
+
+---
+
+### Rule 11.5 — MUST: Organise code into layers with dependencies pointing inward only — functional core, imperative shell
+
+**Rationale.** The preceding four rules govern how modules are *shaped*. This one governs how they may *depend on each other*, which is what actually determines whether the axioms hold at the scale of a program rather than a function.
+
+Every rule in this standard is cheap to satisfy in a leaf function and expensive to satisfy in a codebase that lets HTTP concerns reach into domain logic. Purity (axiom 4) is not a property you can enforce one file at a time: a single `import { db } from './client'` in a domain module makes every function in it effectful, no matter how carefully each was written. The layering is therefore the enforcement mechanism for the axioms, not an aesthetic preference.
+
+The pattern is *functional core, imperative shell*: a large, pure, total core that computes decisions, wrapped in a thin shell that performs the I/O those decisions imply. The core is where the compiler proves things; the shell is where the program touches the world.
+
+**The layers.**
+
+| Layer | Contains | May import | Must not import |
+|---|---|---|---|
+| **core** (domain) | Types, ADTs, branded values, smart constructors, pure decision functions | The prelude, other core modules | Any adapter, any transport, `node:*`, any framework, anything returning `Promise` |
+| **use case** | Orchestration of core functions; ports (interfaces) the domain defines | core, the prelude | Concrete adapters, transport types |
+| **boundary** | Parsing `unknown` into domain values; mapping domain errors outward | core, use case, schema libraries | Business rules |
+| **shell** (adapters, handlers) | HTTP, database, filesystem, clock, entropy — the actual effects | Everything inward | — |
+| **composition root** | `main.ts` / server bootstrap: constructs real `Deps` and wires the graph | Everything | — |
+
+**Do**
+```typescript
+// core/subscription.ts — pure; the compiler can prove things about this file
+import { type Option, some, none } from '@tsfpp/prelude'
+export const canAllocate = (seats: SeatCount, remaining: number): Result<SeatCount, PlanError> => ...
+```
+
+**Don't**
+```typescript
+// core/subscription.ts
+import { db } from '../adapters/postgres'   // core reaching outward — forbidden
+import type { Request } from 'express'      // transport type in the domain — forbidden
+
+// Every function in this module is now effectful and untestable in isolation,
+// regardless of how it is written.
+```
+
+**Direction, not naming.** The layer names above are conventional; a project may use others. What is normative is that the dependency graph is **acyclic and inward-pointing**: a module may import from its own layer or a more central one, never a more peripheral one. If a core module needs something a shell provides, the core defines a *port* (a function type) and the shell supplies an implementation at the composition root (Rule 6.5).
+
+**Enforcement.** This is machine-checkable and MUST be enforced, not merely reviewed. Appendix B provides `no-restricted-imports` zones; `@tsfpp/eslint-config/layered` ships them preconfigured.
+
+**Worked example.** [`spec/examples/reference-service.md`](./examples/reference-service.md) is a complete vertical slice with each layer in its own module and the dependency direction visible in the imports.
+
+---
+
+### Rule 11.6 — MUST: Modules must be side-effect free at import time
+
+**Rationale.** Rule 4.6 forbids ambient reads inside functions. A read at *module top level* is strictly worse: it runs on import, before any caller exists, in an order determined by the module graph rather than by the program. It cannot be injected, cannot be stubbed, and cannot be deferred.
+
+The failure modes are distinctive. Import order becomes load-bearing, so adding an unrelated import can change behaviour. Test setup runs after the value was already captured, so freezing the clock has no effect. Bundlers cannot tree-shake the module (Rule 11.4 already notes this), so dead code ships. And the value is computed once for the process lifetime, which is wrong for anything that can change — a config reload, a rotated credential, a date.
+
+Importing a module must do nothing but define bindings.
+
+**Do**
+```typescript
+// A function: evaluated when called, injectable, stubbable.
+export const defaultTimeout = (config: Config): Milliseconds => config.timeoutMs
+
+// A true constant: no ambient read, no computation with observable effects.
+export const maxRetries = 3
+```
+
+**Don't**
+```typescript
+export const startedAt = new Date()                 // runs at import (Rule 4.6)
+export const apiKey = process.env.API_KEY           // runs at import; unstubable
+export const cache = await loadCacheFromDisk()      // I/O at import; blocks the graph
+registerGlobalHandler(onError)                      // mutates global state at import
+console.log('module loaded')                        // observable effect at import
+```
+
+**Exception.** The composition root is a boundary (Rule 4.6) and may perform its wiring at module scope, because it *is* the program's entry point rather than a dependency of one.
 
 ---
 
@@ -1567,6 +1702,16 @@ export default [
         { selector: "MemberExpression[object.object.name='process'][object.property.name='env']", message: 'process.env is ambient input; load config at the boundary and inject it (Rule 4.6 / CONFIG_CODING_STANDARD.md).' }
       ],
 
+      // --- Layer boundaries (Rule 11.5) & import purity (Rule 11.6) ---
+      // Dependencies point inward only. Adjust the path globs to the project's
+      // own layout; `@tsfpp/eslint-config/layered` ships this preconfigured.
+      'no-restricted-imports': ['error', {
+        patterns: [
+          { group: ['**/adapters/*', '**/infra/*', '**/handlers/*', 'express', 'fastify', 'node:*'],
+            message: 'TSF++ Rule 11.5: the core must not import adapters, transports, or node builtins. Define a port and inject it (Rule 6.5).' },
+        ],
+      }],
+
       // --- General hygiene ---
       'no-console': 'warn',
       'prefer-const': 'error',                                     // Rule 2.1
@@ -1690,6 +1835,8 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 - [ ] Body ≤ 40 lines, complexity ≤ 10, nesting ≤ 4.
 - [ ] Pipelines ≤ 8 stages; longer pipelines decomposed and named.
 - [ ] Discriminants accessed via `isOk` / `isSome` / `isErr` / `isNone`, never `result._tag`.
+- [ ] Records/arrays compared with an `Eq` (`uniqueWith`, `elemWith`), not `===` / `.includes()`; sorting uses `sortWith(ord)`.
+- [ ] Imports point inward only (core → nothing peripheral); no top-level side effects.
 - [ ] Constructors use `mk*` (not `create*`); ADT combinators suffixed by full type name (`mapOption`, not `mapO`/`getOrElseR`), `Result` unsuffixed (Rules 7.3, 7.8).
 
 ### Tests and docs

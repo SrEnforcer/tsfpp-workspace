@@ -43,7 +43,7 @@ The primary goal is to make illegal states unrepresentable in the type system. I
 
 **Defect class eliminated.** Invalid combinations of fields, missing variant cases, smuggled invariants. The most common bug in business logic — "I forgot we could be in state X here" — is moved from runtime to compile time, or made impossible to express at all.
 
-**Consequence.** Type narrowing, not runtime checks. Exhaustive matching, not boolean guards. Smart constructors at every boundary where untyped data enters the domain.
+**Consequence.** Type narrowing, not runtime checks. Exhaustive matching, not boolean guards. Smart constructors at every boundary where untyped data enters the domain. This extends to the primitives themselves: `number` admits `NaN` and `Infinity`, which satisfy none of the laws arithmetic assumes, so constrained numerics are branded (`Int`, `Positive`, `NonNegative`) and coercion is confined to the boundary (Rule 1.13). Where a literal must merely be *checked* against a type, `satisfies` proves conformance without the widening or blind assertion `as` performs (Rule 1.14).
 
 ### 2. Totality
 
@@ -51,13 +51,15 @@ Every function must have an output for every legal input. Partiality — functio
 
 **Defect class eliminated.** Uncaught exceptions, `undefined is not a function`, silent `null` returns from APIs that nominally return `T`. Failure becomes a value the caller is forced to handle, not a transition the caller can fail to anticipate.
 
-**Consequence.** No partial functions. Use `Option<T>` for "no value", `Result<T, E>` for "might fail". Never `null` or `throw` in the middle of a pipeline.
+**Consequence.** No partial functions. Use `Option<T>` for "no value", `Result<T, E>` for "might fail". Never `null` or `throw` in the middle of a pipeline. Failure is not only *typed* but *shaped*: the error channel is a discriminated union so recovery can be exhaustive (Rule 6.7), and where checks are independent rather than sequential, `Validation<E, A>` accumulates every failure instead of discarding all but the first (Rule 6.8).
 
 ### 3. Immutability
 
 Mutable state is temporal coupling. If an object can change after creation, every alias to it becomes a potential source of surprise, and every line that operates on it becomes order-sensitive.
 
-**Defect class eliminated.** Aliasing bugs, order-of-update bugs, stale-reference bugs, and the family of "it worked in isolation but broke in context" failures. With immutable values, identity and equality coincide; with mutable values, they diverge.
+**Defect class eliminated.** Aliasing bugs, order-of-update bugs, stale-reference bugs, and the family of "it worked in isolation but broke in context" failures. With immutable values, identity and equality *may* safely coincide, because a value that never changes can be shared without risk; with mutable values they diverge, and sharing becomes a hazard.
+
+**A caveat TypeScript forces on us.** In an ML-family language that equivalence is also *operational*: the language compares immutable values structurally. TypeScript does not — `===` on any non-primitive compares references, so `{ id: 1 } === { id: 1 }` is `false` no matter how `readonly` the type is. Immutability therefore buys us the *right* to treat equal-by-contents values as interchangeable, but the language will not do it for us. Rule 4.7 closes the gap by requiring an explicit `Eq<A>` wherever structural equality is meant.
 
 **Consequence.** Data is values, not objects. Use `const`, discriminated unions, and recursive structures. No `let` within a function body.
 
@@ -67,7 +69,7 @@ A function's output depends only on its inputs. Calling a function twice with th
 
 **Defect class eliminated.** Heisenbugs, test flakes, "works on my machine", and the cascade of defensive coding that follows when callers stop trusting that a function does what it says. Equational reasoning — substituting a function call for its result — becomes valid, which is the foundation of every higher-order refactor.
 
-**Consequence.** Immutable inputs, pure outputs, explicit side effects at the boundary. No class instance state, no `this`, no ambient context. Effects are reified as values (`Task`, `IO`, `Result`) and threaded through the program, not invoked implicitly.
+**Consequence.** Immutable inputs, pure outputs, explicit side effects at the boundary. No class instance state, no `this`, no ambient context. Effects are reified as values (`Result`, and a `Promise<Result<A, E>>` for asynchrony) and threaded through the program, not invoked implicitly. "Ambient context" is concrete and enumerable: the clock, the entropy source, and the environment. `Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()` and `process.env` are inputs whether the signature admits them or not, so they are injected rather than called (Rule 4.6).
 
 ### 5. Exhaustiveness
 
@@ -75,7 +77,7 @@ The compiler must enforce that every case is handled. Silent fallthrough on an u
 
 **Defect class eliminated.** "We added a new variant and forgot to update the renderer." A new arm of a discriminated union becomes a compile error at every site that should have considered it, surfacing the inventory of work to be done rather than letting it ship as a silent gap.
 
-**Consequence.** Discriminated unions with exhaustive `switch` and an `absurd` witness in the default arm. No untagged unions, no generic `any`, no silent fallthroughs.
+**Consequence.** Discriminated unions with exhaustive `switch` and an `absurd` witness in the default arm. No untagged unions, no generic `any`, no silent fallthroughs. For the two-variant prelude ADTs the same discipline takes the form of a total eliminator: `match` and `matchOption` require a handler per variant, so a missing arm is a compile error rather than an omission a reviewer must notice (Rule 8.5).
 
 ## How the axioms compose
 
@@ -113,6 +115,8 @@ TSF++ rejects four positions that are common in mainstream TypeScript. Each is r
 **Exceptions as ordinary control flow.** `throw` is invisible in a function signature. A reader of the type `(x: A) => B` cannot tell whether the function returns `B`, throws, or loops. `Result<B, E>` makes the same information visible, exhaustively handled, and composable. TSF++ reserves `throw` for unrecoverable invariant violations and forbids it in domain logic.
 
 **Tests as a substitute for types.** A test exhibits a defect on one input. A type rules out a defect on every input. They are complementary — but they are not interchangeable, and a codebase that relies on tests to enforce properties the type system could have enforced has chosen to sample where it could have proven.
+
+The corollary matters as much as the rejection. Some properties are simply not expressible in TypeScript's type system: that `reverse` is involutive, that `map` preserves length, that a codec round-trips, that a smart constructor agrees with the predicate it documents. For those, the honest fallback is not an example — it is a *property*, checked over generated input, which is why Rule 8.2 makes property-based testing mandatory for the pure core rather than optional. A law written in a JSDoc comment and never executed is documentation, not proof; the gap between the two is exactly where defects live. This standard's own reference implementation demonstrated the point: `unique` documented a law that was false for object elements, and the claim survived review precisely because no generator ever produced an object.
 
 These rejections are categorical. They are the line between TSF++ and a strict-but-not-functional TypeScript style.
 
@@ -155,6 +159,16 @@ This is not an incidental benefit. It is what makes the standard sustainable. Pr
 - "We have always done it this way" is a non-negotiable constraint.
 
 These are descriptive, not exhortative. TSF++ is a fit for a specific class of system. It is not a universal style claim and does not aspire to be.
+
+## Seeing it whole
+
+The axioms above are claims about what code becomes possible. The claim is
+easier to evaluate against a program than against prose:
+[`spec/examples/reference-service.md`](./examples/reference-service.md) is a
+complete vertical slice — untrusted HTTP body to typed response across five
+layers — with the actual program output showing accumulation, a frozen clock,
+and exhaustive error mapping. It is the shortest path from "these five axioms
+sound reasonable" to "this is what they cost and buy".
 
 ## Further reading
 
