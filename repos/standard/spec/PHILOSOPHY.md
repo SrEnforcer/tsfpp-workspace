@@ -160,6 +160,16 @@ This is not an incidental benefit. It is what makes the standard sustainable. Pr
 
 These are descriptive, not exhortative. TSF++ is a fit for a specific class of system. It is not a universal style claim and does not aspire to be.
 
+## Seeing it whole
+
+The axioms above are claims about what code becomes possible. The claim is
+easier to evaluate against a program than against prose:
+[`spec/examples/reference-service.md`](./examples/reference-service.md) is a
+complete vertical slice — untrusted HTTP body to typed response across five
+layers — with the actual program output showing accumulation, a frozen clock,
+and exhaustive error mapping. It is the shortest path from "these five axioms
+sound reasonable" to "this is what they cost and buy".
+
 ## Further reading
 
 **The lineages**
