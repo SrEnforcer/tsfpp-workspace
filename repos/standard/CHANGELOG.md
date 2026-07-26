@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-07-25
+
+### ⚠ BREAKING CHANGES
+
+- Rule 4.7 reclassifies previously-permitted comparisons; ships as a major, consistent with 2.0.0 and 3.0.0.
+
+### Added
+
+- **Rule 4.7** — Never compare non-primitive values with `===`/`!==` expecting structural equality; pass an explicit `Eq<A>`. Covers ordering too (`.sort()` without a comparator sorts by string coercion). `===` stays correct for primitives, branded primitives, and string-literal discriminants.
+
+### Fixed
+
+- **PHILOSOPHY.md** claimed "with immutable values, identity and equality coincide" — true of ML-family languages, **false as written for TypeScript**, where `===` on non-primitives is reference equality. Restated, with a pointer to Rule 4.7.
+
 ## [3.0.0] - 2026-07-25
 
 ### ⚠ BREAKING CHANGES

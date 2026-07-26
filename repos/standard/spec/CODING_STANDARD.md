@@ -3,7 +3,7 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 3.0.0
+**Version:** 4.0.0
 **Date:** 2026-07-23
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
@@ -11,6 +11,15 @@ Codename TSF++ (tsfpp)
 ---
 
 ## Changelog
+
+### 4.0.0 — 2026-07-25
+
+**Breaking.** Adds a MUST rule that reclassifies previously-permitted comparisons, so it ships as a major (consistent with 2.0.0 and 3.0.0).
+
+- **New Rule 4.7** — Never compare non-primitive values with `===`/`!==` expecting structural equality; pass an explicit `Eq<A>`. `===` on any non-primitive is *reference* equality in TypeScript, so `{ id: 1 } === { id: 1 }` is `false` regardless of `readonly`. Also covers ordering: `.sort()` without a comparator sorts by string coercion. `===` remains correct for primitives, branded primitives, and string-literal discriminants (`s.kind === 'circle'` is unaffected).
+- **PHILOSOPHY corrected** — the claim that "with immutable values, identity and equality coincide" was true of ML-family languages but **false as written for TypeScript**. It now states what immutability actually buys (the *right* to treat equal-by-contents values as interchangeable) and points at Rule 4.7 for the operational gap.
+- **`@tsfpp/prelude` 2.2.0** implements the abstractions: `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `ordNumber`/`ordString`/`ordBoolean`, `eqNumber`/`eqString`/`eqBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`.
+- **Bug fix** — `unique`'s documentation claimed it "uses structural equality (`===`)". `===` is *not* structural equality; the function is reference-based and its documented "each element appears exactly once" law is false for objects. Corrected, with a pointer to `uniqueWith`.
 
 ### 3.0.0 — 2026-07-25
 
@@ -785,6 +794,48 @@ const mkOrderId = (customer: CustomerId): OrderId =>
 
 ---
 
+### Rule 4.7 — MUST: Never compare non-primitive values with `===`/`!==` expecting structural equality; pass an explicit `Eq<A>`
+
+**Rationale.** Rule 4.5 governs *how* to compare; this rule governs *what comparison means*. In an ML-family language, immutable values are compared by structure, which is why this standard's philosophy says that with immutable values "identity and equality coincide". **In TypeScript that is false.** `===` on any non-primitive compares references, and no amount of `readonly` changes it:
+
+```typescript
+{ id: 1 } === { id: 1 }   // false
+```
+
+The failure is silent and survives review, because the code reads correctly and *is* correct for primitives — which is exactly what a test written with numbers reports. It then propagates into every operation that quietly assumes structural equality: deduplication, membership, cache keys, memoisation, change detection, and React dependency arrays.
+
+TypeScript cannot infer the right notion of equality for a domain type — is a `User` equal by `id`, or by every field? — so the standard's answer is to make the choice explicit at the call site rather than let `===` decide by accident.
+
+**Do**
+```typescript
+import { eqBy, eqStructural, eqNumber, uniqueWith, elemWith, sortWith, ordBy, ordNumber } from '@tsfpp/prelude'
+
+// Entity equality is identity of the key, not of every field.
+const eqUser = eqBy((u: User) => u.id, eqNumber)
+
+const distinct = uniqueWith(eqUser)(users)
+const present  = elemWith(eqUser)(target)(users)
+const byAge    = sortWith(ordBy((u: User) => u.age, ordNumber))(users)
+```
+
+**Don't**
+```typescript
+users.includes(target)                     // === — never matches a fresh object
+unique(users)                              // reference-based; duplicates survive
+if (prevProps.filter === nextProps.filter) // always false for a record; re-renders forever
+```
+
+**`===` remains correct and required for:**
+- primitives (`string`, `number`, `boolean`, `bigint`, `symbol`, `null`, `undefined`) and branded primitives,
+- string-literal discriminants — `s.kind === 'circle'` is the exhaustiveness idiom of Rule 4.1 and is unaffected,
+- deliberate *identity* checks, where reference equality is the question being asked (document the intent).
+
+**Ordering.** The same argument applies to comparison. `Array.prototype.sort` without a comparator sorts by string coercion (`[10, 9]` sorts to `[10, 9]`), and Rule 2.3's "sort a copy" guidance presumes you already have a comparator. Use an `Ord<A>` — `sortWith(ord)` sorts a copy and satisfies Rule 2.3 by construction.
+
+**Numeric precondition.** An `Ord<number>` assumes finite values (Rule 1.13): `NaN` is unordered, so every comparison against it is `false` and it would sort as "equal" to everything. Brand at the boundary with `mkInt` / `mkPositive` / `mkNonNegative` and the precondition holds by construction.
+
+---
+
 ## 5 — Composition and Call Sites
 
 ### Rule 5.1 — MUST: Use `pipe` (left-to-right) for multi-step transformations; limit pipeline depth to 8 stages
@@ -1380,6 +1431,7 @@ Pre-push MAY additionally run the full test suite. CI re-runs all gates without 
 - [ ] No ambient clock/entropy/env in the core; injected via `Deps` (Rule 4.6)
 - [ ] Domain error channels are `kind`-tagged unions, not `string`/`Error` (Rule 6.7)
 - [ ] `Option`/`Result` collapsed via `match` where both arms yield a value (Rule 8.5)
+- [ ] Non-primitive comparison goes through an explicit `Eq`/`Ord`, never bare `===` or `.includes()` (Rule 4.7)
 
 A condensed quick-reference card is provided in Appendix E.
 
@@ -1690,6 +1742,7 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 - [ ] Body ≤ 40 lines, complexity ≤ 10, nesting ≤ 4.
 - [ ] Pipelines ≤ 8 stages; longer pipelines decomposed and named.
 - [ ] Discriminants accessed via `isOk` / `isSome` / `isErr` / `isNone`, never `result._tag`.
+- [ ] Records/arrays compared with an `Eq` (`uniqueWith`, `elemWith`), not `===` / `.includes()`; sorting uses `sortWith(ord)`.
 - [ ] Constructors use `mk*` (not `create*`); ADT combinators suffixed by full type name (`mapOption`, not `mapO`/`getOrElseR`), `Result` unsuffixed (Rules 7.3, 7.8).
 
 ### Tests and docs

@@ -551,11 +551,18 @@ export const tapErr =
 
 /**
  * Returns a new array with duplicate elements removed, preserving first-occurrence order.
- * Uses structural equality (`===`) for comparison.
+ *
+ * Uses **reference/`===` equality**, NOT structural equality. Two records with
+ * identical contents are therefore both kept:
+ * `unique([{ id: 1 }, { id: 1 }])` has length 2.
+ *
+ * For any non-primitive element type use `uniqueWith(eq)` from the `eq` module
+ * with an explicit `Eq` (Rule 4.7).
+ *
  * @law unique([]) ≡ []
- * @law Every element of xs appears in unique(xs) exactly once.
+ * @law Every element of xs appears in unique(xs) exactly once, up to `===`.
  * @law unique(xs).length <= xs.length
- * @law unique is idempotent: unique(unique(xs)) ≡ unique(xs)
+ * @law unique is idempotent: unique(unique(xs)) ≡ unique(unique(xs))
  */
 export const unique = <A>(values: ReadonlyArray<A>): ReadonlyArray<A> =>
   values.reduce<ReadonlyArray<A>>(

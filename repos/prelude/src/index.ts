@@ -7,3 +7,4 @@
  */
 export * from './fp.js';
 export * from './validation.js';
+export * from './eq.js';

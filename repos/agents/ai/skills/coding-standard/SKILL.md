@@ -9,9 +9,9 @@ description: >
   conflict.
 ---
 
-# TSF++ coding standard — v3.0.0
+# TSF++ coding standard — v4.0.0
 
-Standard version: 3.0.0 (2026-07-25). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
+Standard version: 4.0.0 (2026-07-25). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
 
 ---
 
@@ -39,6 +39,8 @@ Number()·parseInt·parseFloat·unary +  in core  → parse at boundary; brand n
 NaN·Infinity leak; global isNaN·isFinite  → use Number.isNaN·Number.isFinite (Rule 1.13)
 Date.now·new Date()·Math.random·crypto.randomUUID·process.env  in core  → inject via Deps (Rule 4.6)
 string·Error as a domain error channel  → use a kind-tagged union (Rule 6.7)
+=== · !== · .includes() on non-primitives  → reference equality! pass an Eq (Rule 4.7)
+.sort() without a comparator  → string coercion; use sortWith(ord) (Rule 4.7)
 create* constructor prefix  → use mk* (Rule 7.3)
 ```
 
@@ -55,6 +57,7 @@ Critical rules always in context:
 - 1.14 — Prefer `satisfies` over `as` for literal conformance
 - 4.1 — Every exhaustive `switch` ends in `default: return absurd(x)`
 - 4.6 — No ambient clock/entropy/env in core — inject via `Deps`
+- 4.7 — `===` on non-primitives is REFERENCE equality; pass an explicit `Eq`/`Ord` (`uniqueWith`, `elemWith`, `sortWith`)
 - 6.3 — No `null`/`undefined` — use `Option<A>`
 - 6.7 — Error channels are `kind`-tagged unions, never `string`/`Error`
 - 6.8 — Independent checks that must all be reported use `Validation` (accumulates); dependent steps use `Result` (short-circuits)

@@ -10,6 +10,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-25
+
+### Features
+
+- Teach standard Rule 4.7 (`===` on non-primitives is reference equality; pass an explicit `Eq`/`Ord`) across the coding-standard skill, base instructions, and the prelude skill; document the `@tsfpp/prelude` 2.2.0 `Eq`/`Ord` API.
+
+### Changed
+
+- Coding-standard skill marker → v4.0.0; peer ranges → `@tsfpp/standard >=4.0.0`, `@tsfpp/prelude >=2.2.0`.
+
 ## [2.1.0] - 2026-07-25
 
 ### Features

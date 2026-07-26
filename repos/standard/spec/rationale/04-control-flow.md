@@ -234,3 +234,23 @@ expect(mkOrderId(frozen)(customer)).toBe('cust-0-test-uuid')
 ```
 
 **Where the raw constructors live.** Exactly one place: the composition root that builds the real `Deps`. That module is a boundary by definition and reads the clock, entropy, and `process.env` directly to wire them in. Everywhere else, the linter's `no-restricted-globals` / `no-restricted-syntax` entries make an ambient read a build failure, so the boundary cannot erode by accident.
+
+---
+
+## Rule 4.7 — Equality is a choice, not a default
+
+This is the rule that repairs a claim the philosophy has always made and TypeScript has never honoured.
+
+Axiom 3 (immutability) argues that once a value cannot change, sharing it is safe and "identity and equality coincide". That reasoning is sound, and in an ML-family language it is also *operational*: the language compares immutable values structurally. TypeScript inherited JavaScript's `===`, which for any non-primitive asks a different question — *are these the same allocation?* So the axiom's conclusion is true about the **semantics of values** and false about the **behaviour of the operator**.
+
+```typescript
+{ id: 1 } === { id: 1 }   // false, and `readonly` cannot help
+```
+
+**Why this defect survives review.** It is invisible in three reinforcing ways. The code reads correctly — `users.includes(target)` says exactly what it means. It behaves correctly for primitives, which is what most examples and most unit tests use. And it fails *silently*: `includes` returns `false`, `unique` keeps both copies, a memo never hits. Nothing throws. The prelude's own `unique` documented itself as using "structural equality (`===`)" — two incompatible ideas in one phrase — and its stated law "every element appears exactly once" is simply false for objects. That escaped review, and it escaped a property-test suite, because the generator produced numbers.
+
+**Why the rule requires an explicit `Eq` rather than mandating deep equality.** A blanket "always compare deeply" would be both slow and wrong. For a domain entity, equality is usually *identity of the key*: two `User` records with the same `id` and a different `lastSeenAt` are the same user. For a value object — a `Money`, a `Coordinate` — equality is by contents. For a cache key, reference equality may be exactly right. TypeScript cannot infer which of these a type means, and a default would silently pick wrong. Making the choice explicit at the call site (`eqBy((u: User) => u.id, eqNumber)`) puts the decision where the domain knowledge is, and makes it reviewable.
+
+**Ordering is the same argument.** `Array.prototype.sort` with no comparator coerces to strings, so `[10, 9].sort()` yields `[10, 9]`. Rule 2.3 already tells you to sort a copy; Rule 4.7 supplies the missing half — the comparator — via `Ord<A>`, and `sortWith(ord)` satisfies both at once.
+
+**What is deliberately untouched.** Primitives and branded primitives compare with `===` correctly, and so do string-literal discriminants — `shape.kind === 'circle'` is the exhaustiveness idiom of Rule 4.1 and is not affected by this rule. The prohibition is narrow on purpose: it targets the case where the programmer *means* structural equality and the operator quietly delivers something else.

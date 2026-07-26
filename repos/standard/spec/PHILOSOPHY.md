@@ -57,7 +57,9 @@ Every function must have an output for every legal input. Partiality — functio
 
 Mutable state is temporal coupling. If an object can change after creation, every alias to it becomes a potential source of surprise, and every line that operates on it becomes order-sensitive.
 
-**Defect class eliminated.** Aliasing bugs, order-of-update bugs, stale-reference bugs, and the family of "it worked in isolation but broke in context" failures. With immutable values, identity and equality coincide; with mutable values, they diverge.
+**Defect class eliminated.** Aliasing bugs, order-of-update bugs, stale-reference bugs, and the family of "it worked in isolation but broke in context" failures. With immutable values, identity and equality *may* safely coincide, because a value that never changes can be shared without risk; with mutable values they diverge, and sharing becomes a hazard.
+
+**A caveat TypeScript forces on us.** In an ML-family language that equivalence is also *operational*: the language compares immutable values structurally. TypeScript does not — `===` on any non-primitive compares references, so `{ id: 1 } === { id: 1 }` is `false` no matter how `readonly` the type is. Immutability therefore buys us the *right* to treat equal-by-contents values as interchangeable, but the language will not do it for us. Rule 4.7 closes the gap by requiring an explicit `Eq<A>` wherever structural equality is meant.
 
 **Consequence.** Data is values, not objects. Use `const`, discriminated unions, and recursive structures. No `let` within a function body.
 

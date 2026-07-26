@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-25
+
+### Features
+
+- add the **`Eq<A>` / `Ord<A>`** module (standard Rule 4.7) — explicit equality and ordering, because `===` on any non-primitive is *reference* equality in TypeScript (`{ id: 1 } === { id: 1 }` is `false`) and `readonly` cannot change that. Exports `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `eqNumber`/`eqString`/`eqBoolean`, `ordNumber`/`ordString`/`ordBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`.
+  - `Ordering` is `-1 | 0 | 1` rather than `number`, so a comparator cannot return `NaN` (Rule 1.13).
+  - `mkOrd` derives `equals` from `compare`, so the two can never disagree.
+  - `sortWith` sorts a **copy**, satisfying Rule 2.3 without needing ES2023's `toSorted`.
+  - `maxWith`/`minWith` take a `NonEmptyReadonlyArray` and are therefore total — no `Option` wrapper.
+
+### Fixed
+
+- **`unique` documentation was wrong.** It claimed to use "structural equality (`===`)" — `===` is *not* structural equality; the function is reference-based, so `unique([{ id: 1 }, { id: 1 }])` has length 2. Its stated law "every element appears exactly once" is false for objects. Corrected, with a pointer to `uniqueWith(eq)`. Behaviour is unchanged.
+
 ## [2.1.0] - 2026-07-25
 
 ### Features

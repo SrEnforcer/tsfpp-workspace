@@ -1,5 +1,5 @@
 /**
- * Examples for §4 — Control Flow (Rules 4.1–4.6)
+ * Examples for §4 — Control Flow (Rules 4.1–4.7)
  * See ../CODING_STANDARD.md §4 and ../rationale/04-control-flow.md
  */
 
@@ -212,10 +212,49 @@ const mkReceiptId = (customer: string): string =>
   `${customer}-${Date.now()}-${Math.random()}` // different every call; untestable
 */
 
+// ─── Rule 4.7 — Explicit Eq/Ord for non-primitives ───────────────────────────
+//
+// MUST: `===` on any non-primitive is REFERENCE equality. Pass an explicit Eq.
+
+type Eq<A> = { readonly equals: (x: A, y: A) => boolean }
+type Ordering = -1 | 0 | 1
+type Ord<A> = Eq<A> & { readonly compare: (x: A, y: A) => Ordering }
+
+const eqBy = <A, B>(project: (a: A) => B, eqB: Eq<B>): Eq<A> => ({
+  equals: (x, y) => eqB.equals(project(x), project(y)),
+})
+const eqNumberEx: Eq<number> = { equals: (x, y) => Object.is(x, y) }
+
+type Member = { readonly id: number; readonly name: string }
+
+// GOOD: equality for an entity is identity of its key, stated explicitly.
+const eqMember = eqBy((m: Member) => m.id, eqNumberEx)
+
+const containsMember = (xs: ReadonlyArray<Member>, target: Member): boolean =>
+  xs.some((x) => eqMember.equals(x, target))
+
+// GOOD: sorting a copy with an explicit comparator (satisfies Rules 2.3 + 4.7).
+const ordByAge = (project: (m: Member) => number): Ord<Member> => ({
+  compare: (x, y) => (project(x) < project(y) ? -1 : project(x) > project(y) ? 1 : 0),
+  equals: (x, y) => project(x) === project(y),
+})
+const sortMembers = (xs: ReadonlyArray<Member>, ord: Ord<Member>): ReadonlyArray<Member> =>
+  [...xs].sort(ord.compare)
+
+/* BAD: reference equality masquerading as structural equality.
+xs.includes({ id: 1, name: 'ada' })  // always false — fresh object, new reference
+if (prevProps.filter === nextProps.filter) { ... }  // always false for a record
+[10, 9].sort()                        // string coercion → [10, 9], not [9, 10]
+*/
+
+// `===` is still correct for string-literal discriminants (Rule 4.1 is unaffected):
+const isCircleKind = (d: Direction): boolean => d === 'north'
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
-export type { Direction, MoveEvent, Employee, EmailAddress, ParsedEmail, ValidationError, Clock }
+export type { Direction, MoveEvent, Employee, EmailAddress, ParsedEmail, ValidationError, Clock, Eq, Ord, Ordering, Member }
 export {
   describeEvent, isMoving, employees, activeNames, totalActiveSalary, firstActive,
   allSkills, formatCount, displayName, parseEmail, isNonEmpty, isPositive, isPresent,
   formatOptional, mkReceiptId, systemClock, frozenClock,
+  eqBy, eqNumberEx, eqMember, containsMember, ordByAge, sortMembers, isCircleKind,
 }
