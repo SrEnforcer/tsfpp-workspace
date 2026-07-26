@@ -108,3 +108,83 @@ const make = (raw: string): BrandedId => raw as BrandedId
 ```
 
 The format is: `// DEVIATION(RULE_NUMBER): <one-line justification>`.
+
+---
+
+### DEV-002 — Rule 8.2: Property-based testing with fast-check
+
+| Field        | Value |
+|--------------|-------|
+| ID           | DEV-002 |
+| Rule         | 8.2 — Property-based testing with fast-check is mandatory for all pure functions in the core |
+| Scope        | `@tsfpp/mcp-server` |
+| Status       | active |
+| Approved by  | @maintainer on 2026-07-25 |
+| Reviewed at  | 2026-07-25 (revisit by 2026-10-31) |
+
+**Justification**
+
+`@tsfpp/mcp-server` has example-based tests but no property-based suite. This is
+a genuine, currently-unremediated violation of a MUST rule, recorded here rather
+than left implicit.
+
+The package is largely I/O and protocol plumbing (MCP request handling, file
+reads, rule-index construction from the on-disk spec). Its pure fragment —
+principally `lib/rule-index.ts` — is a parser over the standard's own Markdown
+and is the part that genuinely warrants generated input.
+
+`@tsfpp/prelude` and `@tsfpp/boundary` are compliant as of prelude 2.1.0 and
+boundary 2.2.0 respectively. `@tsfpp/agents` contains no TypeScript source
+(Markdown assets plus a Node build script), so Rule 8.2 does not apply to it.
+
+**Mitigation**
+
+Example-based tests cover the rule-index construction paths and the tool
+handlers. The package sits outside the domain core: nothing depends on it at
+runtime, and a defect surfaces as degraded AI-assistant guidance rather than as
+incorrect production behaviour.
+
+**Revocation condition**
+
+A `fast-check` suite covers `lib/rule-index.ts`'s parsing invariants — at
+minimum: every rule id extracted round-trips to the section it was parsed from,
+parsing never throws on arbitrary Markdown, and the index is total over the
+spec's rule set. Revisit no later than 2026-10-31.
+
+---
+
+### DEV-003 — Rule 11.2: Maximum file length
+
+| Field        | Value |
+|--------------|-------|
+| ID           | DEV-003 |
+| Rule         | 11.2 — Maximum file length is 400 lines (800 absolute with deviation) |
+| Scope        | `@tsfpp/boundary` — `src/boundary-types.ts` (436 lines) |
+| Status       | active |
+| Approved by  | @maintainer on 2026-07-25 |
+| Reviewed at  | 2026-07-25 (revisit when the file next changes materially) |
+
+**Justification**
+
+`boundary-types.ts` is 36 lines over the 400-line soft limit and well inside the
+800-line absolute ceiling. It holds one cohesive unit: the branded boundary
+identifiers, their smart constructors, request-context extraction, and the
+`ApiError` taxonomy with its Problem Details mapping. Splitting it would separate
+the `ApiError` union from the constructors that build its variants, which Rule
+11.1 explicitly asks to keep together ("collocate related sum type and its
+constructors in the same module").
+
+**Mitigation**
+
+The module is already decomposed at the package level — `boundary-response`,
+`boundary-handler`, `boundary-operations`, `boundary-idempotency`,
+`boundary-webhook`, and `boundary-node` are separate files, each comfortably
+within the limit. Every export is documented, and the package barrel keeps the
+public surface flat.
+
+**Revocation condition**
+
+The file exceeds 500 lines, or the Problem Details mapping grows enough to stand
+alone — at which point `ApiError` + its constructors move to `boundary-errors.ts`
+and the identifier brands stay here. Revisit whenever the file next changes
+materially.

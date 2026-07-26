@@ -8,6 +8,15 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ---
 
+## [1.1.0] — 2026-07-25
+
+### Features
+
+- add the **`@tsfpp/eslint-config/layered`** profile enforcing standard Rules 11.5 (layer boundaries — functional core, imperative shell) and 11.6 (import purity):
+  - `no-restricted-imports` zones stopping `core`/`domain` and `use-case` modules from importing adapters, transports, `node:*`, or frameworks — the error message points at Rule 6.5's port-and-inject remedy.
+  - `no-restricted-syntax` for module-level side effects: clock reads, `process.env`, top-level `await`, and bare calls at module scope.
+  - Verified against a fixture: catches all five violation shapes and stays silent on compliant code.
+
 ## [1.0.3] — 2026-07-24
 
 ### Changed

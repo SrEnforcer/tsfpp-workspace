@@ -48,6 +48,20 @@ const upper = map((s: string) => s.toUpperCase())(name);   // cannot fail
 const valid = flatMap(validateEmail)(input);                // can fail
 ```
 
+### Equality and ordering (Rule 4.7)
+
+`===` on any non-primitive is **reference** equality. Pass an explicit `Eq`:
+
+```ts
+const eqUser = eqBy((u: User) => u.id, eqNumber);  // equality is identity of the key
+uniqueWith(eqUser)(users);                          // not unique() — that is reference-based
+elemWith(eqUser)(target)(users);                    // not .includes()
+sortWith(ordBy((u: User) => u.age, ordNumber))(users); // sorts a copy, explicit comparator
+```
+
+`eqStructural()` compares plain data by contents; `eqStrict()` keeps `===` where it is correct.
+`maxWith`/`minWith` take a `NonEmptyReadonlyArray` and are total.
+
 ### `Result` vs `Validation` (Rule 6.8)
 
 - Next step needs the previous step's value → `Result` (short-circuits on first `Err`)

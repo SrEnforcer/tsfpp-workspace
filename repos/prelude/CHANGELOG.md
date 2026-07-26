@@ -10,6 +10,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-25
+
+### Features
+
+- add the **`Eq<A>` / `Ord<A>`** module (standard Rule 4.7) — explicit equality and ordering, because `===` on any non-primitive is *reference* equality in TypeScript (`{ id: 1 } === { id: 1 }` is `false`) and `readonly` cannot change that. Exports `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `eqNumber`/`eqString`/`eqBoolean`, `ordNumber`/`ordString`/`ordBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`.
+  - `Ordering` is `-1 | 0 | 1` rather than `number`, so a comparator cannot return `NaN` (Rule 1.13).
+  - `mkOrd` derives `equals` from `compare`, so the two can never disagree.
+  - `sortWith` sorts a **copy**, satisfying Rule 2.3 without needing ES2023's `toSorted`.
+  - `maxWith`/`minWith` take a `NonEmptyReadonlyArray` and are therefore total — no `Option` wrapper.
+
+### Changed
+
+- **Split `fp.ts` into focused modules** (`core`, `adt`, `combinators`, `record`, `traversals`, `list`, `collections`, `logger`, `refined`). At 1228 lines `fp.ts` exceeded even Rule 11.2's 800-line absolute ceiling, so no deviation could sanction it; every file is now within the 400-line soft limit. `fp.ts` remains as an internal barrel, so the `./fp.js` import path still works. **The public API is byte-identical** — all 123 exports verified unchanged against the pre-split build.
+
+### Fixed
+
+- **`unique` documentation was wrong.** It claimed to use "structural equality (`===`)" — `===` is *not* structural equality; the function is reference-based, so `unique([{ id: 1 }, { id: 1 }])` has length 2. Its stated law "every element appears exactly once" is false for objects. Corrected, with a pointer to `uniqueWith(eq)`. Behaviour is unchanged.
+
 ## [2.1.0] - 2026-07-25
 
 ### Features

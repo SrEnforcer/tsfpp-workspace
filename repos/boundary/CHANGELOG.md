@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-25
+
+### Testing
+
+- add a **`fast-check` property-based law suite** (`boundary.laws.test.ts`) satisfying standard Rule 8.2, which this package previously violated without a recorded deviation. Covers the cursor codec round-trip (`decodeCursor ∘ encodeCursor ≡ Some(identity)`, base64url output shape, and totality on arbitrary text), branded smart-constructor predicate agreement (`mkTraceId`, `mkPrincipalId`, `mkWebhookEventId`, `mkIdempotencyKey`), and `parsePaginationQuery` bounds over generated input. Suite: 21 tests.
+
 ### Changed
 
 - Loosened the `@tsfpp/prelude` runtime dependency to `^2.0.0` (was an exact `2.0.2` pin) so patch/minor prelude releases no longer require a boundary republish.

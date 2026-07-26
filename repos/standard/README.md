@@ -28,6 +28,7 @@ All standard documents live in `spec/`.
 |---|---|
 | [`spec/PHILOSOPHY.md`](./spec/PHILOSOPHY.md) | Design philosophy and rationale behind TSF++ |
 | [`spec/RATIONALE.md`](./spec/RATIONALE.md) | Section-by-section rationale for normative decisions |
+| [`spec/examples/reference-service.md`](./spec/examples/reference-service.md) | **Start here.** A complete worked vertical slice — one feature from untrusted HTTP body to typed response — showing where every rule lands in a real program |
 | [`spec/DEVIATIONS.md`](./spec/DEVIATIONS.md) | Project-wide deviation registry |
 
 ---

@@ -10,6 +10,26 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-07-25
+
+### Features
+
+- Teach standard Rules 11.5 (layer boundaries — functional core, imperative shell; dependencies point inward only) and 11.6 (no module-level side effects) in the coding-standard skill and base instructions.
+
+### Changed
+
+- Coding-standard skill marker → v4.1.0; peer ranges → `@tsfpp/standard >=4.1.0`, `@tsfpp/eslint-config >=1.1.0`.
+
+## [2.2.0] - 2026-07-25
+
+### Features
+
+- Teach standard Rule 4.7 (`===` on non-primitives is reference equality; pass an explicit `Eq`/`Ord`) across the coding-standard skill, base instructions, and the prelude skill; document the `@tsfpp/prelude` 2.2.0 `Eq`/`Ord` API.
+
+### Changed
+
+- Coding-standard skill marker → v4.0.0; peer ranges → `@tsfpp/standard >=4.0.0`, `@tsfpp/prelude >=2.2.0`.
+
 ## [2.1.0] - 2026-07-25
 
 ### Features
