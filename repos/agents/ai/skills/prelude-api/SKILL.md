@@ -48,6 +48,21 @@ const upper = map((s: string) => s.toUpperCase())(name);   // cannot fail
 const valid = flatMap(validateEmail)(input);                // can fail
 ```
 
+### Combining — Semigroup / Monoid
+
+`Eq` = "are these the same?", `Ord` = "which comes first?", `Monoid` = "how do
+two combine?". The identity element makes folding an empty collection total.
+
+```ts
+concatAll(monoidSum)([]);                                   // 0 — no Option needed
+foldMap(monoidSum)((o: Order) => o.seats)(orders);          // sum of a projection
+foldMap(monoidAny)((o: Order) => mkAny(o.overdue))(orders); // "is any overdue?"
+```
+
+`monoidEvery` / `monoidAny` are distinct types on purpose — their identities are
+`true` and `false`, so the wrong choice silently inverts the empty-collection result.
+`semigroupFirst`/`Last`/`Max`/`Min` are Semigroups (no identity exists).
+
 ### Equality and ordering (Rule 4.7)
 
 `===` on any non-primitive is **reference** equality. Pass an explicit `Eq`:

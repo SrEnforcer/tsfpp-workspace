@@ -47,6 +47,8 @@ From `@tsfpp/prelude`:
 - **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
 - **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
 - **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `headNonEmpty`, `lastNonEmpty`
+- **Combining (Semigroup/Monoid)**: `Semigroup`, `Monoid`, `mkSemigroup`, `mkMonoid`, `monoidSum`, `monoidProduct`, `monoidString`, `monoidEvery`, `monoidAny`, `monoidArray`, `monoidRecord`, `semigroupFirst`/`semigroupLast`, `semigroupMax`/`semigroupMin`, `concatAll`, `concatAllWith`, `foldMap`, `dual`
+- **Typed record helpers**: `keysOf`, `valuesOf`, `entriesOfRecord`, `mapValues`
 - **Equality & ordering**: `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `eqNumber`/`eqString`/`eqBoolean`, `ordNumber`/`ordString`/`ordBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`
 - **Validation (error-accumulating)**: `Validation`, `valid`, `invalid`, `invalidAll`, `isValid`, `isInvalid`, `mapValidation`, `mapErrorsValidation`, `apValidation`, `matchValidation`, `traverseArrayValidation`, `sequenceArrayValidation`, `sequenceStructValidation`, `validationToResult`, `resultToValidation`
 - **Collection helpers**: `traverseArray`, `traverseArrayOption`, `sequenceArrayOption`, `unique`, `intoMap`, `entriesOf`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
@@ -161,6 +163,24 @@ const withFallback = orElseOption(() => some('Anonymous'))(parsed);
 // Option -> string
 const value = getOrElseOption(() => 'Anonymous')(parsed);
 ```
+
+### Combine with a `Monoid` when folding a collection
+
+`Eq` answers "are these the same?", `Ord` answers "which comes first?", and a
+`Monoid` answers "how do two of these combine?". The identity element is what
+makes folding an *empty* collection total — no `Option`, no special case.
+
+```ts
+import { concatAll, foldMap, monoidSum, monoidAny, mkAny } from '@tsfpp/prelude';
+
+concatAll(monoidSum)([]);                                  // 0 — total, no Option
+foldMap(monoidSum)((o: Order) => o.seats)(orders);         // sum of a projection
+foldMap(monoidAny)((o: Order) => mkAny(o.overdue))(orders); // "is any overdue?"
+```
+
+`monoidEvery` and `monoidAny` are deliberately distinct types: their identities
+differ (`true` vs `false`), so picking the wrong one silently inverts the answer
+on an empty collection. The `Every`/`Any` brands make that unrepresentable.
 
 ### Compare non-primitives with an `Eq`, never `===`
 

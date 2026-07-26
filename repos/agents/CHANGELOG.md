@@ -10,6 +10,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-07-26
+
+### Features
+
+- Document the `@tsfpp/prelude` 2.3.0 `Semigroup`/`Monoid` algebra and the typed record helpers (`keysOf`, `valuesOf`, `entriesOfRecord`, `mapValues`) in the prelude skill and instructions, including why `monoidEvery` and `monoidAny` are distinct types.
+
+### Changed
+
+- Peer range → `@tsfpp/prelude >=2.3.0`.
+
 ## [2.3.0] - 2026-07-25
 
 ### Features

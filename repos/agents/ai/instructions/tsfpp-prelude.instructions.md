@@ -33,6 +33,12 @@ import {
   // Validation — accumulating failure (Rule 6.8)
   valid, invalid, invalidAll, isValid, isInvalid, mapValidation, matchValidation,
   traverseArrayValidation, sequenceStructValidation, validationToResult, resultToValidation,
+  // Combining — Semigroup / Monoid
+  mkSemigroup, mkMonoid, monoidSum, monoidProduct, monoidString, monoidEvery, monoidAny,
+  monoidArray, monoidRecord, semigroupFirst, semigroupLast, semigroupMax, semigroupMin,
+  concatAll, concatAllWith, foldMap, dual,
+  // Typed record helpers (Object.keys loses keyof T)
+  keysOf, valuesOf, entriesOfRecord, mapValues,
   // Non-empty arrays
   isNonEmptyArray, mkNonEmpty, headNonEmpty, lastNonEmpty,
   // Refined numerics (Rule 1.13)
@@ -46,6 +52,7 @@ import {
   // Types
   type Option, type Result, type Unit, type Brand, type UnknownRecord,
   type NonEmptyReadonlyArray, type Int, type Positive, type NonNegative, type Validation,
+  type Semigroup, type Monoid,
 } from '@tsfpp/prelude'
 ```
 

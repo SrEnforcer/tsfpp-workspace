@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-07-26
+
+### Features
+
+- add the **`Semigroup<A>` / `Monoid<A>`** module — the algebra of *combining*, completing the trio alongside `Eq` ("are these the same?") and `Ord` ("which comes first?"). Exports `mkSemigroup`, `mkMonoid`, `monoidSum`, `monoidProduct`, `monoidString`, `monoidEvery`, `monoidAny`, `monoidArray`, `monoidRecord`, `semigroupFirst`/`semigroupLast`, `semigroupMax`/`semigroupMin`, `concatAll`, `concatAllWith`, `foldMap`, `dual`.
+  - **`Every` and `Any` finally have a purpose.** Both brands have been exported since 1.x and used by nothing, because the abstraction that gives them meaning did not exist. They now type `monoidEvery` and `monoidAny`, whose identities differ (`true` vs `false`) — picking the wrong one silently inverts the result on an empty collection, which the distinct brands make unrepresentable.
+  - The identity element is what makes `concatAll([])` total; `semigroupFirst`/`Last`/`Max`/`Min` are deliberately `Semigroup`, not `Monoid`, because no identity exists for them.
+  - Every instance is run through a shared law suite (associativity + both identities), so a new instance cannot be added without earning them. 54 new tests; suite now **319**.
+- add **typed record helpers** `keysOf`, `valuesOf`, `entriesOfRecord`, `mapValues` — `Object.keys` returns `string[]` and discards `keyof T`, so each use was a small escape hatch forcing a cast back.
+
+### Fixed
+
+- `sequenceStructValidation` no longer needs one of its two `DEVIATION(1.6)` casts: `keysOf` preserves the key type, so the index access is sound without an assertion. The remaining cast is irreducible — TypeScript cannot prove entries rebuilt from a record's own keys reconstitute its mapped type — and is documented as such.
+
 ## [2.2.0] - 2026-07-25
 
 ### Features

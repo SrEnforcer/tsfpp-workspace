@@ -42,6 +42,7 @@ import {
   type Result,
   err,
   isOk,
+  keysOf,
   ok,
 } from './fp.js';
 
@@ -199,17 +200,19 @@ type ValidationStruct<E, T> = { readonly [K in keyof T]: Validation<E, T[K]> };
 export const sequenceStructValidation = <E, T extends Readonly<Record<string, unknown>>>(
   fields: ValidationStruct<E, T>,
 ): Validation<E, T> => {
-  const entries = Object.keys(fields).map(
+  // `keysOf` preserves the key type that `Object.keys` discards, so the index
+  // access below needs no assertion. The remaining cast is irreducible: TypeScript
+  // cannot prove that entries rebuilt from a record's own keys reconstitute its
+  // mapped type, so one DEVIATION stays and one is gone.
+  const entries = keysOf(fields).map(
     (key): Validation<E, readonly [string, unknown]> =>
       mapValidation<E, unknown, readonly [string, unknown]>((value) => [key, value] as const)(
-        // Index access is total here: `key` came from Object.keys(fields).
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): key is proven present by Object.keys
-        fields[key as keyof T] as Validation<E, unknown>,
+        fields[key],
       ),
   );
 
   return mapValidation<E, ReadonlyArray<readonly [string, unknown]>, T>(
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): rebuilt from the same keys the input struct declared
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): entries are rebuilt from the input struct's own keys
     (pairs) => Object.fromEntries(pairs) as T,
   )(sequenceArrayValidation(entries));
 };
