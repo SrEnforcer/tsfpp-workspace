@@ -1,8 +1,11 @@
 /**
  * @module refined
  *
- * Total eliminators (Rule 8.5), refined array types (`NonEmptyReadonlyArray`),
- * and refined numerics `Int` / `Positive` / `NonNegative` (Rule 1.13).
+ * Total eliminators (Rule 8.5) and refined numerics `Int` / `Positive` /
+ * `NonNegative` (Rule 1.13).
+ *
+ * `NonEmptyReadonlyArray` and its combinators live in the `nonempty` module
+ * (Rule 11.1: one type, one file).
  */
 
 import { type Option, type Result, err, isErr, isOk, isSome, none, some } from './adt.js';
@@ -82,54 +85,6 @@ export const findO =
   <A>(pred: (a: A) => boolean) =>
   (xs: ReadonlyArray<A>): Option<A> =>
     fromNullable(xs.find(pred));
-
-// ---------------------------------------------------------------------------
-// Non-empty arrays — correctness by construction (Rule 1.1 / Rule 8.1)
-//
-// `head` on a `ReadonlyArray` must return `Option<A>` because the array may be
-// empty. When a caller has already established non-emptiness, that fact should
-// live in the type, not be re-checked at every use site. `NonEmptyReadonlyArray`
-// makes the empty case unrepresentable, so `headNonEmpty` / `lastNonEmpty` are total.
-// ---------------------------------------------------------------------------
-
-/**
- * A readonly array proven to hold at least one element. The leading `A` in the
- * tuple is what makes `headNonEmpty` total.
- */
-export type NonEmptyReadonlyArray<A> = readonly [A, ...ReadonlyArray<A>];
-
-/**
- * Type guard proving an array is non-empty. Narrows to
- * `NonEmptyReadonlyArray<A>`, after which `headNonEmpty` / `lastNonEmpty` apply.
- */
-export const isNonEmptyArray = <A>(
-  xs: ReadonlyArray<A>,
-): xs is NonEmptyReadonlyArray<A> => xs.length > 0;
-
-/**
- * Smart constructor lifting a possibly-empty array into `Option` of a
- * non-empty one. The sole gateway into `NonEmptyReadonlyArray` (Rule 1.3).
- *
- * @law isSome(mkNonEmpty(xs)) ≡ xs.length > 0
- */
-export const mkNonEmpty = <A>(
-  xs: ReadonlyArray<A>,
-): Option<NonEmptyReadonlyArray<A>> =>
-  isNonEmptyArray(xs) ? some(xs) : none;
-
-/**
- * Total head: the first element of a non-empty array, with no `Option`
- * wrapper, because the type guarantees it exists.
- */
-export const headNonEmpty = <A>(xs: NonEmptyReadonlyArray<A>): A => xs[0];
-
-/**
- * Total last: the final element of a non-empty array. Uses `reduce` without an
- * initial value, which is itself total only on non-empty input — exactly the
- * guarantee the type carries.
- */
-export const lastNonEmpty = <A>(xs: NonEmptyReadonlyArray<A>): A =>
-  xs.reduce((_prev, curr) => curr);
 
 // ---------------------------------------------------------------------------
 // Refined numerics — no numeric hazards (Rule 1.13)

@@ -46,13 +46,13 @@ From `@tsfpp/prelude`:
 - **Conversions and guards**: `fromNullable`, `isDefined`, `toNullable`, `isRecord`, `fromUnknownString`, `fromUnknownArray`, `fromUnknownArrayOf`, `fromNonEmptyString`, `getTypedField`, `getStringField`, `getNumberField`, `getBooleanField`, `findO`
 - **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
 - **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
-- **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `headNonEmpty`, `lastNonEmpty`
-- **Combining (Semigroup/Monoid)**: `Semigroup`, `Monoid`, `mkSemigroup`, `mkMonoid`, `monoidSum`, `monoidProduct`, `monoidString`, `monoidEvery`, `monoidAny`, `monoidArray`, `monoidRecord`, `semigroupFirst`/`semigroupLast`, `semigroupMax`/`semigroupMin`, `concatAll`, `concatAllWith`, `foldMap`, `dual`
+- **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `consNonEmpty`, `singletonNonEmpty`, `headNonEmpty`, `lastNonEmpty`, `tailNonEmpty`, `toArrayNonEmpty`, `lengthNonEmpty`, `mapNonEmpty`, `appendNonEmpty`, `prependNonEmpty`, `concatNonEmpty`, `reverseNonEmpty`, `sortNonEmpty`, `reduceNonEmpty`, `reduceMapNonEmpty`, `traverseNonEmpty`
+- **Combining (Semigroup/Monoid)**: `Semigroup`, `Monoid`, `mkSemigroup`, `mkMonoid`, `monoidSum`, `monoidProduct`, `monoidString`, `monoidEvery`, `monoidAny`, `monoidArray`, `monoidRecord`, `semigroupFirst`/`semigroupLast`, `semigroupMax`/`semigroupMin`, `semigroupNonEmpty`, `concatAll`, `concatAllWith`, `foldMap`, `dual`
 - **Typed record helpers**: `keysOf`, `valuesOf`, `entriesOfRecord`, `mapValues`
 - **Equality & ordering**: `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `eqNumber`/`eqString`/`eqBoolean`, `ordNumber`/`ordString`/`ordBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`
 - **Validation (error-accumulating)**: `Validation`, `valid`, `invalid`, `invalidAll`, `isValid`, `isInvalid`, `mapValidation`, `mapErrorsValidation`, `apValidation`, `matchValidation`, `traverseArrayValidation`, `sequenceArrayValidation`, `sequenceStructValidation`, `validationToResult`, `resultToValidation`
 - **Collection helpers**: `traverseArray`, `traverseArrayOption`, `sequenceArrayOption`, `unique`, `intoMap`, `entriesOf`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
-- **Immutable list ADT**: `List`, `nil`, `cons`, `singletonList`, `fromArray`, `toArray`, `headList`, `tailList`, `isEmptyList`, `lengthList`, `mapList`, `flatMapList`, `appendList`, `reverseList`, `filterList`, `foldList`, `foldLeftList`, `foldLeftListCurried`, `traverseList`
+- **Immutable list ADT**: `List`, `nil`, `cons`, `singletonList`, `fromArray`, `toArray`, `headList`, `tailList`, `isNil`, `isCons`, `isEmptyList`, `lengthList`, `mapList`, `flatMapList`, `appendList`, `reverseList`, `filterList`, `foldList`, `foldLeftList`, `foldLeftListCurried`, `traverseList`
 
 ## Why a prelude when these libraries exist?
 
@@ -181,6 +181,47 @@ foldMap(monoidAny)((o: Order) => mkAny(o.overdue))(orders); // "is any overdue?"
 `monoidEvery` and `monoidAny` are deliberately distinct types: their identities
 differ (`true` vs `false`), so picking the wrong one silently inverts the answer
 on an empty collection. The `Every`/`Any` brands make that unrepresentable.
+
+### Keep the non-empty proof across the pipeline
+
+Proving an array is non-empty and then calling `.map()` on it hands back a plain
+`ReadonlyArray` — the proof is discarded on the first transformation, and every
+later `head` is back to returning an `Option`. A refinement that cannot survive a
+`map` buys very little, so the operations that *cannot* empty a collection are
+typed to preserve it.
+
+```ts
+import {
+  type NonEmptyReadonlyArray,
+  mkNonEmpty, mapNonEmpty, sortNonEmpty, reduceNonEmpty,
+  headNonEmpty, lengthNonEmpty, ordNumber, matchOption,
+} from '@tsfpp/prelude';
+
+// Prove it once, at the boundary.
+matchOption<NonEmptyReadonlyArray<number>, string>(
+  () => 'no readings',
+  (readings) => {
+    const celsius = mapNonEmpty(toCelsius)(readings);   // still non-empty
+    const hottest = headNonEmpty(sortNonEmpty(ordNumber)(celsius)); // no Option
+    const total   = reduceNonEmpty<number>((a, b) => a + b)(celsius);
+    return `max ${hottest}, mean ${total / lengthNonEmpty(celsius)}`;
+  },
+)(mkNonEmpty(rawReadings));
+```
+
+> The explicit type arguments on `matchOption` are load-bearing: `A` appears only
+> in the `Option` supplied by the *second* call, so without them `readings` infers
+> as `unknown`. This is true of every data-last eliminator in the prelude.
+
+`reduceNonEmpty` is the clearest illustration of what the refinement buys:
+`Array.prototype.reduce` without an initial value *throws* on an empty array, so
+it is partial. Excluding the empty case in the type makes the same operation
+total — no `Option` wrapper, no runtime guard.
+
+`semigroupNonEmpty()` exposes the concatenation as a lawful `Semigroup`. It is
+deliberately **not** a `Monoid`: the identity would have to be an empty non-empty
+array, which the type makes unrepresentable. This is the structure `Validation`
+uses to accumulate its errors.
 
 ### Compare non-primitives with an `Eq`, never `===`
 

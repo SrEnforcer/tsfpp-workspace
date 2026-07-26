@@ -10,6 +10,27 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-07-26
+
+### Features
+
+- **complete the `NonEmptyReadonlyArray` ADT.** The type has shipped since 1.x with only a guard, a smart constructor, and two accessors — which made the refinement nearly worthless in practice: proving an array non-empty and then calling `.map()` returned a plain `ReadonlyArray`, so the proof was discarded on the first transformation and every later `head` went back to returning an `Option`. The operations that *cannot* empty a collection now preserve it: `mapNonEmpty`, `appendNonEmpty`, `prependNonEmpty`, `concatNonEmpty`, `reverseNonEmpty`, `sortNonEmpty`, plus `consNonEmpty`, `singletonNonEmpty`, `tailNonEmpty`, `toArrayNonEmpty`, `lengthNonEmpty`, `reduceNonEmpty`, `reduceMapNonEmpty`, and `traverseNonEmpty`.
+  - **`reduceNonEmpty` is the clearest thing the refinement buys.** `Array.prototype.reduce` without an initial value is *partial* — it throws on an empty array. Excluding the empty case in the type makes the identical operation total, with no `Option` wrapper and no runtime guard. A test asserts the stdlib version really does throw, so the contrast is verified rather than claimed.
+  - `sortNonEmpty` sorts a **copy** under an explicit `Ord` (Rules 2.3, 4.7) and recovers the refinement through `isNonEmptyArray` rather than an assertion.
+  - `traverseNonEmpty` short-circuits to the first `Err` and returns `Result<NonEmptyReadonlyArray<B>, E>`, so the proof survives a fallible traversal too.
+  - 29 new tests, property-based where a law applies (functor identity/composition, concat associativity, reverse involutivity, sort idempotence, head/tail round-trip); suite now **348**.
+- add **`semigroupNonEmpty`** to the `monoid` module. Two non-empty arrays concatenate to a non-empty array, so this is a lawful `Semigroup` — and deliberately **not** a `Monoid`, because the identity would have to be an empty non-empty array, which the type makes unrepresentable. It is the concrete example behind that distinction, and it is exactly the structure `Validation` uses to accumulate errors.
+
+### Changed
+
+- **extract `NonEmptyReadonlyArray` from `refined.ts` into its own `nonempty` module** (Rule 11.1: one type, one file). The public API is unaffected — the root barrel re-exports it, and all 19 non-empty exports are verified reachable from the built `dist/index.js`.
+- `validation.ts`'s internal `concatErrors` now delegates to `concatNonEmpty` instead of rebuilding the concatenation by hand, so the error-accumulation semigroup has exactly one implementation.
+- `mapErrorsValidation` was hand-rolling `mapNonEmpty` (`[f(v.errors[0]), ...v.errors.slice(1).map(f)]`) — a live violation of the new standard Rule 1.15 on the *author* side, and a direct index into a non-empty array where `headNonEmpty` exists. It now calls `mapNonEmpty(f)`. A sweep of all three source packages found no other instance.
+
+### Fixed
+
+- corrected the non-empty pipeline example in the README: the data-last eliminators need explicit type arguments, because `A` appears only in the `Option` supplied by the second call — without them the handler's parameter infers as `unknown`. The example is now compiled as written.
+
 ## [2.3.0] - 2026-07-26
 
 ### Features

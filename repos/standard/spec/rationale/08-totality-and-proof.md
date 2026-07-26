@@ -122,7 +122,7 @@ const label = isSome(name) ? name.value : /* nothing here still type-checks in m
 const label = matchOption(() => 'anonymous', (n: string) => n)(name)
 ```
 
-`matchOption(onNone, onSome)` and `matchResult(onErr, onOk)` are eliminators: their type demands a handler per variant and a common result type, so a missing arm is not a review-catchable oversight but a compile error. That is axiom 5 (exhaustiveness) applied to the two-variant prelude ADTs, in the same spirit as the `never` assertion for n-ary unions. A second benefit falls out for free: the discriminant never appears at the call site, so Rule 1.11 is satisfied by construction rather than by discipline.
+`matchOption(onNone, onSome)` and the unsuffixed `match(onErr, onOk)` for `Result` (Rule 7.8) are eliminators: their type demands a handler per variant and a common result type, so a missing arm is not a review-catchable oversight but a compile error. That is axiom 5 (exhaustiveness) applied to the two-variant prelude ADTs, in the same spirit as the `never` assertion for n-ary unions. A second benefit falls out for free: the discriminant never appears at the call site, so Rule 1.11 is satisfied by construction rather than by discipline.
 
 The rule is a `SHOULD`, not a `MUST`, because guards are genuinely better for one shape: early-return control flow. When the intent is "bail out of the whole function on `None`, then proceed on the golden path" (Rule 4.4), a guard clause keeps the happy path unindented and reads more directly than a `match` whose `onSome` would swallow the rest of the body:
 

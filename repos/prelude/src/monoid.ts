@@ -33,6 +33,7 @@ import type { Any, Every } from './adt.js';
 import { mkAny, mkEvery } from './adt.js';
 import type { Ord } from './eq.js';
 import { keysOf } from './record.js';
+import { type NonEmptyReadonlyArray, concatNonEmpty } from './nonempty.js';
 import { unique } from './collections.js';
 
 /**
@@ -142,6 +143,19 @@ export const monoidRecord = <A>(
       keys.map((k) => [k, inner.concat(x[k] ?? inner.empty, y[k] ?? inner.empty)]),
     );
   }, {});
+
+/**
+ * Concatenation of non-empty arrays — the canonical identity-less semigroup.
+ *
+ * There is deliberately no `monoidNonEmpty`: the identity would have to be an
+ * empty non-empty array, which the type makes unrepresentable. This is the
+ * concrete case behind the Semigroup/Monoid distinction, and it is exactly the
+ * structure `Validation` uses to accumulate errors.
+ *
+ * @law associativity: inherited from array concatenation
+ */
+export const semigroupNonEmpty = <A>(): Semigroup<NonEmptyReadonlyArray<A>> =>
+  mkSemigroup((x, y) => concatNonEmpty(y)(x));
 
 // ---------------------------------------------------------------------------
 // Folds

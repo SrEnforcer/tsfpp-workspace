@@ -45,6 +45,7 @@ import {
   keysOf,
   ok,
 } from './fp.js';
+import { concatNonEmpty, mapNonEmpty } from './nonempty.js';
 
 /**
  * Accumulating validation ADT.
@@ -94,13 +95,14 @@ export const isInvalid = <E, A>(
 
 /**
  * Concatenates two non-empty error collections, preserving order.
- * Indexing element 0 of a `NonEmptyReadonlyArray` is total, so no assertion is
- * needed to rebuild the non-empty shape.
+ *
+ * This is the non-empty-array semigroup (`semigroupNonEmpty`) applied to the
+ * error channel — the structure that makes accumulation lawful.
  */
 const concatErrors = <E>(
   xs: NonEmptyReadonlyArray<E>,
   ys: NonEmptyReadonlyArray<E>,
-): NonEmptyReadonlyArray<E> => [xs[0], ...xs.slice(1), ...ys];
+): NonEmptyReadonlyArray<E> => concatNonEmpty(ys)(xs);
 
 /**
  * Maps the success channel, leaving accumulated errors untouched.
@@ -122,9 +124,7 @@ export const mapValidation =
 export const mapErrorsValidation =
   <E, F, A>(f: (e: E) => F) =>
   (v: Validation<E, A>): Validation<F, A> =>
-    isInvalid(v)
-      ? invalidAll<F, A>([f(v.errors[0]), ...v.errors.slice(1).map(f)])
-      : v;
+    isInvalid(v) ? invalidAll<F, A>(mapNonEmpty(f)(v.errors)) : v;
 
 /**
  * Applicative application — the primitive that makes accumulation possible.

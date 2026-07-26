@@ -10,6 +10,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-07-26
+
+### ⚠ BREAKING CHANGES
+
+- Rule 1.15 reclassifies a construct previously permitted — calling a widening standard-library method on a refined value — so it ships as a major, consistent with 2.0.0, 3.0.0, and 4.0.0.
+
+### Added
+
+- **Rule 1.15** — Preserve a refinement across transformation; never launder it through a widening standard-library method. A refined type earns its keep only while the proof survives: `.map()` on a proven non-empty array returns a plain `ReadonlyArray`, so the proof is discarded on the first transformation and the code that follows *reads* as safe while carrying no guarantee — worse than no refinement, because the type name implies one. The rule binds both sides of the API: consumers must prefer the preserving combinator, and authors of a refined type must ship one for every operation that provably cannot violate the refinement. Operations that genuinely can violate it (a `filter` on a non-empty array) must widen honestly rather than re-assert the proof through `as`.
+  - **The standard was violating its own new rule.** `NonEmptyReadonlyArray` had shipped since 1.x with only a guard, a smart constructor, and two accessors — exactly the incomplete shape Rule 1.15 now forbids. Closed by **`@tsfpp/prelude` 2.4.0**.
+  - `reduceNonEmpty` is the sharpest justification: `Array.prototype.reduce` without an initial value is *partial* and throws on `[]`. A refinement makes the identical operation total — which a proof that dies at the first `map` never survives long enough to deliver.
+
+### Fixed
+
+- **Rule 8.5 instructed adopters to import an export that does not exist.** Its rationale and worked example both used `matchResult`, while Rule 7.8 makes `Result` the *unsuffixed* base ADT — and Rule 7.8's own rationale cites `matchResult`/`matchOption` as precisely the drift it was written to end. The prelude exports `match`. Corrected in Rule 8.5, `rationale/08-totality-and-proof.md`, and the Appendix E card; the historical mention in `rationale/07-naming.md` is left alone, as it documents the state that was fixed.
+- **Three MUST-level constructs were absent from the section 12 forbidden-constructs table**, so a reviewer working from that table alone would have passed them: `===`/`!==` on non-primitives and comparator-less `.sort()` (Rule 4.7, shipped in 4.0.0), import-time side effects (Rule 11.6, shipped in 4.1.0), and Rule 1.15.
+- **`release-please-manifest.json` was stale in four of five packages** (`standard` recorded 1.4.0 against a published 4.1.0; `prelude`, `boundary`, and `agents` recorded 2.0.2 against a published 2.1.0). release-please derives the next version from that base, so an automated release would have proposed a version already published — the same class of collision hit manually earlier. All four now record the version actually on npm.
+
 ## [4.0.0] - 2026-07-25
 
 ### ⚠ BREAKING CHANGES

@@ -77,6 +77,24 @@ sortWith(ordBy((u: User) => u.age, ordNumber))(users); // sorts a copy, explicit
 `eqStructural()` compares plain data by contents; `eqStrict()` keeps `===` where it is correct.
 `maxWith`/`minWith` take a `NonEmptyReadonlyArray` and are total.
 
+### Keep the non-empty proof (`NonEmptyReadonlyArray`)
+
+`.map()` on a proven non-empty array returns a plain `ReadonlyArray` — the proof is
+discarded and every later `head` is back to `Option`. Use the preserving combinators:
+
+```ts
+mapNonEmpty(f)(xs);                          // not xs.map(f)
+sortNonEmpty(ordNumber)(xs);                 // not [...xs].sort()
+reverseNonEmpty(xs); concatNonEmpty(ys)(xs); // append/prependNonEmpty too
+headNonEmpty(xs);                            // A, not Option<A>
+reduceNonEmpty<number>((a, b) => a + b)(xs); // stdlib reduce w/o a seed THROWS on []
+traverseNonEmpty(parseFoo)(xs);              // Result<NonEmptyReadonlyArray<Foo>, E>
+```
+
+`reduceNonEmpty` is the payoff: a partial stdlib function made total by the type.
+`tailNonEmpty` deliberately returns a plain array — the tail of `[a]` *is* empty.
+`semigroupNonEmpty()` is a Semigroup, never a Monoid — no empty non-empty array exists.
+
 ### `Result` vs `Validation` (Rule 6.8)
 
 - Next step needs the previous step's value → `Result` (short-circuits on first `Err`)
