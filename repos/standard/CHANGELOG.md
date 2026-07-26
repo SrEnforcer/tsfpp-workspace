@@ -20,6 +20,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 - **Rule 4.7** — Never compare non-primitive values with `===`/`!==` expecting structural equality; pass an explicit `Eq<A>`. Covers ordering too (`.sort()` without a comparator sorts by string coercion). `===` stays correct for primitives, branded primitives, and string-literal discriminants.
 
+### Changed
+
+- **Self-compliance.** Two live, unrecorded MUST violations in the reference implementation were closed: `@tsfpp/prelude`'s `fp.ts` (1228 lines, past Rule 11.2's 800-line absolute ceiling) was split into focused modules with the public API unchanged, and `@tsfpp/boundary` gained the `fast-check` suite Rule 8.2 requires. The remaining gap (`@tsfpp/mcp-server`) is now recorded as **DEV-002** with a revocation condition and a revisit date, instead of being implicit.
+- **PHILOSOPHY.md axioms refreshed.** The five axioms predated six rules; their consequences now name numeric hazards and `satisfies` (axiom 1), tagged error channels and accumulation (axiom 2), the enumerable ambient reads (axiom 4), and total eliminators (axiom 5). The "tests as a substitute for types" rejection gained its corollary: properties the type system cannot express are checked with generated input, not examples.
+
 ### Fixed
 
 - **PHILOSOPHY.md** claimed "with immutable values, identity and equality coincide" — true of ML-family languages, **false as written for TypeScript**, where `===` on non-primitives is reference equality. Restated, with a pointer to Rule 4.7.

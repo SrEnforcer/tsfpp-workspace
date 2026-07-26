@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/boundary",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Functional HTTP boundary toolkit with typed handler helpers, Problem Details mapping, pagination, idempotency, and webhook primitives",
   "private": false,
   "license": "MIT",
@@ -59,6 +59,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^9.39.4",
     "eslint-plugin-functional": "^9.0.0",
+    "fast-check": "^4.9.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
