@@ -31,6 +31,10 @@ Full standard: `node_modules/@tsfpp/standard/spec/CODING_STANDARD.md`
 - `Date.now()` `new Date()` `Math.random()` `crypto.randomUUID()` in core — inject a clock/entropy port via `Deps` (Rule 4.6)
 - `string` or `Error` as a `Result` error channel — use a `kind`-tagged discriminated union (Rule 6.7)
 - `create*` constructor prefix — use `mk*` (Rule 7.3)
+- `===` / `!==` / `.includes()` / `unique()` on records or arrays expecting structural equality — `===` is REFERENCE equality (`{id:1} === {id:1}` is `false`); pass an explicit `Eq` (`uniqueWith`, `elemWith`, `lookupWith`). Still correct for primitives and string-literal discriminants (Rule 4.7)
+- outward imports from `core`/`domain` (adapters, transports, `node:*`, frameworks) — define a port and inject it at the composition root (Rule 11.5)
+- module-level side effects: `const x = new Date()`, `process.env.X`, top-level `await`, bare calls at module scope — importing a module must only define bindings (Rule 11.6)
+- `.sort()` without a comparator — sorts by string coercion (`[10,9]` stays `[10,9]`); use `sortWith(ord)` (Rule 4.7)
 
 ## Always
 
