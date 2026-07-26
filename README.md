@@ -47,6 +47,7 @@ From `@tsfpp/prelude`:
 - **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
 - **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
 - **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `headNonEmpty`, `lastNonEmpty`
+- **Equality & ordering**: `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `eqNumber`/`eqString`/`eqBoolean`, `ordNumber`/`ordString`/`ordBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`
 - **Validation (error-accumulating)**: `Validation`, `valid`, `invalid`, `invalidAll`, `isValid`, `isInvalid`, `mapValidation`, `mapErrorsValidation`, `apValidation`, `matchValidation`, `traverseArrayValidation`, `sequenceArrayValidation`, `sequenceStructValidation`, `validationToResult`, `resultToValidation`
 - **Collection helpers**: `traverseArray`, `traverseArrayOption`, `sequenceArrayOption`, `unique`, `intoMap`, `entriesOf`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
 - **Immutable list ADT**: `List`, `nil`, `cons`, `singletonList`, `fromArray`, `toArray`, `headList`, `tailList`, `isEmptyList`, `lengthList`, `mapList`, `flatMapList`, `appendList`, `reverseList`, `filterList`, `foldList`, `foldLeftList`, `foldLeftListCurried`, `traverseList`
@@ -160,6 +161,24 @@ const withFallback = orElseOption(() => some('Anonymous'))(parsed);
 // Option -> string
 const value = getOrElseOption(() => 'Anonymous')(parsed);
 ```
+
+### Compare non-primitives with an `Eq`, never `===`
+
+`===` on any non-primitive is *reference* equality — `{ id: 1 } === { id: 1 }` is `false`, and
+`readonly` does not change that. So `includes`, `unique`, and memo comparisons silently do the wrong
+thing for records (standard Rule 4.7).
+
+```ts
+import { eqBy, eqNumber, uniqueWith, elemWith, sortWith, ordBy, ordNumber } from '@tsfpp/prelude';
+
+const eqUser = eqBy((u: User) => u.id, eqNumber);   // equality is identity of the key
+
+uniqueWith(eqUser)(users);                           // dedupes properly
+elemWith(eqUser)(target)(users);                     // membership that actually matches
+sortWith(ordBy((u: User) => u.age, ordNumber))(users); // sorts a copy, explicit comparator
+```
+
+`eqStructural()` compares by contents for plain data; `eqStrict()` keeps `===` where it is correct.
 
 ### Use `Validation` when the caller needs every error, `Result` when it needs the first
 
