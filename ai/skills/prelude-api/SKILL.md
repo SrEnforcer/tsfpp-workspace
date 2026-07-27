@@ -48,6 +48,21 @@ const upper = map((s: string) => s.toUpperCase())(name);   // cannot fail
 const valid = flatMap(validateEmail)(input);                // can fail
 ```
 
+### Combining — Semigroup / Monoid
+
+`Eq` = "are these the same?", `Ord` = "which comes first?", `Monoid` = "how do
+two combine?". The identity element makes folding an empty collection total.
+
+```ts
+concatAll(monoidSum)([]);                                   // 0 — no Option needed
+foldMap(monoidSum)((o: Order) => o.seats)(orders);          // sum of a projection
+foldMap(monoidAny)((o: Order) => mkAny(o.overdue))(orders); // "is any overdue?"
+```
+
+`monoidEvery` / `monoidAny` are distinct types on purpose — their identities are
+`true` and `false`, so the wrong choice silently inverts the empty-collection result.
+`semigroupFirst`/`Last`/`Max`/`Min` are Semigroups (no identity exists).
+
 ### Equality and ordering (Rule 4.7)
 
 `===` on any non-primitive is **reference** equality. Pass an explicit `Eq`:
@@ -61,6 +76,24 @@ sortWith(ordBy((u: User) => u.age, ordNumber))(users); // sorts a copy, explicit
 
 `eqStructural()` compares plain data by contents; `eqStrict()` keeps `===` where it is correct.
 `maxWith`/`minWith` take a `NonEmptyReadonlyArray` and are total.
+
+### Keep the non-empty proof (`NonEmptyReadonlyArray`)
+
+`.map()` on a proven non-empty array returns a plain `ReadonlyArray` — the proof is
+discarded and every later `head` is back to `Option`. Use the preserving combinators:
+
+```ts
+mapNonEmpty(f)(xs);                          // not xs.map(f)
+sortNonEmpty(ordNumber)(xs);                 // not [...xs].sort()
+reverseNonEmpty(xs); concatNonEmpty(ys)(xs); // append/prependNonEmpty too
+headNonEmpty(xs);                            // A, not Option<A>
+reduceNonEmpty<number>((a, b) => a + b)(xs); // stdlib reduce w/o a seed THROWS on []
+traverseNonEmpty(parseFoo)(xs);              // Result<NonEmptyReadonlyArray<Foo>, E>
+```
+
+`reduceNonEmpty` is the payoff: a partial stdlib function made total by the type.
+`tailNonEmpty` deliberately returns a plain array — the tail of `[a]` *is* empty.
+`semigroupNonEmpty()` is a Semigroup, never a Monoid — no empty non-empty array exists.
 
 ### `Result` vs `Validation` (Rule 6.8)
 

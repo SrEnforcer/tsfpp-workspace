@@ -33,8 +33,17 @@ import {
   // Validation — accumulating failure (Rule 6.8)
   valid, invalid, invalidAll, isValid, isInvalid, mapValidation, matchValidation,
   traverseArrayValidation, sequenceStructValidation, validationToResult, resultToValidation,
-  // Non-empty arrays
-  isNonEmptyArray, mkNonEmpty, headNonEmpty, lastNonEmpty,
+  // Combining — Semigroup / Monoid
+  mkSemigroup, mkMonoid, monoidSum, monoidProduct, monoidString, monoidEvery, monoidAny,
+  monoidArray, monoidRecord, semigroupFirst, semigroupLast, semigroupMax, semigroupMin,
+  semigroupNonEmpty, concatAll, concatAllWith, foldMap, dual,
+  // Typed record helpers (Object.keys loses keyof T)
+  keysOf, valuesOf, entriesOfRecord, mapValues,
+  // Non-empty arrays — the refinement survives map/sort/reverse/concat
+  isNonEmptyArray, mkNonEmpty, consNonEmpty, singletonNonEmpty,
+  headNonEmpty, lastNonEmpty, tailNonEmpty, toArrayNonEmpty, lengthNonEmpty,
+  mapNonEmpty, appendNonEmpty, prependNonEmpty, concatNonEmpty, reverseNonEmpty,
+  sortNonEmpty, reduceNonEmpty, reduceMapNonEmpty, traverseNonEmpty,
   // Refined numerics (Rule 1.13)
   isFiniteNumber, mkInt, mkPositive, mkNonNegative,
   // Pipe
@@ -46,6 +55,7 @@ import {
   // Types
   type Option, type Result, type Unit, type Brand, type UnknownRecord,
   type NonEmptyReadonlyArray, type Int, type Positive, type NonNegative, type Validation,
+  type Semigroup, type Monoid,
 } from '@tsfpp/prelude'
 ```
 
@@ -153,6 +163,39 @@ traverseArrayOption(fromNullable)([1, null, 3]) // None
 // Guard typed arrays from unknown
 const strings = fromUnknownArrayOf((v): v is string => typeof v === 'string')(raw)
 ```
+
+## NonEmptyReadonlyArray\<A\>
+
+Prove non-emptiness **once**, at the boundary, then keep the proof. The
+combinators below preserve it, so downstream `head`/`last`/`reduce` need no
+`Option` and no guard.
+
+```ts
+const one = singletonNonEmpty(42)
+const xs  = consNonEmpty(head)(tailArray)      // total — non-emptiness supplied
+const o   = mkNonEmpty(maybeEmpty)             // Option<NonEmptyReadonlyArray<A>>
+
+// These KEEP the refinement — never use .map/.sort/.reverse on a proven array,
+// because the stdlib versions widen back to ReadonlyArray and discard the proof.
+mapNonEmpty(f)(xs)
+sortNonEmpty(ordNumber)(xs)                    // sorts a copy (Rules 2.3, 4.7)
+reverseNonEmpty(xs)
+concatNonEmpty(ys)(xs)                         // the semigroup operation
+appendNonEmpty(a)(xs) / prependNonEmpty(a)(xs)
+
+// Total because the empty case is excluded by the type
+headNonEmpty(xs) / lastNonEmpty(xs)            // A, not Option<A>
+reduceNonEmpty<number>((a, b) => a + b)(xs)    // stdlib reduce w/o seed THROWS on []
+reduceMapNonEmpty(f, combine)(xs)              // foldMap needing no identity
+traverseNonEmpty(parseFoo)(xs)                 // Result<NonEmptyReadonlyArray<Foo>, E>
+
+tailNonEmpty(xs)                               // ReadonlyArray — tail of [a] IS empty
+toArrayNonEmpty(xs)                            // deliberate widening
+```
+
+`semigroupNonEmpty<A>()` is a lawful `Semigroup`, never a `Monoid` — the identity
+would be an empty non-empty array, which the type makes unrepresentable. This is
+the structure behind `Validation`'s error accumulation.
 
 ## ReadonlyMap
 

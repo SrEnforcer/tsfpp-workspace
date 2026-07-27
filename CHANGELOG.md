@@ -10,6 +10,25 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-07-26
+
+### Features
+
+- Document the completed `NonEmptyReadonlyArray` ADT from `@tsfpp/prelude` 2.4.0 in the prelude skill and instructions. The guidance an agent most needs is the negative one: `.map()` / `.sort()` / `.reverse()` on a proven non-empty array silently widen back to `ReadonlyArray` and throw the proof away, so the suffixed combinators (`mapNonEmpty`, `sortNonEmpty`, `reverseNonEmpty`, `concatNonEmpty`, …) are what keep downstream `head`/`reduce` free of `Option`.
+- Record why `reduceNonEmpty` exists — `Array.prototype.reduce` without a seed is partial and throws on `[]` — and why `semigroupNonEmpty` is a `Semigroup` and never a `Monoid`.
+
+### Changed
+
+- Raise the `@tsfpp/prelude` floor to `>=2.4.0`, the version whose export list these instructions describe.
+
+### Features
+
+- Document the `@tsfpp/prelude` 2.3.0 `Semigroup`/`Monoid` algebra and the typed record helpers (`keysOf`, `valuesOf`, `entriesOfRecord`, `mapValues`) in the prelude skill and instructions, including why `monoidEvery` and `monoidAny` are distinct types.
+
+### Changed
+
+- Peer range → `@tsfpp/prelude >=2.3.0`.
+
 ## [2.3.0] - 2026-07-25
 
 ### Features

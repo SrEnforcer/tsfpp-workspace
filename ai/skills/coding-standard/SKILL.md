@@ -9,9 +9,9 @@ description: >
   conflict.
 ---
 
-# TSF++ coding standard — v4.1.0
+# TSF++ coding standard — v5.0.0
 
-Standard version: 4.1.0 (2026-07-25). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
+Standard version: 5.0.0 (2026-07-26). When this skill and the full `CODING_STANDARD.md` conflict, the file wins.
 
 ---
 
@@ -41,6 +41,7 @@ Date.now·new Date()·Math.random·crypto.randomUUID·process.env  in core  → 
 string·Error as a domain error channel  → use a kind-tagged union (Rule 6.7)
 === · !== · .includes() on non-primitives  → reference equality! pass an Eq (Rule 4.7)
 .sort() without a comparator  → string coercion; use sortWith(ord) (Rule 4.7)
+.map()·.sort()·.reverse() on a NonEmpty* value  → widens and discards the proof; use mapNonEmpty etc. (Rule 1.15)
 create* constructor prefix  → use mk* (Rule 7.3)
 ```
 
@@ -55,6 +56,7 @@ Critical rules always in context:
 - 1.12 — `_tag` for prelude ADTs · `kind` for domain ADTs
 - 1.13 — No numeric coercion / `NaN` in core; brand constrained numerics (`Int`/`Positive`/`NonNegative`)
 - 1.14 — Prefer `satisfies` over `as` for literal conformance
+- 1.15 — Keep a refinement across transformation: `mapNonEmpty`/`sortNonEmpty`, never `.map()`/`.sort()` on a proven value (which widens and throws the proof away)
 - 4.1 — Every exhaustive `switch` ends in `default: return absurd(x)`
 - 4.6 — No ambient clock/entropy/env in core — inject via `Deps`
 - 4.7 — `===` on non-primitives is REFERENCE equality; pass an explicit `Eq`/`Ord` (`uniqueWith`, `elemWith`, `sortWith`)
