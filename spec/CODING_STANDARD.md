@@ -3,14 +3,27 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 4.1.0
-**Date:** 2026-07-23
+**Version:** 5.0.0
+**Date:** 2026-07-26
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
 
 ---
 
 ## Changelog
+
+### 5.0.0 — 2026-07-26
+
+**Breaking.** Adds a MUST rule that reclassifies a construct the standard previously permitted — calling a widening standard-library method on a refined value — so it ships as a major, consistent with 2.0.0, 3.0.0, and 4.0.0.
+
+- **New Rule 1.15** — Preserve a refinement across transformation; never launder it through a widening standard-library method. A refined type earns its keep only while the proof survives: `.map()` on a proven non-empty array returns a plain `ReadonlyArray`, discarding the proof on the first transformation and leaving code that *reads* as safe while carrying no guarantee. The rule binds both sides — consumers must prefer the preserving combinator, and authors of a refined type must ship one for every operation that provably cannot violate the refinement. Operations that genuinely can violate it must widen honestly rather than re-assert the proof.
+- **This standard was violating its own new rule.** `NonEmptyReadonlyArray` had shipped since 1.x with a guard, a smart constructor, and two accessors — the exact incomplete shape Rule 1.15 now forbids. **`@tsfpp/prelude` 2.4.0** closes it: `mapNonEmpty`, `appendNonEmpty`, `prependNonEmpty`, `concatNonEmpty`, `reverseNonEmpty`, `sortNonEmpty`, `consNonEmpty`, `singletonNonEmpty`, `tailNonEmpty`, `toArrayNonEmpty`, `lengthNonEmpty`, `reduceNonEmpty`, `reduceMapNonEmpty`, `traverseNonEmpty`, and `semigroupNonEmpty`.
+- `reduceNonEmpty` is the rule's sharpest justification: `Array.prototype.reduce` without an initial value is *partial* and throws on `[]`. Excluding the empty case in the type makes the identical operation total — a partial standard-library function repaired by a refinement, which a proof that dies at the first `map` never reaches.
+
+**Fixed.**
+
+- **Rule 8.5 told adopters to import an export that does not exist.** Its rationale and worked example both used `matchResult`, while Rule 7.8 makes `Result` the *unsuffixed* base ADT — and the Rule 7.8 rationale cites `matchResult`/`matchOption` as precisely the drift it was written to end. The prelude exports `match`. Corrected in Rule 8.5, in `rationale/08-totality-and-proof.md`, and on the Appendix E card; the historical mention in `rationale/07-naming.md` stands, since it describes the state that was fixed.
+- **Three MUST-level constructs were missing from the section 12 summary table**, so a reviewer working from that table alone would have passed them: `===`/`!==` on non-primitives and comparator-less `.sort()` (Rule 4.7, added in 4.0.0), import-time side effects (Rule 11.6, added in 4.1.0), and the new Rule 1.15.
 
 ### 4.1.0 — 2026-07-25
 
@@ -467,6 +480,44 @@ const routes = {
 ```
 
 **Note.** `satisfies` does not replace smart constructors. It proves a *statically known literal* conforms to a type; it does nothing for `unknown` runtime input, which still requires parsing (Rule 8.4). Where both apply, parse first, then let inference carry the typed value.
+
+---
+
+### Rule 1.15 — MUST: Preserve a refinement across transformation; never launder it through a widening standard-library method
+
+**Rationale.** A refined type earns its keep only for as long as the proof survives. Proving an array non-empty and then calling `.map()` on it returns a plain `ReadonlyArray`: the standard library knows nothing about the refinement, so the proof is silently discarded on the first transformation and every subsequent access is back to returning an `Option`. The refinement then costs a smart constructor at the boundary and buys exactly one total access — after which the code is indistinguishable from unrefined code, while *reading* as though it were safe. That is worse than no refinement, because the type name suggests a guarantee the value no longer carries.
+
+The rule has two halves, one for each side of the API:
+
+1. **Consumers** MUST use the refinement-preserving combinator where one exists, in preference to the structurally identical standard-library method that widens.
+2. **Authors** of a refined type MUST ship preserving combinators for every operation that provably cannot violate the refinement. A refined type exported with only a guard, a smart constructor, and accessors is incomplete: it pushes every caller straight back into the widening path.
+
+Where an operation genuinely *can* violate the refinement — `filter` on a non-empty array, division on a `Positive` — the combinator MUST widen honestly (return the unrefined type, or an `Option`) rather than re-assert the proof. Recovering a refinement after such an operation goes through the guard or the smart constructor, never through `as` (Rule 1.6).
+
+**Do**
+```typescript
+const readings: NonEmptyReadonlyArray<Reading> = ...
+
+const celsius = mapNonEmpty(toCelsius)(readings)        // still proven non-empty
+const hottest = headNonEmpty(sortNonEmpty(ordC)(celsius)) // total: no Option, no guard
+const total   = reduceNonEmpty<number>((a, b) => a + b)(celsius) // total fold
+```
+
+**Don't**
+```typescript
+const celsius = readings.map(toCelsius)   // ReadonlyArray<Celsius> — proof gone
+const hottest = headNonEmpty(celsius)     // does not compile, so the caller reaches for:
+const hottest = celsius[0] as Celsius     // Rule 1.6 violation papering over a lost proof
+const total   = celsius.reduce((a, b) => a + b) // PARTIAL: throws on an empty array
+```
+
+**Note.** `Array.prototype.reduce` without an initial value is the sharpest illustration: it is a *partial* standard-library function, throwing on empty input. Excluding the empty case in the type makes the identical operation total, with no `Option` wrapper and no runtime guard. A refinement that cannot survive a `map` never reaches the point of delivering that.
+
+**Note.** The preserving combinators follow Rule 7.8 — they carry the refined type's full name as a suffix (`mapNonEmpty`, `sortNonEmpty`, `concatNonEmpty`), which is what makes a widening `.map()` visible in review.
+
+**Enforcement.** This rule is **review-enforced**, not machine-checked. Deciding whether `xs.map(f)` violates it requires knowing the *type* of `xs`, which no `no-restricted-syntax` selector can see; a name-based approximation would both miss real violations and flag correct code, and an unreliable lint rule is worse than an honest checklist item. Two things do make it catchable in practice: the loss of the refinement almost always surfaces as a downstream type error at the first total accessor, and the fix reached for under time pressure is an `as` cast, which Rule 1.6 *does* forbid mechanically. Treat an `as` on a formerly-refined value as this rule's signature.
+
+**Note for authors.** The combinator implementations themselves necessarily call the widening standard-library methods — that is what the abstraction is *for*. Rule 1.15 governs call sites in domain, use-case, and boundary code; the module that defines the refined type is the one sanctioned place where the stdlib method appears, and it is exactly why the proof is re-established there rather than at every consumer.
 
 ---
 
@@ -1301,16 +1352,17 @@ const greet = (raw: unknown): string => {
 
 ### Rule 8.5 — SHOULD: Eliminate `Option` / `Result` through a total `match` when both arms yield a value; reserve guards for early-return control flow
 
-**Rationale.** The exhaustiveness axiom (axiom 5) wants both variants of an ADT accounted for at every consumption site. `isOk` / `isNone` guards *permit* exhaustiveness but do not *enforce* it: a reader must confirm by eye that the `else` was written and that both branches return. A total eliminator — `matchOption(onNone, onSome)`, `matchResult(onErr, onOk)` — makes the omission unrepresentable: it is a single expression that does not type-check unless a handler is supplied for each variant and both produce the common result type. It also honours Rule 1.11 by construction, since the discriminant never appears at the call site.
+**Rationale.** The exhaustiveness axiom (axiom 5) wants both variants of an ADT accounted for at every consumption site. `isOk` / `isNone` guards *permit* exhaustiveness but do not *enforce* it: a reader must confirm by eye that the `else` was written and that both branches return. A total eliminator — `matchOption(onNone, onSome)` for `Option`, and the unsuffixed `match(onErr, onOk)` for `Result`, which is the base ADT under Rule 7.8 — makes the omission unrepresentable: it is a single expression that does not type-check unless a handler is supplied for each variant and both produce the common result type. It also honours Rule 1.11 by construction, since the discriminant never appears at the call site.
 
 The rule is scoped deliberately. When the consumption *produces a value* (mapping a `Result` to a response, collapsing an `Option` to a label), `match` is the right shape. When the consumption is *control flow* — bail out early on `None`, then continue in the golden path (Rule 4.4) — a guard clause reads better and `match` would force an awkward nesting. Prefer the eliminator for the former; keep guards for the latter.
 
 **Do**
 ```typescript
-import { matchResult } from '@tsfpp/prelude'
+import { match } from '@tsfpp/prelude'
 
-// Value-producing consumption — both arms return, exhaustiveness enforced
-const toResponse = matchResult(
+// Value-producing consumption — both arms return, exhaustiveness enforced.
+// `match` is unsuffixed because `Result` is the base ADT (Rule 7.8).
+const toResponse = match(
   (e: OrderError) => problem(e),
   (c: Confirmation) => ok200(c),
 )
@@ -1595,6 +1647,9 @@ console.log('module loaded')                        // observable effect at impo
 | Global `isNaN` / `isFinite` (coercing) | 1.13 | MUST NOT (use `Number.isNaN` / `Number.isFinite`) |
 | Ambient nondeterminism in the core (`Date.now`, `new Date`, `Math.random`, `crypto.randomUUID`, `process.env`) | 4.6 | MUST NOT (inject via `Deps`) |
 | Bare `string` or `Error` as a domain error channel | 6.7 | MUST NOT (use a `kind`-tagged union) |
+| `===`/`!==` on non-primitives expecting structural equality; `.sort()` without a comparator | 4.7 | MUST NOT (pass an explicit `Eq`/`Ord`) |
+| Widening stdlib methods on a refined value (`.map`/`.sort`/`.reverse` on a `NonEmpty*`) | 1.15 | MUST NOT (use the preserving combinator) |
+| Side effects at module import time (top-level I/O, ambient reads, mutable module state) | 11.6 | MUST NOT |
 
 ---
 
@@ -1822,7 +1877,7 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 ### Effects and errors
 - [ ] Failure encoded as `Result<A, E>`. Absence as `Option<A>`.
 - [ ] Error channel `E` is a `kind`-tagged union, not `string`/`Error`; boundary errors remapped with `mapErr`.
-- [ ] `Option`/`Result` collapsed via `matchOption` / `matchResult` when both arms yield a value.
+- [ ] `Option`/`Result` collapsed via `matchOption` / `match` when both arms yield a value.
 - [ ] No `throw` in core. `tryCatch` / `tryCatchAsync` at adapters.
 - [ ] Async returns `Promise<Result<A, E>>`, not `Promise<A>`.
 - [ ] `Promise.allSettled` chosen over `Promise.all` when partial failure matters.
@@ -1836,6 +1891,7 @@ A one-page version of Rule 10.4 for printout or PR template inclusion.
 - [ ] Pipelines ≤ 8 stages; longer pipelines decomposed and named.
 - [ ] Discriminants accessed via `isOk` / `isSome` / `isErr` / `isNone`, never `result._tag`.
 - [ ] Records/arrays compared with an `Eq` (`uniqueWith`, `elemWith`), not `===` / `.includes()`; sorting uses `sortWith(ord)`.
+- [ ] Refined values transformed with the preserving combinator (`mapNonEmpty`, `sortNonEmpty`), never a widening `.map()`/`.sort()` that discards the proof (Rule 1.15).
 - [ ] Imports point inward only (core → nothing peripheral); no top-level side effects.
 - [ ] Constructors use `mk*` (not `create*`); ADT combinators suffixed by full type name (`mapOption`, not `mapO`/`getOrElseR`), `Result` unsuffixed (Rules 7.3, 7.8).
 
