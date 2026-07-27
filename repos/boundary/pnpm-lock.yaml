@@ -14,13 +14,13 @@ importers:
     devDependencies:
       '@tsfpp/agents':
         specifier: ^2.0.0
-        version: 2.0.0(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.2)(@tsfpp/standard@4.1.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))
+        version: 2.0.0(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.2)(@tsfpp/standard@5.0.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))
       '@tsfpp/eslint-config':
         specifier: ^1.0.3
         version: 1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@tsfpp/standard':
-        specifier: ^4.0.0
-        version: 4.1.0
+        specifier: ^5.0.0
+        version: 5.0.0
       '@tsfpp/tsconfig':
         specifier: ^1.0.0
         version: 1.0.0(typescript@5.9.3)
@@ -506,8 +506,8 @@ packages:
     resolution: {integrity: sha512-lLdqFXP4KchS0Vo56naAW3Rorq7RBQmRffxEDmCAJ6+DBJ8xy9CFWdycOT1SYb3C4P8/p89hmIZpQf9KVqrYaw==}
     engines: {node: '>=18.0.0'}
 
-  '@tsfpp/standard@4.1.0':
-    resolution: {integrity: sha512-UXiLydIHW0ZKIkWHkkhnWs5iSnGG1+TM+L1vx0lzjgKea6fiYvE3GkisOZHefMgwt/i27j33nDe2BGj/BEr6nw==}
+  '@tsfpp/standard@5.0.0':
+    resolution: {integrity: sha512-9QnBYJqJTjNrkt8y89hAhMOt9YqCNz3FuuoL//tEETZ4zE7ME5ZY8yssYFOXx6KYc+OQXd58vZ+gw1GHj2O9eg==}
 
   '@tsfpp/tsconfig@1.0.0':
     resolution: {integrity: sha512-LJ3sLHDpJv08SQoC7SQRTNwCDHzWa0kju4XymkssJppIPahAZazCs5kS40U+fz1p8rUiLmvtangUQnvQf/X41g==}
@@ -1566,12 +1566,12 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.4':
     optional: true
 
-  '@tsfpp/agents@2.0.0(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.2)(@tsfpp/standard@4.1.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))':
+  '@tsfpp/agents@2.0.0(@tsfpp/boundary@1.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@tsfpp/prelude@2.0.2)(@tsfpp/standard@5.0.0)(@tsfpp/tsconfig@1.0.0(typescript@5.9.3))':
     dependencies:
       '@tsfpp/boundary': 1.1.0
       '@tsfpp/eslint-config': 1.0.3(@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3))(@typescript-eslint/parser@8.59.4(eslint@9.39.4)(typescript@5.9.3))(eslint-plugin-functional@9.0.5(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@tsfpp/prelude': 2.0.2
-      '@tsfpp/standard': 4.1.0
+      '@tsfpp/standard': 5.0.0
       '@tsfpp/tsconfig': 1.0.0(typescript@5.9.3)
 
   '@tsfpp/boundary@1.1.0':
@@ -1590,7 +1590,7 @@ snapshots:
 
   '@tsfpp/prelude@2.0.2': {}
 
-  '@tsfpp/standard@4.1.0': {}
+  '@tsfpp/standard@5.0.0': {}
 
   '@tsfpp/tsconfig@1.0.0(typescript@5.9.3)':
     dependencies:
