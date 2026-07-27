@@ -42,8 +42,10 @@ import {
   type Result,
   err,
   isOk,
+  keysOf,
   ok,
 } from './fp.js';
+import { concatNonEmpty, mapNonEmpty } from './nonempty.js';
 
 /**
  * Accumulating validation ADT.
@@ -93,13 +95,14 @@ export const isInvalid = <E, A>(
 
 /**
  * Concatenates two non-empty error collections, preserving order.
- * Indexing element 0 of a `NonEmptyReadonlyArray` is total, so no assertion is
- * needed to rebuild the non-empty shape.
+ *
+ * This is the non-empty-array semigroup (`semigroupNonEmpty`) applied to the
+ * error channel — the structure that makes accumulation lawful.
  */
 const concatErrors = <E>(
   xs: NonEmptyReadonlyArray<E>,
   ys: NonEmptyReadonlyArray<E>,
-): NonEmptyReadonlyArray<E> => [xs[0], ...xs.slice(1), ...ys];
+): NonEmptyReadonlyArray<E> => concatNonEmpty(ys)(xs);
 
 /**
  * Maps the success channel, leaving accumulated errors untouched.
@@ -121,9 +124,7 @@ export const mapValidation =
 export const mapErrorsValidation =
   <E, F, A>(f: (e: E) => F) =>
   (v: Validation<E, A>): Validation<F, A> =>
-    isInvalid(v)
-      ? invalidAll<F, A>([f(v.errors[0]), ...v.errors.slice(1).map(f)])
-      : v;
+    isInvalid(v) ? invalidAll<F, A>(mapNonEmpty(f)(v.errors)) : v;
 
 /**
  * Applicative application — the primitive that makes accumulation possible.
@@ -199,17 +200,19 @@ type ValidationStruct<E, T> = { readonly [K in keyof T]: Validation<E, T[K]> };
 export const sequenceStructValidation = <E, T extends Readonly<Record<string, unknown>>>(
   fields: ValidationStruct<E, T>,
 ): Validation<E, T> => {
-  const entries = Object.keys(fields).map(
+  // `keysOf` preserves the key type that `Object.keys` discards, so the index
+  // access below needs no assertion. The remaining cast is irreducible: TypeScript
+  // cannot prove that entries rebuilt from a record's own keys reconstitute its
+  // mapped type, so one DEVIATION stays and one is gone.
+  const entries = keysOf(fields).map(
     (key): Validation<E, readonly [string, unknown]> =>
       mapValidation<E, unknown, readonly [string, unknown]>((value) => [key, value] as const)(
-        // Index access is total here: `key` came from Object.keys(fields).
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): key is proven present by Object.keys
-        fields[key as keyof T] as Validation<E, unknown>,
+        fields[key],
       ),
   );
 
   return mapValidation<E, ReadonlyArray<readonly [string, unknown]>, T>(
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): rebuilt from the same keys the input struct declared
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): entries are rebuilt from the input struct's own keys
     (pairs) => Object.fromEntries(pairs) as T,
   )(sequenceArrayValidation(entries));
 };

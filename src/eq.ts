@@ -30,7 +30,8 @@
  * assumes you already have.
  */
 
-import { type NonEmptyReadonlyArray, type Option, isRecord, none, some } from './fp.js';
+import { type Option, isRecord, none, some } from './fp.js';
+import type { NonEmptyReadonlyArray } from './nonempty.js';
 
 /**
  * Equality for `A`. A lawful `Eq` is reflexive, symmetric, and transitive;
