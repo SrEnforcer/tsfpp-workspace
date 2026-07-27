@@ -15,4 +15,5 @@ export * from './traversals.js';
 export * from './list.js';
 export * from './collections.js';
 export * from './logger.js';
+export * from './nonempty.js';
 export * from './refined.js';

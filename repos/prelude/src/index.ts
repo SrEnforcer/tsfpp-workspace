@@ -8,3 +8,4 @@
 export * from './fp.js';
 export * from './validation.js';
 export * from './eq.js';
+export * from './monoid.js';
