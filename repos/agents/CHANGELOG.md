@@ -10,6 +10,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **The AI sources listed `default:` as a forbidden construct, contradicting the rule they cite.** `ai/skills/coding-standard/SKILL.md` and `ai/instructions/tsfpp-base.instructions.md` both placed `default:` in an exhaustive switch inside their **MUST NOT** blocks, while stating two lines later that every exhaustive `switch` ends in `default: return absurd(x)`. Assistants read the prohibition list as hard constraints, so this taught them to strip the exhaustiveness witness the standard requires. Both now distinguish a `default` that **handles** variants (forbidden) from the `absurd(x)` witness (required by Rule 1.2). Mirrors the same correction to Rule 4.1 in `@tsfpp/standard`.
+
 ## [2.5.0] - 2026-07-26
 
 ### Features

@@ -32,7 +32,7 @@ throw         → only at adapter boundaries (Rule 6.2); core uses Result<T,E>
 ==  !=        → use === !==
 truthiness checks on non-booleans  (if (str) · if (value))
 optional params ?  → use Option<T> or a defaults record
-default:      in an exhaustive switch  → use absurd(x)
+default:      handling variants in an exhaustive switch  → the only permitted default is absurd(x) (Rule 4.1)
 direct _tag comparison outside @tsfpp/prelude  → use exported guards
 import from 'ramda' / 'lodash'  → use @tsfpp/prelude (Remeda is the *recommended*, optional, collection lib — not a dep)
 Number()·parseInt·parseFloat·unary +  in core  → parse at boundary; brand numerics (Rule 1.13)
