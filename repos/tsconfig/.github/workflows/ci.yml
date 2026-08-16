@@ -1,0 +1,24 @@
+---
+name: ci
+
+"on":
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      # A config-only package has no sources, so `tsc --showConfig` reports
+      # TS18003 and never checks the options. `validate` compiles a sample
+      # through each preset from a consumer's position instead.
+      - run: pnpm run validate
