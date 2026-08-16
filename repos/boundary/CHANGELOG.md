@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Widened the `@tsfpp/standard` **dev** dependency to `^5.0.0` (was `^4.0.0`, which the caret excluded from 5.0.0). Dev-only, so this carries no consumer-facing change and deliberately does **not** warrant a release of its own — it rides along with the next boundary release. The runtime `@tsfpp/prelude` range `^2.0.0` already admits 2.4.0, so the new `NonEmptyReadonlyArray` combinators are available to this package without a republish.
+
 ## [2.1.0] - 2026-07-25
 
 ### Testing
