@@ -54,5 +54,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "scripts": {
+    "check": "node --check init.mjs && node --check scripts/build-ai.mjs && node scripts/smoke.mjs"
   }
 }

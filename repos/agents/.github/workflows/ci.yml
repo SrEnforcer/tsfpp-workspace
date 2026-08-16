@@ -1,0 +1,22 @@
+---
+name: ci
+
+"on":
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # This package ships the compiler every consumer's .github/ layout is
+      # built from, and it had no test of any kind. A generator that throws or
+      # quietly stops emitting a category of file would reach adopters through
+      # postinstall before anyone noticed. npm, not pnpm: no dependencies.
+      - run: npm run check
