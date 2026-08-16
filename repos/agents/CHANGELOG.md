@@ -10,7 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **`build-ai.mjs --check`** — reports generated files that no longer match their sources, exits non-zero, and names the command to regenerate. Only files the generator owns are compared, so a project's own `ci.yml` is never flagged. This is the guard the pipeline never had: `boundary` and `mcp-server` were four majors behind (`Standard version: 1.1.0` against a source of `5.0.0`) and nothing reported it. `buildAiLayout()` now accepts a target directory so the check can build to a scratch dir instead of mutating the repo; the extraction of `compileAgents`/`compileInstructions`/`compilePrompts` into one `compileDirectory` is behaviour-preserving, verified by regenerating both consumers to a zero-byte diff.
+
 ### Fixed
+
+- **The generated release-please workflow pointed at a manifest that does not exist.** `ai/workflows/release-please.yml` specified `manifest-file: .release-please-manifest.json` with a leading dot; every repo's file is `release-please-manifest.json`. Any consumer regenerating its bindings would have had releases break silently at the next run. The committed consumer copies were more correct than the source — the manifest path and `workflow_dispatch` had been fixed locally and never pushed upstream, so the correction would have been destroyed by the next regeneration. Both are now in the source.
+- **`.ai/` was missing from the bootstrap `.gitignore` template.** `bootstrap.sh` writes the template only when no `.gitignore` exists, so any adopter with one already never received the entry — which is how `mcp-server` came to commit the tool-agnostic layout while every other repo ignored it. `.github/` is the committed deliverable; `.ai/` is a build artifact.
 
 - **The AI sources listed `default:` as a forbidden construct, contradicting the rule they cite.** `ai/skills/coding-standard/SKILL.md` and `ai/instructions/tsfpp-base.instructions.md` both placed `default:` in an exhaustive switch inside their **MUST NOT** blocks, while stating two lines later that every exhaustive `switch` ends in `default: return absurd(x)`. Assistants read the prohibition list as hard constraints, so this taught them to strip the exhaustiveness witness the standard requires. Both now distinguish a `default` that **handles** variants (forbidden) from the `absurd(x)` witness (required by Rule 1.2). Mirrors the same correction to Rule 4.1 in `@tsfpp/standard`.
 
