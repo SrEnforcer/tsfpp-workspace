@@ -19,7 +19,7 @@ Full standard: `node_modules/@tsfpp/standard/spec/CODING_STANDARD.md`
 - `throw` in core — return `err(...)` instead
 - `==` `!=` or truthiness checks on non-booleans (`if (str)`, `if (value)`)
 - Optional params `?` — use `Option<T>` or a defaults record
-- `default:` in an exhaustive switch — use `absurd(x)` instead
+- `default:` that handles variants in an exhaustive switch — the only permitted default is `default: return absurd(x)` (Rule 4.1)
 - `import from 'ramda'` / `'lodash'` — use `@tsfpp/prelude` (Ramda is not a dep; Remeda is the recommended, optional, collection lib — not a dep either)
 - `new Map()` `new Set()` — use `intoMap` / `intoSet` from `@tsfpp/prelude`
 - `if (x === null)` `if (x !== null)` `if (x === undefined)` `if (x !== undefined)` `if (!x)` `x ?? y` — any nullability check in any form; use `fromNullable` → `Option<T>`, then `isSome` / `isNone` / `getOrElseOption`

@@ -1,0 +1,27 @@
+---
+name: ci
+
+"on":
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run lint
+      - run: pnpm run check:test
+      # Runs the rule index against the INSTALLED @tsfpp/standard, so a spec
+      # format change that empties the index fails the build instead of
+      # shipping a server that answers every query with nothing.
+      - run: pnpm run test

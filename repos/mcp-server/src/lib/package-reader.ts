@@ -29,7 +29,7 @@ import {
   some,
   tryCatch,
   fromNullable,
-  getOrElse,
+  getOrElseOption,
   tryCatchAsync,
 } from '@tsfpp/prelude'
 
@@ -97,7 +97,7 @@ const resolvePackageJsonPath = (
 
   const resolvedPath = pipe(
     fromNullable(candidates.find((candidate) => existsSync(candidate))),
-    getOrElse(() => ''),
+    getOrElseOption(() => ''),
   )
 
   return resolvedPath.length > 0 ? ok(resolvedPath) : err(`package not installed: ${packageName}`)

@@ -17,7 +17,7 @@ import {
   type Result,
   err,
   fromNullable,
-  getOrElse,
+  getOrElseOption,
   isErr,
   isNone,
   isSome,
@@ -54,6 +54,19 @@ type SourceFile = {
 const ruleHeadingRegex = /### Rule ([a-z]+\.\d+\.\d+|\d+\.\d+)(?:\s*[—-]\s*(.*))?\n([\s\S]*?)(?=\n### Rule |\n## |\n# |$)/g
 
 const neverSectionRegex = /## Never([\s\S]*?)(?=\n## |\n### |\n# |$)/g
+
+/**
+ * Match the standard's forbidden-construct summary section.
+ *
+ * The spec publishes this as a numbered section holding a markdown table
+ * (`## 12 — Forbidden Constructs (Summary)`), not as the `## Never` bullet list
+ * the skill files use. Both shapes are parsed so the index is populated whether
+ * it is fed spec documents or skill documents.
+ */
+const forbiddenTableSectionRegex = /## \d+\s*[—-]\s*Forbidden Constructs[^\n]*\n([\s\S]*?)(?=\n## |\n# |$)/g
+
+/** Capture the parenthetical remedy in a level cell: `MUST NOT (use X)`. */
+const levelAlternativeRegex = /\(([^)]+)\)\s*$/u
 
 const patternHeadingRegex = /### Pattern:\s*(.+)\n([\s\S]*?)(?=\n### Pattern:|\n## |\n# |$)/g
 
@@ -143,7 +156,7 @@ const buildRule = (params: {
   readonly headingTitle: string
   readonly lines: ReadonlyArray<string>
 }): Rule => {
-  const firstLine = pipe(fromNullable(params.lines[0]), getOrElse(() => 'Unnamed rule'))
+  const firstLine = pipe(fromNullable(params.lines[0]), getOrElseOption(() => 'Unnamed rule'))
   const title = titleFrom(params.headingTitle, firstLine)
   const description = descriptionFrom(params.lines, firstLine)
   const rationaleOption = rationaleFrom(params.lines)
@@ -166,9 +179,9 @@ const buildRule = (params: {
 }
 
 const parseRuleMatch = (filename: SpecFileName, match: RegExpMatchArray): Option<Rule> => {
-  const idRaw = pipe(fromNullable(match[1]), getOrElse(() => '')).trim()
-  const headingTitle = pipe(fromNullable(match[2]), getOrElse(() => '')).trim()
-  const body = pipe(fromNullable(match[3]), getOrElse(() => '')).trim()
+  const idRaw = pipe(fromNullable(match[1]), getOrElseOption(() => '')).trim()
+  const headingTitle = pipe(fromNullable(match[2]), getOrElseOption(() => '')).trim()
+  const body = pipe(fromNullable(match[3]), getOrElseOption(() => '')).trim()
 
   if (idRaw.length === 0 || body.length === 0) {
     return none
@@ -217,7 +230,7 @@ const parseForbiddenLine = (line: string): Option<ForbiddenConstruct> => {
     (matchOption) => (isSome(matchOption) ? fromNullable(matchOption.value[2]) : none),
   )
 
-  const alternative = pipe(explicitAlternative, getOrElse(() => metadataOption.value.alternative))
+  const alternative = pipe(explicitAlternative, getOrElseOption(() => metadataOption.value.alternative))
 
   return some({
     construct: constructOption.value,
@@ -226,29 +239,79 @@ const parseForbiddenLine = (line: string): Option<ForbiddenConstruct> => {
   })
 }
 
+/**
+ * Parse one row of the spec's forbidden-construct table.
+ *
+ * Cells are `| Construct | Rule | Level |`. The construct cell is prose that
+ * qualifies the prohibition (`\`as\` (outside smart constructor)`), so it is
+ * kept whole rather than reduced to a bare token — the catalog documents the
+ * constraint, and the qualification is the constraint.
+ */
+const parseForbiddenTableRow = (row: string): Option<ForbiddenConstruct> => {
+  const cells = row
+    .split('|')
+    .map((cell) => cell.trim())
+    .filter((cell) => cell.length > 0)
+
+  const constructRaw = pipe(fromNullable(cells[0]), getOrElseOption(() => ''))
+  const ruleRaw = pipe(fromNullable(cells[1]), getOrElseOption(() => ''))
+  const levelRaw = pipe(fromNullable(cells[2]), getOrElseOption(() => ''))
+
+  const construct = constructRaw.replace(/`/gu, '').trim()
+
+  if (construct.length === 0 || construct === 'Construct' || construct.startsWith('--')) {
+    return none
+  }
+
+  const ruleIdOption = mkRuleId(ruleRaw)
+
+  if (isNone(ruleIdOption)) {
+    return none
+  }
+
+  const alternativeMatch = levelAlternativeRegex.exec(levelRaw)
+  const alternative = pipe(
+    fromNullable(alternativeMatch),
+    (matchOption) => (isSome(matchOption) ? fromNullable(matchOption.value[1]) : none),
+    getOrElseOption(() => `See Rule ${ruleRaw}.`),
+  )
+
+  return some({ construct, rule: ruleIdOption.value, alternative: alternative.replace(/`/gu, '') })
+}
+
 const parseForbiddenFromSource = (source: SourceFile): ReadonlyArray<ForbiddenConstruct> => {
   const sections = Array.from(source.content.matchAll(neverSectionRegex)).map((match) => match[1])
   const lines = sections
-    .map((section) => pipe(fromNullable(section), getOrElse(() => '')))
+    .map((section) => pipe(fromNullable(section), getOrElseOption(() => '')))
     .flatMap((section) => section.split('\n'))
     .map((line) => line.trim())
     .filter((line) => line.startsWith('- `'))
 
   const maybeConstructs = lines.map(parseForbiddenLine)
 
-  return maybeConstructs.flatMap((constructOption) => (isSome(constructOption) ? [constructOption.value] : []))
+  const tableRows = Array.from(source.content.matchAll(forbiddenTableSectionRegex))
+    .map((match) => pipe(fromNullable(match[1]), getOrElseOption(() => '')))
+    .flatMap((section) => section.split('\n'))
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('|'))
+
+  const maybeTableConstructs = tableRows.map(parseForbiddenTableRow)
+
+  return [...maybeConstructs, ...maybeTableConstructs].flatMap((constructOption) =>
+    isSome(constructOption) ? [constructOption.value] : [],
+  )
 }
 
 const parsePatternMatch = (sectionMatch: RegExpMatchArray): Option<Pattern> => {
-  const name = pipe(fromNullable(sectionMatch[1]), getOrElse(() => '')).trim()
-  const body = pipe(fromNullable(sectionMatch[2]), getOrElse(() => '')).trim()
+  const name = pipe(fromNullable(sectionMatch[1]), getOrElseOption(() => '')).trim()
+  const body = pipe(fromNullable(sectionMatch[2]), getOrElseOption(() => '')).trim()
 
   if (name.length === 0 || body.length === 0) {
     return none
   }
 
   const codeBlocks = Array.from(body.matchAll(codeBlockRegex)).map((blockMatch) =>
-    pipe(fromNullable(blockMatch[1]), getOrElse(() => '')).trim(),
+    pipe(fromNullable(blockMatch[1]), getOrElseOption(() => '')).trim(),
   )
 
   const goodCodeOption = fromNullable(codeBlocks.find((code) => code.includes('// Good')))
@@ -301,7 +364,7 @@ export const buildRuleIndexFromSources = (sources: ReadonlyArray<SourceFile>): R
     content: pipe(
       sourceMap,
       lookup(filename),
-      getOrElse(() => ''),
+      getOrElseOption(() => ''),
     ),
   }))
 

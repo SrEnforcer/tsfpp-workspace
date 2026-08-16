@@ -9,7 +9,7 @@ import type {
   Standard,
 } from './types'
 
-describe('types', () => {
+describe('types: layers and standards', () => {
   it('defines the supported layers and standards', () => {
     expectTypeOf<Layer>().toMatchTypeOf<
       | 'core'
@@ -36,7 +36,9 @@ describe('types', () => {
       | 'security'
     >()
   })
+})
 
+describe('types: rule and pattern contracts', () => {
   it('keeps rule and pattern contracts readonly', () => {
     expectTypeOf<Rule>().toMatchTypeOf<{
       readonly id: RuleId
