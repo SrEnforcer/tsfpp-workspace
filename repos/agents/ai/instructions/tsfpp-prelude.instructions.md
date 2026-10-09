@@ -29,7 +29,7 @@ import {
   // ReadonlySet
   intoSet, conj, disj, member,
   // Traversal + array search
-  traverseArray, traverseArrayOption, sequenceArrayOption, findO, unique,
+  traverseArray, traverseArrayOption, sequenceArrayOption, findOption, unique,
   // Validation — accumulating failure (Rule 6.8)
   valid, invalid, invalidAll, isValid, isInvalid, mapValidation, matchValidation,
   traverseArrayValidation, sequenceStructValidation, validationToResult, resultToValidation,

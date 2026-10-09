@@ -78,13 +78,20 @@ export const mapErr =
  * whose `A | undefined` result reintroduces the partiality `Option` removes
  * (Rule 6.3).
  *
- * @law findO(() => true)(xs)  ≡ headArray(xs)
- * @law findO(() => false)(xs) ≡ none
+ * @law findOption(() => true)(xs)  ≡ headArray(xs)
+ * @law findOption(() => false)(xs) ≡ none
  */
-export const findO =
+export const findOption =
   <A>(pred: (a: A) => boolean) =>
   (xs: ReadonlyArray<A>): Option<A> =>
     fromNullable(xs.find(pred));
+
+/**
+ * Former name of {@link findOption}. The abbreviated suffix violates Rule 7.8.
+ *
+ * @deprecated Use `findOption`. Scheduled for removal in the next major release.
+ */
+export const findO = findOption;
 
 // ---------------------------------------------------------------------------
 // Refined numerics — no numeric hazards (Rule 1.13)

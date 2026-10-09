@@ -16,7 +16,12 @@ A strict functional TypeScript coding standard for systems where defects are exp
 - **[API_CODING_STANDARD.md](./API_CODING_STANDARD.md)** — API profile layered on top of TSF++.
 - **[SECURITY_CODING_STANDARD.md](./SECURITY_CODING_STANDARD.md)** — Cross-cutting security profile for TSF++ code, APIs, and UI.
 - **[DATA_CODING_STANDARD.md](./DATA_CODING_STANDARD.md)** — Data access profile layered on top of TSF++.
+- **[TEST_CODING_STANDARD.md](./TEST_CODING_STANDARD.md)** — Test profile layered on top of TSF++.
+- **[ANNOTATION_CODING_STANDARD.md](./ANNOTATION_CODING_STANDARD.md)** — Annotation profile for comments, markers, and decision traceability.
+- **[CONFIG_CODING_STANDARD.md](./CONFIG_CODING_STANDARD.md)** — Cross-cutting profile for typed configuration loading and environment parsing.
+- **[LOG_CODING_STANDARD.md](./LOG_CODING_STANDARD.md)** — Cross-cutting profile for structured logging, trace correlation, and redaction.
 - **[PHILOSOPHY.md](./PHILOSOPHY.md)** — The foundational principles and design rationale behind TSF++.
+- **[RATIONALE.md](./RATIONALE.md)** — Non-normative design rationale for the whole standard family, per standard.
 - **[examples/](./examples/)** — Per-rule companion examples showing correct and incorrect patterns.
 - **[rationale/](./rationale/)** — Detailed justifications for non-obvious rules, including trade-offs and alternatives considered.
 - **[DEVIATIONS.md](./DEVIATIONS.md)** — Project-wide deviation ledger and template.
