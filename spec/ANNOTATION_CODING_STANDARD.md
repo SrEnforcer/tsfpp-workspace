@@ -128,8 +128,8 @@ export const mkUserId = (raw: string): Option<UserId> =>
 /**
  * Maps a function over the value inside `Some`, leaving `None` unchanged.
  *
- * @law identity     — `mapO(x => x)(opt) ≡ opt`
- * @law composition  — `mapO(f)(mapO(g)(opt)) ≡ mapO(x => f(g(x)))(opt)`
+ * @law identity     — `mapOption(x => x)(opt) ≡ opt`
+ * @law composition  — `mapOption(f)(mapOption(g)(opt)) ≡ mapOption(x => f(g(x)))(opt)`
  */
 ```
 
