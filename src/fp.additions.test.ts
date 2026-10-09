@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   err,
   findO,
+  findOption,
   getOrElse,
   headNonEmpty,
   isFiniteNumber,
@@ -140,5 +141,11 @@ describe('refined numerics', () => {
     expect(isSome(mkNonNegative(3))).toBe(true);
     expect(isNone(mkNonNegative(-0.0001))).toBe(true);
     expect(isNone(mkNonNegative(Number.NaN))).toBe(true);
+  });
+});
+
+describe('findOption', () => {
+  it('is the Rule 7.8 name; findO is a deprecated alias of the same function', () => {
+    expect(findO).toBe(findOption);
   });
 });
