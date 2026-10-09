@@ -45,4 +45,42 @@ describe('buildRuleIndex', () => {
 
     expect(pipe(result, map((index) => index.rules.length > 0))).toEqual(ok(true))
   })
+
+  // The assertions below run against the INSTALLED @tsfpp/standard rather than a
+  // fixture. Fixture-only coverage is what allowed the index to be silently
+  // empty in production: every parser regex kept matching its sample while
+  // matching nothing in the published spec.
+
+  it('parses forbidden constructs from the installed spec, not just fixtures', () => {
+    const result = buildRuleIndex()
+
+    expect(pipe(result, map((index) => index.forbiddenConstructs.length > 0))).toEqual(ok(true))
+  })
+
+  it('binds a known rule id to its published heading', () => {
+    const result = buildRuleIndex()
+
+    const title = pipe(
+      result,
+      map((index) => index.rules.find((rule) => String(rule.id) === '4.1')?.title ?? ''),
+    )
+
+    expect(pipe(title, map((value) => value.length > 0))).toEqual(ok(true))
+    expect(pipe(title, map((value) => value.toLowerCase().includes('switch')))).toEqual(ok(true))
+  })
+
+  it('binds a known forbidden construct to its published rule', () => {
+    const result = buildRuleIndex()
+
+    const rule = pipe(
+      result,
+      map(
+        (index) =>
+          index.forbiddenConstructs.find((entry) => entry.construct === 'class')?.rule ?? undefined,
+      ),
+      map((value) => (typeof value === 'undefined' ? '' : String(value))),
+    )
+
+    expect(rule).toEqual(ok('1.9'))
+  })
 })

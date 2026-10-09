@@ -8,10 +8,11 @@
     "mcp:serve:stdio": "tsx bin/tsfpp-mcp.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --max-warnings 0 --ignore-pattern '**/*.test.ts'",
+    "test": "vitest run",
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
     "lint:test": "eslint src/**/*.test.ts tests/factories/**/*.ts --max-warnings 0",
     "check:test": "pnpm typecheck:test && pnpm lint:test",
-    "check": "pnpm typecheck && pnpm lint && pnpm check:test"
+    "check": "pnpm typecheck && pnpm lint && pnpm check:test && pnpm test"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
