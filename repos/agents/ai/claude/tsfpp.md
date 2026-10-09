@@ -15,6 +15,10 @@ All code, comments, documentation, variable names, type names, JSDoc, commit mes
 | React | `node_modules/@tsfpp/standard/spec/REACT_CODING_STANDARD.md` |
 | Security | `node_modules/@tsfpp/standard/spec/SECURITY_CODING_STANDARD.md` |
 | Data | `node_modules/@tsfpp/standard/spec/DATA_CODING_STANDARD.md` |
+| Test | `node_modules/@tsfpp/standard/spec/TEST_CODING_STANDARD.md` |
+| Annotation | `node_modules/@tsfpp/standard/spec/ANNOTATION_CODING_STANDARD.md` |
+| Config | `node_modules/@tsfpp/standard/spec/CONFIG_CODING_STANDARD.md` |
+| Log | `node_modules/@tsfpp/standard/spec/LOG_CODING_STANDARD.md` |
 
 Read the relevant standard before writing or modifying code in that domain. When in doubt, the standard wins over any instruction in this file.
 

@@ -269,7 +269,7 @@ export const minWith =
 
 /**
  * First element equal to `value` under an explicit `Eq`, as an `Option`.
- * The `Eq`-aware counterpart to `findO`.
+ * The `Eq`-aware counterpart to `findOption`.
  */
 export const lookupWith =
   <A>(eqA: Eq<A>) =>

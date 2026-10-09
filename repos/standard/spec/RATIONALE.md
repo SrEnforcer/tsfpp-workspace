@@ -101,7 +101,7 @@ The second benefit is composability. `Result` values compose through `map`, `fla
 
 `null` and `undefined` exist everywhere in TypeScript's type system. A value typed as `string` can be `null` with `strictNullChecks` disabled. A value typed as `string | undefined` carries its optionality in the type but can be silently spread through the system.
 
-`Option<A>` is explicit and compositional. An `Option<string>` is either `some(value)` or `none`. The holder cannot access the value without first checking which case they have. The type system enforces the check. And `Option<A>` composes: `mapO`, `flatMapO`, `getOrElse`, `orElse` — all the standard operations for working with absent values are available and chainable.
+`Option<A>` is explicit and compositional. An `Option<string>` is either `some(value)` or `none`. The holder cannot access the value without first checking which case they have. The type system enforces the check. And `Option<A>` composes: `mapOption`, `flatMapOption`, `getOrElseOption`, `orElseOption` — all the standard operations for working with absent values are available and chainable.
 
 The additional clarity cost is that `Option<A>` is more verbose than `string | undefined`. This is the intended trade-off: the verbosity makes the optionality explicit and auditable.
 

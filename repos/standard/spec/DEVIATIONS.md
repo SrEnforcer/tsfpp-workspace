@@ -47,7 +47,12 @@ What would need to change for this deviation to be removed (e.g., "Once
 
 ## Active deviations
 
-_No active project-wide deviations at initial release._
+| ID | Rule | Scope | Review by |
+|----|------|-------|-----------|
+| [DEV-002](#dev-002--rule-82-property-based-testing-with-fast-check) | 8.2 | `@tsfpp/mcp-server` | 2026-10-31 |
+| [DEV-003](#dev-003--rule-112-maximum-file-length) | 11.2 | `@tsfpp/boundary` — `src/boundary-types.ts` | when the file next changes materially |
+
+Full entries follow the illustrative example below.
 
 ---
 

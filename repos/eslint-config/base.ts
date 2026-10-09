@@ -2,7 +2,7 @@
  * @tsfpp/eslint-config — base
  *
  * Shared ESLint flat configuration for TSF++ projects (pure TypeScript targets).
- * Enforces Rules 1.2–1.9, 2.1–2.3, 3.1–3.2, 3.4, 4.1, 4.2, 4.5, 6.2, 6.4, 11.2
+ * Enforces Rules 1.2–1.9, 1.13, 2.1–2.3, 3.1–3.2, 3.4, 4.1, 4.2, 4.5, 4.6, 6.2, 6.4, 11.2
  * from CODING_STANDARD.md via @typescript-eslint and eslint-plugin-functional.
  *
  * Usage (base only):
@@ -93,6 +93,27 @@ const config: Linter.Config[] = [
           selector: 'NewExpression',
           message:  'TSF++ Rule 1.9: new is forbidden outside adapter boundaries. Add DEVIATION(1.9) and an eslint-disable comment.',
         },
+        // Rule 4.6 — ambient nondeterminism is an effect (Appendix B); `new Date()` is already caught by Rule 1.9 above
+        {
+          selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+          message:  'TSF++ Rule 4.6: Date.now() is an effect; inject `now: () => Date` via Deps.',
+        },
+        {
+          selector: "CallExpression[callee.object.name='Math'][callee.property.name='random']",
+          message:  'TSF++ Rule 4.6: Math.random() is an effect; inject a seeded generator via Deps.',
+        },
+        {
+          selector: "MemberExpression[object.object.name='process'][object.property.name='env']",
+          message:  'TSF++ Rule 4.6: process.env is ambient input; load config at the boundary and inject it.',
+        },
+      ],
+
+      // Rule 1.13 — numeric hazards: coercing globals (Appendix B)
+      'no-restricted-globals': ['error',
+        { name: 'isNaN',      message: 'TSF++ Rule 1.13: use Number.isNaN — the global coerces its argument.' },
+        { name: 'isFinite',   message: 'TSF++ Rule 1.13: use Number.isFinite — the global coerces its argument.' },
+        { name: 'parseInt',   message: 'TSF++ Rule 1.13: coercion parsing is forbidden in the core; parse at the boundary via a smart constructor.' },
+        { name: 'parseFloat', message: 'TSF++ Rule 1.13: coercion parsing is forbidden in the core; parse at the boundary via a smart constructor.' },
       ],
 
       // ── Immutability & functional style ──────────────────────────────────────

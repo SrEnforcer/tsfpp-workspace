@@ -130,6 +130,8 @@ export default [
 | `no-restricted-syntax` → `TSModuleDeclaration[kind='namespace']` | 1.9 | MUST |
 | `no-restricted-syntax` → `BinaryExpression[operator="instanceof"]` | 1.9 | MUST |
 | `no-restricted-syntax` → `NewExpression` | 1.9 | MUST |
+| `no-restricted-globals` → `isNaN`, `isFinite`, `parseInt`, `parseFloat` | 1.13 | MUST |
+| `no-restricted-syntax` → `Date.now()`, `Math.random()`, `process.env` | 4.6 | MUST |
 | `functional/no-classes` | 1.9 | MUST |
 | `functional/no-this-expressions` | 1.9 | MUST |
 | `functional/no-let` | 2.1 | MUST |
