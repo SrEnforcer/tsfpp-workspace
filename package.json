@@ -32,7 +32,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
     "prepublishOnly": "pnpm run build",
-    "lint": "eslint dist/",
+    "lint": "eslint .",
     "test": "node --input-type=module --eval \"import './dist/base.js'\""
   },
   "engines": {

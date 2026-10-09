@@ -28,6 +28,6 @@ import type { ESLint } from 'eslint'
  * Use exclusively at plugin registration sites. Never use to silence unrelated
  * type errors.
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const coercePlugin = (plugin: unknown): ESLint.Plugin =>
-  plugin as ESLint.Plugin  // DEVIATION(1.6): see module JSDoc above
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): see module JSDoc above
+  plugin as ESLint.Plugin

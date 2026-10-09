@@ -8,6 +8,18 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- **`pnpm lint` failed, and had been linting build output.** The `lint` script targeted `dist/`, so ESLint read the emitted JavaScript — which carries the sources' `eslint-disable` comments — under a config that registers no plugins. Every directive resolved to `Definition for rule '@typescript-eslint/consistent-type-assertions' was not found`. It now lints the TypeScript sources and ignores `dist/`.
+- **The one permitted `as` in `plugin-compat.ts` was unguarded.** Its `eslint-disable-next-line` sat above the function signature while the assertion is on the following line, so the directive covered the wrong line. Nothing caught it because the rule was never enforced against the sources. The directive now sits immediately above the assertion and carries its `DEVIATION(1.6)` reason inline.
+- **`release-please-manifest.json` was missing entirely.** The release workflow passes `manifest-file: release-please-manifest.json`, so release-please had no version baseline and never cut a release — which is why 1.1.0 sits in `package.json` while npm still serves 1.0.3, and why `@tsfpp/agents` 2.5.0 declares a peer dependency on `>=1.1.0` that cannot be satisfied. The manifest now records the published 1.0.3 as the baseline.
+
+### Added
+
+- **CI.** This package had no workflow other than release-please: nothing built, linted, or smoke-imported it on push or pull request. The new `ci.yml` runs build, lint and test, and the config now enforces its own Rule 1.6 setting (`consistent-type-assertions: never`) against its sources.
+
 ## [1.1.0] — 2026-07-25
 
 ### Features
