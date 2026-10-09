@@ -3,14 +3,22 @@
 This standard is mandatory for all code, comments, and documentation. English only.
 Codename TSF++ (tsfpp)
 
-**Version:** 5.0.0
-**Date:** 2026-07-26
+**Version:** 5.0.1
+**Date:** 2026-08-16
 **Classification:** Normative — repository-wide
 **Modelled after:** JSF++ AV Rules (Lockheed Martin), JPL Power of Ten (Holzmann)
 
 ---
 
 ## Changelog
+
+### 5.0.1 — 2026-08-16
+
+**Fixed.**
+
+- **Rule 4.1 forbade what Rule 1.2 mandates.** Its heading read *"forbid `default` in exhaustive matches"* while Rule 1.2 requires `default: return absurd(s)`, and the verified reference service in `examples/reference-service.md` uses that arm twice. A reviewer working from Rule 4.1's heading — or from the section 12 summary row, which repeated the error — would have rejected the standard's own flagship example. Rule 4.1's *rationale* already reconciled the two (*"the `never` assertion in Rule 1.2 serves as the catch-all"*), and both `examples/04-control-flow.ts` and the `@tsfpp/eslint-config` base preset had the correct reading all along; only the normative heading and the summary table were wrong.
+
+  The rule now states the actual distinction: a `default` that **handles** variants is forbidden, a `default` that **refutes** them is required. Nothing that was compliant becomes non-compliant, and nothing that was non-compliant becomes compliant — this is a wording correction to a rule whose intent was never in doubt, which is why it ships as a patch.
 
 ### 5.0.0 — 2026-07-26
 
@@ -734,9 +742,28 @@ const findNode = (tree: OrgTree, id: NodeId, maxDepth?: number): OrgNode | undef
 
 ## 4 — Control Flow
 
-### Rule 4.1 — MUST: Use `switch` with exhaustiveness for sum-type dispatch; forbid `default` in exhaustive matches
+### Rule 4.1 — MUST: Use `switch` with exhaustiveness for sum-type dispatch; the only permitted `default` is the Rule 1.2 `never` witness
 
-**Rationale.** `default` silently handles future variants, defeating the purpose of ADTs. The `never` assertion in Rule 1.2 serves as the catch-all.
+**Rationale.** The distinction is between a `default` that *handles* variants and one that *refutes* them. A handling `default` is a catch-all: it silently absorbs every future addition to the union, which is exactly the defect ADTs exist to prevent. A refuting `default` is the opposite — `default: return absurd(x)` type-checks only while every variant is already covered, so adding a variant breaks compilation at this site and every other one.
+
+The refuting arm is therefore not merely tolerated, it is **required** by Rule 1.2. This rule forbids any *other* `default`.
+
+**Do**
+```typescript
+switch (s.kind) {
+  case 'circle': return Math.PI * s.radius ** 2
+  case 'rect':   return s.width * s.height
+  default:       return absurd(s)        // refutes — a new variant fails to compile
+}
+```
+
+**Don't**
+```typescript
+switch (s.kind) {
+  case 'circle': return Math.PI * s.radius ** 2
+  default:       return 0                // handles — a new variant ships silently
+}
+```
 
 **Note on alternatives.** `ts-pattern` (see Appendix C) offers an expression-position pattern match with the same exhaustiveness guarantee. It is permitted as a substitute for `switch` where the matched shape is non-trivial. The `never` discipline still applies via `.exhaustive()`.
 
@@ -1640,7 +1667,7 @@ console.log('module loaded')                        // observable effect at impo
 | `null`/`undefined` propagation without `Option` | 6.3 | MUST NOT |
 | Truthiness checks on non-booleans | 4.5 | MUST NOT |
 | `namespace` | 1.9 | MUST NOT |
-| `default` in exhaustive switch | 4.1 | MUST NOT (use `never` assertion) |
+| `default` that handles variants in an exhaustive switch | 4.1 | MUST NOT (the only permitted `default` is the `absurd(x)` witness required by Rule 1.2) |
 | Direct `_tag` access outside the prelude | 1.11 | MUST NOT |
 | Optional parameters (`?`) outside boundary records | 3.7 | MUST NOT |
 | Coercion parsing in the core (`Number()`, `parseInt`, `parseFloat`, unary `+`) | 1.13 | MUST NOT |
