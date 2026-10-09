@@ -43,7 +43,7 @@ From `@tsfpp/prelude`:
 - **Unit**: `unit`, `Unit`
 - **Result**: `ok`, `err`, `isOk`, `isErr`, `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tryCatch`, `tryCatchAsync`, `tap`, `tapErr`, `match`, `getOrElse`
 - **Logger port**: `LogLevel`, `LogEntry`, `Logger`
-- **Conversions and guards**: `fromNullable`, `isDefined`, `toNullable`, `isRecord`, `fromUnknownString`, `fromUnknownArray`, `fromUnknownArrayOf`, `fromNonEmptyString`, `getTypedField`, `getStringField`, `getNumberField`, `getBooleanField`, `findO`
+- **Conversions and guards**: `fromNullable`, `isDefined`, `toNullable`, `isRecord`, `fromUnknownString`, `fromUnknownArray`, `fromUnknownArrayOf`, `fromNonEmptyString`, `getTypedField`, `getStringField`, `getNumberField`, `getBooleanField`, `findOption` (`findO` is a deprecated alias)
 - **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
 - **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
 - **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `consNonEmpty`, `singletonNonEmpty`, `headNonEmpty`, `lastNonEmpty`, `tailNonEmpty`, `toArrayNonEmpty`, `lengthNonEmpty`, `mapNonEmpty`, `appendNonEmpty`, `prependNonEmpty`, `concatNonEmpty`, `reverseNonEmpty`, `sortNonEmpty`, `reduceNonEmpty`, `reduceMapNonEmpty`, `traverseNonEmpty`
