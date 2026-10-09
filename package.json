@@ -17,8 +17,8 @@
   "license": "MIT",
   "exports": {
     "./base": "./tsconfig.base.json",
-    "./lib":  "./tsconfig.lib.json",
-    "./app":  "./tsconfig.app.json",
+    "./lib": "./tsconfig.lib.json",
+    "./app": "./tsconfig.app.json",
     "./package.json": "./package.json"
   },
   "files": [
@@ -31,6 +31,10 @@
     "typescript": ">=5.0.0"
   },
   "devDependencies": {
+    "@types/node": "^26.2.0",
     "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "validate": "node scripts/validate.mjs"
   }
 }
