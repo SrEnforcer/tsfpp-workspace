@@ -1,0 +1,23 @@
+---
+name: ci
+
+"on":
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # This package ships content plus an installer script. `prepublishOnly`
+      # already syntax-checks the installer; running it on every push means a
+      # broken installer is caught before a release rather than during one.
+      # npm, not pnpm: this package has no dependencies, so there is nothing to
+      # install and no lockfile to honour.
+      - run: npm run check

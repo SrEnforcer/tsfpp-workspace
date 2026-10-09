@@ -30,6 +30,7 @@
     "README.md"
   ],
   "scripts": {
+    "check": "node --check init.mjs",
     "prepublishOnly": "node --check init.mjs"
   },
   "engines": {
