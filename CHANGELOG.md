@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [5.0.1] - 2026-10-14
+
+### Documentation
+
+- Fixed stale references across the spec: `spec/README.md` now lists all eight profiles and `RATIONALE.md` in its structure section; the `@law` example in `ANNOTATION_CODING_STANDARD.md` and the Option combinators in `RATIONALE.md` use the Rule 7.8 names (`mapOption`, not `mapO`); `DEVIATIONS.md` indexes DEV-002 and DEV-003 under active deviations; and the coverage table in `examples/README.md` matches the rule markers in each file. No rule changes.
+
 ### Fixed
 
 - **Rule 4.1 forbade what Rule 1.2 mandates.** Its heading read *"forbid `default` in exhaustive matches"*, while Rule 1.2 requires `default: return absurd(s)` and the verified reference service uses that arm twice. The section 12 summary table repeated the error. Rule 4.1's own rationale already reconciled the two, and `examples/04-control-flow.ts` and the `@tsfpp/eslint-config` base preset both had the correct reading — only the normative heading and the summary row were wrong. The rule now distinguishes a `default` that **handles** variants (forbidden) from one that **refutes** them (required by Rule 1.2). Wording only: nothing changes compliance in either direction.
