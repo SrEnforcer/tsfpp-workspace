@@ -10,6 +10,14 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ## [Unreleased]
 
+## [2.0.0] — 2026-10-14
+
+### ⚠ BREAKING CHANGES
+
+- **The base preset now enforces the Appendix B checks for Rules 1.13 and 4.6**, which standard Rule 9.2 requires and the preset lacked. Code that previously linted clean fails until it injects the dependency or carries a `DEVIATION` comment:
+  - Rule 4.6 — `Date.now()`, `Math.random()` and `process.env` are reported via `no-restricted-syntax` (`new Date()` was already caught under Rule 1.9).
+  - Rule 1.13 — the coercing globals `isNaN`, `isFinite`, `parseInt` and `parseFloat` are reported via `no-restricted-globals`.
+
 ### Fixed
 
 - **`pnpm lint` failed, and had been linting build output.** The `lint` script targeted `dist/`, so ESLint read the emitted JavaScript — which carries the sources' `eslint-disable` comments — under a config that registers no plugins. Every directive resolved to `Definition for rule '@typescript-eslint/consistent-type-assertions' was not found`. It now lints the TypeScript sources and ignores `dist/`.

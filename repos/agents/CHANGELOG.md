@@ -10,6 +10,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-10-14
+
+### Changed
+
+- Raised the `@tsfpp/prelude` peer dependency to `>=2.5.0` (was `>=2.4.0`): the prelude instructions now reference `findOption`, which first ships in 2.5.0.
+- The Claude binding (`ai/claude/tsfpp.md`) lists all nine standards, and the prelude instructions use `findOption` in place of the deprecated `findO` (`@tsfpp/prelude` 2.5.0).
+
 ### Added
 
 - **`build-ai.mjs --check`** — reports generated files that no longer match their sources, exits non-zero, and names the command to regenerate. Only files the generator owns are compared, so a project's own `ci.yml` is never flagged. This is the guard the pipeline never had: `boundary` and `mcp-server` were four majors behind (`Standard version: 1.1.0` against a source of `5.0.0`) and nothing reported it. `buildAiLayout()` now accepts a target directory so the check can build to a scratch dir instead of mutating the repo; the extraction of `compileAgents`/`compileInstructions`/`compilePrompts` into one `compileDirectory` is behaviour-preserving, verified by regenerating both consumers to a zero-byte diff.

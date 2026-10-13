@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/standard",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Normative coding standards for the TSF++ ecosystem — base specification and domain profiles",
   "license": "MIT",
   "homepage": "https://github.com/tsfpp/standard#readme",

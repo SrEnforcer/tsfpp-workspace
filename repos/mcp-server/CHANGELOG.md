@@ -4,18 +4,22 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-10-14
+
 ### Changed
 
+- Raised the `@tsfpp/eslint-config` **dev** dependency to `^2.0.0` (was `^1.0.3`), which adds the Rule 1.13 and 4.6 lint checks. Dev-only; no consumer-facing change.
 - Widened the `@tsfpp/standard` dependency range to `^5.0.0` so the server serves the current ruleset, including Rule 1.15. This entry previously claimed `^2.0.0` while `package.json` had already moved to `^4.0.0` — the range has been raised twice since without the changelog following. Rule 1.15 is verified to parse into the rule index (75 rules, `level=MUST`).
 
-### Known issues — this package is not currently publishable
+### Fixed
 
-Both found while verifying the Rule 1.15 work; neither is fixed yet, because the package has no installed `node_modules` (its dependencies were unpublished at the time) and so its typecheck, lint, and tests could not be run.
+- **The rule index was empty against the installed standard.** `buildRuleIndex()` returned 0 rules, 0 forbidden constructs and 0 patterns, so every rule query answered with nothing. `@tsfpp/prelude` 2.0.0 renamed the `Option` eliminator `getOrElse` to `getOrElseOption` and reused the bare name for the `Result` eliminator; this package kept calling `getOrElse` on `Option` values, which silently yielded the fallback. All 13 call sites in `rule-index.ts` and `package-reader.ts` now use `getOrElseOption`.
+- **`list_forbidden` returned zero constructs.** The parser only understood a `## Never` bullet list that no spec file uses; it now parses the standard's `## 12 — Forbidden Constructs (Summary)` table.
+- The lockfile is regenerated so it agrees with `package.json`; it had still pinned prelude 1.7.0 and standard 1.3.0.
 
-- **The source does not compile against its own declared dependency range.** `rule-index.ts` and `package-reader.ts` pipe `Option` values into `getOrElse`, which has been the **`Result`** eliminator since `@tsfpp/prelude` 2.0.0 (`getOrElseOption` is the `Option` one). There are 8 such call sites, against a declared range of `^2.0.2` — so no version in the permitted range type-checks.
-- **`list_forbidden` returns zero constructs.** It scans for a `## Never` section that exists in no spec file, and even if lines reached it, a hardcoded 5-entry `forbiddenMetadata` whitelist would drop 22 of the 27 rows in the standard's section 12 table. Its test passes because it feeds `listForbidden` a hand-built index with fabricated constructs, so the failure is invisible in CI. Parsing the section 12 table directly yields all 25 rows with real rule IDs and alternatives — prototyped against the real spec, not yet shipped — and would also remove `forbiddenMetadata` as a duplicated source of truth.
+### Testing
 
-Since `@tsfpp/standard` is a **runtime** dependency here (the server reads spec files from the installed package), the range change above is consumer-facing and will need a version bump whenever these two issues are resolved and the package is published again.
+- Regression tests assert against the **installed** `@tsfpp/standard` rather than a fixture, and a `test` script plus a `ci.yml` (typecheck, lint, tests) now exist.
 
 ## [1.0.3] - 2026-07-24
 
