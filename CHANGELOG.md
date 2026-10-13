@@ -10,6 +10,19 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ## [Unreleased]
 
+## [2.1.0] — 2026-10-14
+
+### Added
+
+- **ESLint 10 support.** All four profiles (`base`, `react`, `api`, `layered`) are verified against ESLint 10.12.0 and still work on ESLint 9. No rule was added, removed or changed in severity, so code that linted clean under 2.0.0 lints the same.
+- **The React profile now runs on ESLint 10.** `eslint-plugin-react` 7.37.5 and `eslint-plugin-jsx-a11y` 6.10.2 have no ESLint 10 release; the former throws `contextOrFilename.getFilename is not a function` on the first linted file. Both are now registered through `coerceLegacyPlugin`, which applies `fixupPluginRules` from the new `@eslint/compat` dependency. Under ESLint 10 the package manager still warns about those two plugins' own `eslint` peer range.
+
+### Changed
+
+- **Peer ranges.** `eslint` is now `^9.0.0 || ^10.0.0` (was the open-ended `>=9.0.0`, which claimed majors nobody had tested), and `eslint-plugin-functional` is `^9.0.0 || ^10.0.0`. Under ESLint 10, `eslint-plugin-functional` 9.x needs at least 9.0.5.
+- **`engines.node` is now `^20.19.0 || ^22.13.0 || >=24`** (was `>=18.18.0`), matching ESLint 10 and `@eslint/compat` 2.x. Node 18 reached end of life in April 2025.
+- Development dependencies moved to ESLint 10.12.0, typescript-eslint 8.71.2, `eslint-plugin-functional` 10.0.1 and `@tanstack/eslint-plugin-query` 5.104.2.
+
 ## [2.0.0] — 2026-10-14
 
 ### ⚠ BREAKING CHANGES
