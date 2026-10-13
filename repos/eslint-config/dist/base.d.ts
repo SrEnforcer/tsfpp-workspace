@@ -2,7 +2,7 @@
  * @tsfpp/eslint-config — base
  *
  * Shared ESLint flat configuration for TSF++ projects (pure TypeScript targets).
- * Enforces Rules 1.2–1.9, 2.1–2.3, 3.1–3.2, 3.4, 4.1, 4.2, 4.5, 6.2, 6.4, 11.2
+ * Enforces Rules 1.2–1.9, 1.13, 2.1–2.3, 3.1–3.2, 3.4, 4.1, 4.2, 4.5, 4.6, 6.2, 6.4, 11.2
  * from CODING_STANDARD.md via @typescript-eslint and eslint-plugin-functional.
  *
  * Usage (base only):

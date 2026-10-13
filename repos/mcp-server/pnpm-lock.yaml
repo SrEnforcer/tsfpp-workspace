@@ -26,10 +26,10 @@ importers:
     devDependencies:
       '@tsfpp/agents':
         specifier: ^2.0.2
-        version: 2.5.0(@tsfpp/boundary@2.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@tsfpp/prelude@2.4.0)(@tsfpp/standard@5.0.0)(@tsfpp/tsconfig@1.0.0(typescript@6.0.3))
+        version: 2.5.0(@tsfpp/boundary@2.1.0)(@tsfpp/eslint-config@2.0.0(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@tsfpp/prelude@2.4.0)(@tsfpp/standard@5.0.0)(@tsfpp/tsconfig@1.0.0(typescript@6.0.3))
       '@tsfpp/eslint-config':
-        specifier: ^1.0.3
-        version: 1.0.3(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
+        specifier: ^2.0.0
+        version: 2.0.0(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
       '@tsfpp/tsconfig':
         specifier: ^1.0.0
         version: 1.0.0(typescript@6.0.3)
@@ -411,8 +411,8 @@ packages:
     resolution: {integrity: sha512-oaxSxdkPcmqE7F2dI0flqFpsc2liwbcrkaI9unkTa3Kg1JN60mcn9rEgYlOyWmVkl3FiOMQKD4qSwXx7Henl1g==}
     engines: {node: '>=18.0.0'}
 
-  '@tsfpp/eslint-config@1.0.3':
-    resolution: {integrity: sha512-cUV0DXum2dLM4xyLRXU/i0ubb0IpgUoHLa9TBnq5+YSAwc5W1V0zUccME2Al5nYU+av4jkwD4CfywAGSIxVjbw==}
+  '@tsfpp/eslint-config@2.0.0':
+    resolution: {integrity: sha512-AZVP5D0hrCPwYiitwfVkdx2XhEMWys4TgDieO1+Rm+viHiZ9KctbVZ9LvNTQ1X59pzMI9za7GRvIPUg5Zfl5OQ==}
     engines: {node: '>=18.18.0'}
     peerDependencies:
       '@tanstack/eslint-plugin-query': '>=5.0.0'
@@ -1643,10 +1643,10 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tsfpp/agents@2.5.0(@tsfpp/boundary@2.1.0)(@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@tsfpp/prelude@2.4.0)(@tsfpp/standard@5.0.0)(@tsfpp/tsconfig@1.0.0(typescript@6.0.3))':
+  '@tsfpp/agents@2.5.0(@tsfpp/boundary@2.1.0)(@tsfpp/eslint-config@2.0.0(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@tsfpp/prelude@2.4.0)(@tsfpp/standard@5.0.0)(@tsfpp/tsconfig@1.0.0(typescript@6.0.3))':
     dependencies:
       '@tsfpp/boundary': 2.1.0
-      '@tsfpp/eslint-config': 1.0.3(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
+      '@tsfpp/eslint-config': 2.0.0(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
       '@tsfpp/prelude': 2.4.0
       '@tsfpp/standard': 5.0.0
       '@tsfpp/tsconfig': 1.0.0(typescript@6.0.3)
@@ -1655,7 +1655,7 @@ snapshots:
     dependencies:
       '@tsfpp/prelude': 2.4.0
 
-  '@tsfpp/eslint-config@1.0.3(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)':
+  '@tsfpp/eslint-config@2.0.0(@typescript-eslint/eslint-plugin@8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3))(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint-plugin-functional@9.0.5(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)':
     dependencies:
       '@typescript-eslint/eslint-plugin': 8.60.0(@typescript-eslint/parser@8.60.0(eslint@10.4.0)(typescript@6.0.3))(eslint@10.4.0)(typescript@6.0.3)
       '@typescript-eslint/parser': 8.60.0(eslint@10.4.0)(typescript@6.0.3)
