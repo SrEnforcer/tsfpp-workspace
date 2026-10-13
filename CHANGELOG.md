@@ -10,6 +10,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-10-14
+
+### Features
+
+- add **`findOption`** — the Rule 7.8-conforming name for the `Option`-returning array search.
+
+### Deprecated
+
+- **`findO`** is now a deprecated alias of `findOption`. Its abbreviated ADT suffix is what standard Rule 7.8 forbids. It keeps working and is scheduled for removal in the next major release.
+
+### Changed
+
+- Raised the `@tsfpp/eslint-config` **dev** dependency to `^2.0.0` (was `^1.0.3`), which adds the Rule 1.13 and 4.6 lint checks. Dev-only; no consumer-facing change.
+
 ## [2.4.0] - 2026-07-26
 
 ### Features
