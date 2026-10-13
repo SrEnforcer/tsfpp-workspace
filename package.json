@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@tsfpp/agents": "^2.0.0",
-    "@tsfpp/eslint-config": "^1.0.3",
+    "@tsfpp/eslint-config": "^2.0.0",
     "@tsfpp/standard": "^5.0.0",
     "@tsfpp/tsconfig": "^1.0.0",
     "@types/node": "^25.9.1",

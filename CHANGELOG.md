@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Raised the `@tsfpp/eslint-config` **dev** dependency to `^2.0.0` (was `^1.0.3`), which adds the Rule 1.13 and 4.6 lint checks. Dev-only; no consumer-facing change.
 - Widened the `@tsfpp/standard` **dev** dependency to `^5.0.0` (was `^4.0.0`, which the caret excluded from 5.0.0). Dev-only, so this carries no consumer-facing change and deliberately does **not** warrant a release of its own — it rides along with the next boundary release. The runtime `@tsfpp/prelude` range `^2.0.0` already admits 2.4.0, so the new `NonEmptyReadonlyArray` combinators are available to this package without a republish.
 
 ## [2.1.0] - 2026-07-25
