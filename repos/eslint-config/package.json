@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/eslint-config",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Shared ESLint flat configuration for TSF++ projects",
   "keywords": [
     "eslint",
@@ -36,14 +36,14 @@
     "test": "node --input-type=module --eval \"import './dist/base.js'\""
   },
   "engines": {
-    "node": ">=18.18.0"
+    "node": "^20.19.0 || ^22.13.0 || >=24"
   },
   "peerDependencies": {
     "@tanstack/eslint-plugin-query": ">=5.0.0",
     "@typescript-eslint/eslint-plugin": ">=8.0.0",
     "@typescript-eslint/parser": ">=8.0.0",
-    "eslint": ">=9.0.0",
-    "eslint-plugin-functional": "^9.0.0",
+    "eslint": "^9.0.0 || ^10.0.0",
+    "eslint-plugin-functional": "^9.0.0 || ^10.0.0",
     "eslint-plugin-jsx-a11y": ">=6.0.0",
     "eslint-plugin-react": ">=7.0.0",
     "eslint-plugin-react-hooks": ">=5.0.0",
@@ -64,14 +64,17 @@
     }
   },
   "devDependencies": {
-    "@tanstack/eslint-plugin-query": "^5.100.10",
-    "@typescript-eslint/eslint-plugin": "^8.59.3",
-    "@typescript-eslint/parser": "^8.59.3",
-    "eslint": "^9.39.4",
-    "eslint-plugin-functional": "^9.0.0",
+    "@tanstack/eslint-plugin-query": "^5.104.2",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/parser": "^8.71.2",
+    "eslint": "^10.12.0",
+    "eslint-plugin-functional": "^10.0.1",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@eslint/compat": "^2.1.1"
   }
 }

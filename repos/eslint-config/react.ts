@@ -33,7 +33,7 @@ import reactHooksPlugin   from 'eslint-plugin-react-hooks'
 import jsxA11yPlugin      from 'eslint-plugin-jsx-a11y'
 import tanstackQueryPlugin from '@tanstack/eslint-plugin-query'
 import base               from './base.js'
-import { coercePlugin }   from './plugin-compat.js'
+import { coerceLegacyPlugin, coercePlugin } from './plugin-compat.js'
 
 const config: Linter.Config[] = [
 
@@ -44,9 +44,10 @@ const config: Linter.Config[] = [
   {
     files: ['**/*.tsx'],
     plugins: {
-      'react':             coercePlugin(reactPlugin),
+      // react and jsx-a11y predate ESLint 10 — see coerceLegacyPlugin
+      'react':             coerceLegacyPlugin(reactPlugin),
       'react-hooks':       coercePlugin(reactHooksPlugin),
-      'jsx-a11y':          coercePlugin(jsxA11yPlugin),
+      'jsx-a11y':          coerceLegacyPlugin(jsxA11yPlugin),
       '@tanstack/query':   coercePlugin(tanstackQueryPlugin),
     },
     settings: {

@@ -19,7 +19,8 @@
  * Reviewed and approved per TSF++ deviation procedure.
  */
 
-import type { ESLint } from 'eslint'
+import type { ESLint }      from 'eslint'
+import { fixupPluginRules } from '@eslint/compat'
 
 /**
  * Coerces a third-party ESLint plugin object to the canonical `ESLint.Plugin`
@@ -31,3 +32,16 @@ import type { ESLint } from 'eslint'
 export const coercePlugin = (plugin: unknown): ESLint.Plugin =>
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): see module JSDoc above
   plugin as ESLint.Plugin
+
+/**
+ * Coerces a plugin and additionally restores the rule-context methods ESLint 10
+ * removed (`context.getFilename()`, `context.getSourceCode()`, …).
+ *
+ * Use for plugins that have not shipped ESLint 10 support — currently
+ * eslint-plugin-react and eslint-plugin-jsx-a11y. Without the fixup,
+ * eslint-plugin-react 7.37.5 throws `contextOrFilename.getFilename is not a
+ * function` on the first linted file. Harmless under ESLint 9; drop the call
+ * for a plugin once its own peer range includes ESLint 10.
+ */
+export const coerceLegacyPlugin = (plugin: unknown): ESLint.Plugin =>
+  fixupPluginRules(coercePlugin(plugin))

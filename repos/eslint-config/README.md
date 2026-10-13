@@ -6,7 +6,8 @@ Enforces the machine-checkable subset of TSF++ rules via `@typescript-eslint` an
 
 ## Requirements
 
-- ESLint ≥ 9 (flat config format)
+- ESLint 9 or 10 (flat config format)
+- Node.js `^20.19.0 || ^22.13.0 || >=24` — the range ESLint 10 itself supports
 - TypeScript ≥ 5.3
 - A `tsconfig.json` reachable from each linted file
 
@@ -210,6 +211,10 @@ throw new Error('unreachable')
 ## Internal adapter: plugin-compat
 
 Several ESLint plugin packages ship types that lag behind the current `@eslint/core` `Plugin` interface. This package contains a single `coercePlugin` adapter (`plugin-compat.ts`) that isolates the necessary type cast at one auditable boundary per TSF++ DEVIATION(1.6). Consumers are unaffected — this is an internal concern of the config package itself.
+
+### ESLint 10 and the React profile
+
+`eslint-plugin-react` (7.37.5) and `eslint-plugin-jsx-a11y` (6.10.2) have not yet released ESLint 10 support: both call rule-context methods that ESLint 10 removed. The React profile registers them through `coerceLegacyPlugin`, which wraps them with `fixupPluginRules` from `@eslint/compat`, so the profile works on ESLint 9 and 10 alike. Your package manager will still report an unmet `eslint` peer for those two plugins under ESLint 10 — that warning comes from the plugins' own manifests and is expected until they publish a compatible release.
 
 ## See also
 

@@ -27,4 +27,15 @@ import type { ESLint } from 'eslint';
  * type errors.
  */
 export declare const coercePlugin: (plugin: unknown) => ESLint.Plugin;
+/**
+ * Coerces a plugin and additionally restores the rule-context methods ESLint 10
+ * removed (`context.getFilename()`, `context.getSourceCode()`, …).
+ *
+ * Use for plugins that have not shipped ESLint 10 support — currently
+ * eslint-plugin-react and eslint-plugin-jsx-a11y. Without the fixup,
+ * eslint-plugin-react 7.37.5 throws `contextOrFilename.getFilename is not a
+ * function` on the first linted file. Harmless under ESLint 9; drop the call
+ * for a plugin once its own peer range includes ESLint 10.
+ */
+export declare const coerceLegacyPlugin: (plugin: unknown) => ESLint.Plugin;
 //# sourceMappingURL=plugin-compat.d.ts.map
