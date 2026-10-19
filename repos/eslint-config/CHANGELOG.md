@@ -10,6 +10,12 @@ Versioning follows the policy documented in `docs/semver-policy.md`.
 
 ## [Unreleased]
 
+## [2.1.1] — 2026-10-19
+
+### Fixed
+
+- **The React profile no longer crashes on custom-hook `.ts` files.** The `**/use*.ts` block set `react-hooks/rules-of-hooks` and `react-hooks/exhaustive-deps` without registering the `react-hooks` plugin, which was only registered for `**/*.tsx`, so ESLint aborted with a missing-plugin error on any `use*.ts` file. The block now registers the plugin itself. Consumers who registered `react-hooks` for `use*.ts` in their own config as a workaround should remove it.
+
 ## [2.1.0] — 2026-10-14
 
 ### Added

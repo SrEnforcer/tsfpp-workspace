@@ -132,6 +132,11 @@ const config: Linter.Config[] = [
   // ── React hooks in plain .ts files (custom hooks outside .tsx) ───────────────
   {
     files: ['**/use*.ts', '**/use*.tsx'],
+    // Must register the plugin here too — plain .ts files never match the **/*.tsx block above.
+    // Same object reference as above, so ESLint does not report a plugin redefinition for use*.tsx.
+    plugins: {
+      'react-hooks': coercePlugin(reactHooksPlugin),
+    },
     rules: {
       'react-hooks/rules-of-hooks':  'error',
       'react-hooks/exhaustive-deps': 'error',
