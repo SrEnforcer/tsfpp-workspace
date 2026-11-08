@@ -114,7 +114,8 @@ export const mkNumberBetween = <B extends string>(minimum: number, maximum: numb
 export const clamp =
   (minimum: number, maximum: number) =>
   (value: number): number =>
-    Number.isNaN(value) ? minimum : Math.min(maximum, Math.max(minimum, value));
+    // Comparisons, not Math.min/max: those turn an in-bounds 0 into -0 when a bound is -0.
+    Number.isNaN(value) || value < minimum ? minimum : value > maximum ? maximum : value;
 
 /**
  * The total constructor of a bounded brand: the number clamped into
