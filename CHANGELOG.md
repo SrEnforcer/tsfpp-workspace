@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-08
+
+### Fixed
+
+- **Zod 4 compatibility.** `fromZodError` read `zodError.errors`, which Zod 4 removed, so with Zod 4 every refused body in `parseJsonWithSchema` / `mkJsonHandler` threw a `TypeError` (a 500) instead of answering 422. It now reads `issues` (Zod 4, and Zod 3, which has both) and falls back to `errors`. `JsonSchema`, `EnvSchema` and `fromZodError` share the new `SchemaError` type, whose path segments may be symbols as Zod 4 types them; `loadConfig` no longer needs an adapter for a Zod 4 schema. Verified against `zod@4.6.7`.
+
+### Features
+
+- add **`parseWith`**, **`parseQuery`** and **`queryOf`** (`boundary-parse`): parse path parameters, query strings or any value through a schema into `Result<T, ValidationError>`, the shape `parseJsonWithSchema` gives a body.
+- add **`withIdempotency(store, { required: true })`**: a retryable write without an `Idempotency-Key` is refused with 400 `idempotency_key_required` before the handler runs. The default is unchanged.
+- add **`parseAcceptLanguage`**, **`preferredLanguage`** and **`contentLanguageHeader`** (`boundary-language`): RFC 9110 language negotiation against the application's own locale constructor.
+- add the client side (`boundary-client`): **`fetchJson`** over an injected `FetchPort`, **`readJsonResponse`**, **`parseProblemDetails`** and the **`ClientFailure`** union (`offline`, `unauthenticated`, `problem` with parsed `ProblemDetails`, `malformed`).
+- add **`withResultCache`** (`boundary-cache`): an in-memory TTL cache of a Result-returning source's successes, with an injected clock and a capacity.
+- add **`runMain`** and **`MainFailure`** (`boundary-node`): a script's exit code from its `Result`, so scripts carry no exit-code mutation of their own.
+- add **`mkFieldError(field, issue)`**, plus the `SchemaIssue` / `SchemaError` types and the `schemaIssues`, `pathText` and `fieldOfPath` helpers.
+- 28 new tests (`boundary.additions.test.ts`), property-based for `queryOf` round-trips and `Accept-Language` ordering; suite now **49**.
+
+Extracted from patterns proven in a consuming application (civi). Uses only `@tsfpp/prelude` 2.0.x APIs, so the `^2.0.0` range stands.
+
 ### Changed
 
 - Raised the `@tsfpp/eslint-config` **dev** dependency to `^2.0.0` (was `^1.0.3`), which adds the Rule 1.13 and 4.6 lint checks. Dev-only; no consumer-facing change.

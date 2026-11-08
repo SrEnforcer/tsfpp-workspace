@@ -1,6 +1,6 @@
 {
   "name": "@tsfpp/boundary",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Functional HTTP boundary toolkit with typed handler helpers, Problem Details mapping, pagination, idempotency, and webhook primitives",
   "private": false,
   "license": "MIT",

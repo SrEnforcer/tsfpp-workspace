@@ -156,24 +156,60 @@ export type ValidationError = {
   readonly message: string;
 };
 
-/** Zod-like validation error shape used by boundary adapters without importing zod directly. */
-type ZodLikeError = {
-  readonly errors: ReadonlyArray<{
-    readonly path: ReadonlyArray<string | number>;
-    readonly message: string;
-  }>;
+/**
+ * One issue of a schema failure. A path segment may be a symbol: Zod 4 types
+ * paths as `PropertyKey[]`.
+ */
+export type SchemaIssue = {
+  readonly path: ReadonlyArray<PropertyKey>;
+  readonly message: string;
 };
 
 /**
- * Converts a Zod-like error shape into the canonical validation error value.
+ * A schema failure, structurally, so boundary never imports zod. Zod 4 errors
+ * carry `issues` only; Zod 3 errors carry both `issues` and the older
+ * `errors` alias. Either shape is accepted, `issues` first.
+ */
+export type SchemaError =
+  | { readonly issues: ReadonlyArray<SchemaIssue> }
+  | { readonly errors: ReadonlyArray<SchemaIssue> };
+
+/**
+ * The issues of a schema failure, whichever shape it has.
+ * @param error Error object from a schema parser.
+ * @returns Its issues.
+ */
+export const schemaIssues = (error: SchemaError): ReadonlyArray<SchemaIssue> =>
+  'issues' in error ? error.issues : error.errors;
+
+const segmentText = (segment: PropertyKey): string =>
+  typeof segment === 'symbol' ? segment.description ?? 'symbol' : String(segment);
+
+/**
+ * A path as dotted text; symbol segments use their description.
+ * @param path Issue path.
+ * @returns Dotted path, empty for an empty one.
+ */
+export const pathText = (path: ReadonlyArray<PropertyKey>): string => path.map(segmentText).join('.');
+
+/**
+ * A path as a dotted field name for a field issue.
+ * @param path Issue path.
+ * @returns Dotted path, `(root)` for an empty one.
+ */
+export const fieldOfPath = (path: ReadonlyArray<PropertyKey>): string =>
+  path.length > 0 ? pathText(path) : '(root)';
+
+/**
+ * Converts a schema failure (Zod 3 or Zod 4) into the canonical validation error value.
  * @param zodError Error object from a schema parser.
  * @returns Validation error with normalized issue paths.
  */
-export const fromZodError = (zodError: ZodLikeError): ValidationError => ({
+export const fromZodError = (zodError: SchemaError): ValidationError => ({
   kind: 'validation',
   message: 'Request validation failed',
-  issues: zodError.errors.map((issue) => ({
-    field: issue.path.length > 0 ? issue.path.join('.') : '(root)',
+  issues: schemaIssues(zodError).map((issue) => ({
+    field: fieldOfPath(issue.path),
     issue: issue.message,
   })),
 });
@@ -188,6 +224,16 @@ export const mkValidationError = (
   issues: ReadonlyArray<FieldIssue>,
   message = 'Validation failed',
 ): ValidationError => ({ kind: 'validation', issues, message });
+
+/**
+ * Builds a validation error for one field — the common case of a domain
+ * refusal that concerns a single request field.
+ * @param field Dotted field name, as in the request.
+ * @param issue Stable issue code.
+ * @returns Validation error with that one issue.
+ */
+export const mkFieldError = (field: string, issue: string): ValidationError =>
+  mkValidationError([{ field, issue }]);
 
 /** Canonical HTTP-safe error ADT mapped to RFC 9457 responses by boundary mappers. */
 export type ApiError =
@@ -337,19 +383,14 @@ export const mkProblem = (
   };
 };
 
-/** Zod-like parser interface used to decouple config loading from a hard zod dependency. */
+/**
+ * Zod-like parser interface used to decouple config loading from a hard zod
+ * dependency. A Zod 3 or Zod 4 schema satisfies it as it is.
+ */
 export type EnvSchema<T> = {
   readonly safeParse: (data: unknown) =>
     | { readonly success: true; readonly data: T }
-    | {
-      readonly success: false;
-      readonly error: {
-        readonly issues: ReadonlyArray<{
-          readonly path: ReadonlyArray<string | number>;
-          readonly message: string;
-        }>;
-      };
-    };
+    | { readonly success: false; readonly error: SchemaError };
 };
 
 /** Startup-time configuration validation error with aggregated field failures. */
@@ -372,8 +413,8 @@ export const loadConfig = <T>(
   const parsed = schema.safeParse(env);
 
   if (!parsed.success) {
-    const issues = parsed.error.issues.map((issue) => ({
-      path: issue.path.join('.'),
+    const issues = schemaIssues(parsed.error).map((issue) => ({
+      path: pathText(issue.path),
       message: issue.message,
     }));
 

@@ -81,19 +81,33 @@ type IdempotencyInput = {
   readonly principalId: PrincipalId | null;
 };
 
+/** How `withIdempotency` treats a request without an `Idempotency-Key`. */
+export type IdempotencyOptions = {
+  /**
+   * When `true`, a request without the header is refused with 400
+   * (`idempotency_key_required`) before the handler runs — for a retryable
+   * write that must never run twice. When `false` (the default), such a
+   * request runs without replay protection.
+   */
+  readonly required?: boolean;
+};
+
 /**
  * Wraps a handler with idempotency semantics.
  * @param store Backing idempotency store.
+ * @param options Whether the key is required; optional by default.
  * @returns Middleware wrapper.
  */
 // NOTE(unknown, 2026-05-20): Request hash includes method + URL + body to preserve
 // semantic uniqueness across endpoints where the same key may otherwise collide.
 export const withIdempotency =
-  (store: IdempotencyStore) =>
+  (store: IdempotencyStore, options: IdempotencyOptions = {}) =>
   (handler: RawHandler): RawHandler =>
   async (req: Request): Promise<Response> => {
     const parsedInput = await parseIdempotencyInput(req);
-    if (parsedInput.kind === 'no_key') return handler(req);
+    if (parsedInput.kind === 'no_key') {
+      return options.required === true ? mkKeyRequiredResponse(extractTraceId(req)) : handler(req);
+    }
     if (parsedInput.kind === 'invalid_key') return mkInvalidKeyResponse(parsedInput.traceId);
 
     const lookup = await store.check(
@@ -167,6 +181,20 @@ const mkInvalidKeyResponse = (traceId: TraceId): Response =>
       traceId,
       opts: {
         detail: 'Key must be 1-255 characters, [A-Za-z0-9_-]',
+      },
+    }),
+  );
+
+const mkKeyRequiredResponse = (traceId: TraceId): Response =>
+  problemResponse(
+    mkProblem({
+      status: 400,
+      code: 'idempotency_key_required',
+      title: 'Idempotency-Key header required',
+      traceId,
+      opts: {
+        detail: 'This request may be retried, so it must carry an Idempotency-Key header',
+        errors: [{ field: 'Idempotency-Key', issue: 'required' }],
       },
     }),
   );
