@@ -8,7 +8,11 @@ It provides:
 
 - **Branded primitives** — `TraceId`, `PrincipalId`, `IdempotencyKey`, `Cursor`, `WebhookEventId`
 - **Request context** — `extractContext`, `extractTraceId`, `RequestContext`
-- **Validation** — `ValidationError`, `FieldIssue`, `fromZodError`, `mkValidationError`
+- **Validation** — `ValidationError`, `FieldIssue`, `SchemaError`, `fromZodError` (Zod 3 and Zod 4), `mkValidationError`, `mkFieldError`
+- **Request parsing** — `parseWith`, `parseQuery`, `queryOf`
+- **Language negotiation** — `parseAcceptLanguage`, `preferredLanguage`, `contentLanguageHeader`
+- **Client** — `fetchJson`, `readJsonResponse`, `parseProblemDetails`, `ClientFailure`, `FetchPort`
+- **Result cache** — `withResultCache`
 - **Configuration** — `loadConfig`, `EnvSchema<T>`, `ConfigError`
 - **API error taxonomy** — `ApiError` discriminated union, smart constructors, exhaustive mapper
 - **Problem Details (RFC 9457)** — `ProblemDetails`, `mkProblem`, `problemResponse`
@@ -19,11 +23,12 @@ It provides:
 - **Bulk operations** — `BulkItem<T>`, `BulkResponse<T>`, `mkBulkOkItem`, `mkBulkErrorItem`, `bulkResponse`
 - **Rate limiting** — `rateLimitHeaders`, `retryAfterHeader`
 - **Security and CORS** — `baselineSecurityHeaders`, `corsHeaders`
-- **Idempotency** — `IdempotencyStore` port, `withIdempotency` HOF
+- **Idempotency** — `IdempotencyStore` port, `withIdempotency` HOF (key optional or `required`)
 - **Observability** — `RequestLog`, `RequestLogger` port, `withRequestLog` HOF
 - **Webhooks** — `signWebhook`, `verifyWebhook`, `WebhookSignatureHeaders`
 - **Cache headers** — `CachePolicy`, `cacheHeaders`
 - **Handler types** — `RawHandler`, `HandlerFactory<Deps>`
+- **Scripts** — `runMain`, `MainFailure` (exit code from a `Result`)
 
 One peer dependency (`@tsfpp/prelude`). Zero others. Framework-agnostic — works with any Fetch API–compatible runtime.
 
@@ -153,8 +158,41 @@ export const makeCreateOrderRoute = (
 |---|---|
 | `FieldIssue` | Type — `{ field: string; issue: string }` |
 | `ValidationError` | Type — `{ kind: 'validation'; issues: ReadonlyArray<FieldIssue>; message: string }` |
-| `fromZodError(zodError)` | Converts a `ZodError` to `ValidationError`. Accepts any structurally compatible error — no hard Zod import. |
+| `SchemaError` | Type — a schema failure: Zod 4's `{ issues }` or Zod 3's `{ errors }`; path segments may be symbols. |
+| `fromZodError(zodError)` | Converts a Zod 3 or Zod 4 `ZodError` to `ValidationError`. Accepts any structurally compatible error — no hard Zod import. |
 | `mkValidationError(issues, message?)` | Constructs a `ValidationError` from field issues directly. |
+| `mkFieldError(field, issue)` | A `ValidationError` with one issue — a domain refusal at one request field. |
+
+### Request parsing
+
+| Export | Description |
+|---|---|
+| `parseWith(schema, input)` | Parses any value (path parameters, a record in hand) through a schema; `Result<T, ValidationError>`. |
+| `queryOf(url)` | The decoded query parameters of a URL as a record; the first of repeated names wins. |
+| `parseQuery(schema)(req)` | `parseWith` over `queryOf(req.url)`. |
+
+### Language negotiation
+
+| Export | Description |
+|---|---|
+| `parseAcceptLanguage(header)` | `Accept-Language` ranges, most preferred first; drops `q=0` and malformed weights. |
+| `preferredLanguage(header, accept)` | The most preferred range your locale constructor accepts, as `Option`. |
+| `contentLanguageHeader(tag)` | `{ 'Content-Language': tag }` to spread into response headers. |
+
+### Client
+
+| Export | Description |
+|---|---|
+| `ClientFailure` | Union — `offline \| unauthenticated \| problem (with parsed ProblemDetails) \| malformed` |
+| `fetchJson(deps, { url, init?, schema })` | Sends through an injected `fetch` and parses the answer; never throws. |
+| `readJsonResponse(response, schema)` | Reads a `Response` into its parsed body or a `ClientFailure`. |
+| `parseProblemDetails(body)` | Parses the RFC 9457 body boundary writes, as `Option<ProblemDetails>`. |
+
+### Result cache
+
+| Export | Description |
+|---|---|
+| `withResultCache({ clock, ttlMs, capacity, keyOf })(source)` | Keeps a Result-returning source's successes per key for `ttlMs`; failures are retried; oldest key evicted past `capacity`. |
 
 ### Configuration
 
@@ -268,7 +306,7 @@ Extend with application-specific variants without modifying `ApiError` — see [
 | `IdempotencyLookup` | Discriminated union — `first_request \| replay \| in_flight \| key_conflict` |
 | `StoredResponse` | Type — serialisable response snapshot for replay |
 | `IdempotencyStore` | Port (interface) — `check`, `markInFlight`, `store`. Implement with Redis, Postgres, or any durable store. |
-| `withIdempotency(store)` | `(RawHandler) → RawHandler` HOF — full idempotency lifecycle |
+| `withIdempotency(store, options?)` | `(RawHandler) → RawHandler` HOF — full idempotency lifecycle. `{ required: true }` refuses a request without the header with 400 `idempotency_key_required`. |
 
 ### Observability
 
@@ -299,6 +337,12 @@ Extend with application-specific variants without modifying `ApiError` — see [
 |---|---|
 | `RawHandler` | `(req: Request) => Promise<Response>` |
 | `HandlerFactory<Deps>` | `(deps: Deps) => RawHandler` — the canonical handler export shape |
+
+### Scripts
+
+| Export | Description |
+|---|---|
+| `runMain(program, onFailure)` | Runs a Result-returning main; sets `process.exitCode` to 0 for `Ok`, 1 for `Err` or a throw, and reports the `MainFailure`. |
 
 ---
 

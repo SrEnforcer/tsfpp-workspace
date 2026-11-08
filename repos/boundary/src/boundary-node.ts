@@ -8,7 +8,18 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { buffer } from 'node:stream/consumers';
 
-import { fromNullable, getOrElseOption, isSome, type Logger } from '@tsfpp/prelude';
+import {
+  type Logger,
+  type Option,
+  type Result,
+  fromNullable,
+  getOrElseOption,
+  isErr,
+  isSome,
+  none,
+  some,
+  tryCatchAsync,
+} from '@tsfpp/prelude';
 
 import { type RawHandler } from './boundary-idempotency.js';
 
@@ -166,4 +177,33 @@ export const mkNodeAdapter = (
   const close = (): Promise<void> => closeServer(server);
 
   return { listen, close };
+};
+
+/** Why a script's main program did not succeed. */
+export type MainFailure<E> =
+  | { readonly kind: 'failed'; readonly error: E }
+  | { readonly kind: 'threw'; readonly reason: unknown };
+
+/**
+ * Runs a script's main program and reports its outcome through the process
+ * exit code — `0` for `Ok`, `1` for an `Err` or a throw — so a script needs
+ * no exit-code mutation of its own. The process is left to end by itself
+ * (no `process.exit`), so pending output still flushes.
+ * @param program The script's work, as a Result-returning effect.
+ * @param onFailure Reports a failure, typically through a logger.
+ * @returns The exit code it set.
+ */
+export const runMain = async <E>(
+  program: () => Promise<Result<unknown, E>>,
+  onFailure: (failure: MainFailure<E>) => void,
+): Promise<number> => {
+  const outcome = await tryCatchAsync(program, (reason): MainFailure<E> => ({ kind: 'threw', reason }));
+  const failure: Option<MainFailure<E>> = isErr(outcome)
+    ? some(outcome.error)
+    : isErr(outcome.value) ? some({ kind: 'failed', error: outcome.value.error }) : none;
+  if (isSome(failure)) onFailure(failure.value);
+  const code = isSome(failure) ? 1 : 0;
+  // eslint-disable-next-line functional/immutable-data -- DEVIATION(2.3): the process reports its outcome through its exit code.
+  process.exitCode = code;
+  return code;
 };

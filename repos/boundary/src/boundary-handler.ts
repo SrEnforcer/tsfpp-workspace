@@ -26,24 +26,21 @@ import {
   type ApiError,
   type Cursor,
   type RequestContext,
+  type SchemaError,
   type ValidationError,
   extractContext,
   fromZodError,
   mkValidationError,
 } from './boundary-types.js';
 
-type ZodLikeParseError = {
-  readonly errors: ReadonlyArray<{
-    readonly path: ReadonlyArray<string | number>;
-    readonly message: string;
-  }>;
-};
-
-/** Structural schema shape accepted by boundary JSON parsing helpers. */
+/**
+ * Structural schema shape accepted by boundary parsing helpers. A Zod 3 or
+ * Zod 4 schema satisfies it as it is.
+ */
 export type JsonSchema<T> = {
   readonly safeParse: (input: unknown) =>
     | { readonly success: true; readonly data: T }
-    | { readonly success: false; readonly error: ZodLikeParseError };
+    | { readonly success: false; readonly error: SchemaError };
 };
 
 /** Shared input passed to application handler implementations. */
