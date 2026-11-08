@@ -136,6 +136,11 @@ describe('clamp', () => {
     }));
   });
 
+  it('keeps the sign of an in-bounds zero when a bound is -0', () => {
+    expect(Object.is(clamp(0, -0)(0), 0)).toBe(true);
+    expect(Object.is(clamp(-0, 0)(-0), -0)).toBe(true);
+  });
+
   it('is idempotent', () => {
     fc.assert(fc.property(bounds, anyNumber, ([lo, hi], n) => clamp(lo, hi)(clamp(lo, hi)(n)) === clamp(lo, hi)(n)));
   });
