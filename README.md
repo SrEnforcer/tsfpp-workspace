@@ -44,14 +44,16 @@ From `@tsfpp/prelude`:
 - **Result**: `ok`, `err`, `isOk`, `isErr`, `map`, `flatMap`, `flatMapAsync`, `mapErr`, `tryCatch`, `tryCatchAsync`, `tap`, `tapErr`, `match`, `getOrElse`
 - **Logger port**: `LogLevel`, `LogEntry`, `Logger`
 - **Conversions and guards**: `fromNullable`, `isDefined`, `toNullable`, `isRecord`, `fromUnknownString`, `fromUnknownArray`, `fromUnknownArrayOf`, `fromNonEmptyString`, `getTypedField`, `getStringField`, `getNumberField`, `getBooleanField`, `findOption` (`findO` is a deprecated alias)
-- **Branded types**: `Brand`, `Every`, `Any`, `mkEvery`, `mkAny`
-- **Refined numerics**: `Int`, `Positive`, `NonNegative`, `mkInt`, `mkPositive`, `mkNonNegative`, `isFiniteNumber`
+- **Branded types**: `Brand`, `refineBrand` (builds a smart constructor from a predicate — no brand assertion needed), `Every`, `Any`, `mkEvery`, `mkAny`
+- **Refined numerics**: `Int`, `Positive`, `NonNegative`, `SafeInt`, `PositiveInt`, `mkInt`, `mkPositive`, `mkNonNegative`, `mkSafeInt`, `mkPositiveInt`, `isFiniteNumber`
+- **Bounded numerics**: `mkIntBetween`, `mkNumberBetween`, `mkClampedBetween`, `clamp`, `checkNumber`, `refineNumber`, `NumberSpec`, `NumberIssue`
+- **Unit interval** (`[0, 1]`): `UnitInterval`, `mkUnitInterval`, `clampUnitInterval`, `ratio`, `multiplyUnitInterval`
 - **Non-empty arrays**: `NonEmptyReadonlyArray`, `isNonEmptyArray`, `mkNonEmpty`, `consNonEmpty`, `singletonNonEmpty`, `headNonEmpty`, `lastNonEmpty`, `tailNonEmpty`, `toArrayNonEmpty`, `lengthNonEmpty`, `mapNonEmpty`, `appendNonEmpty`, `prependNonEmpty`, `concatNonEmpty`, `reverseNonEmpty`, `sortNonEmpty`, `reduceNonEmpty`, `reduceMapNonEmpty`, `traverseNonEmpty`
 - **Combining (Semigroup/Monoid)**: `Semigroup`, `Monoid`, `mkSemigroup`, `mkMonoid`, `monoidSum`, `monoidProduct`, `monoidString`, `monoidEvery`, `monoidAny`, `monoidArray`, `monoidRecord`, `semigroupFirst`/`semigroupLast`, `semigroupMax`/`semigroupMin`, `semigroupNonEmpty`, `concatAll`, `concatAllWith`, `foldMap`, `dual`
 - **Typed record helpers**: `keysOf`, `valuesOf`, `entriesOfRecord`, `mapValues`
 - **Equality & ordering**: `Eq`, `Ord`, `Ordering`, `mkEq`, `mkOrd`, `eqStrict`, `eqStructural`, `structuralEquals`, `eqBy`, `ordBy`, `reverseOrd`, `ordThen`, `eqNumber`/`eqString`/`eqBoolean`, `ordNumber`/`ordString`/`ordBoolean`, `eqArray`, `eqOption`, `elemWith`, `uniqueWith`, `sortWith`, `maxWith`, `minWith`, `lookupWith`
 - **Validation (error-accumulating)**: `Validation`, `valid`, `invalid`, `invalidAll`, `isValid`, `isInvalid`, `mapValidation`, `mapErrorsValidation`, `apValidation`, `matchValidation`, `traverseArrayValidation`, `sequenceArrayValidation`, `sequenceStructValidation`, `validationToResult`, `resultToValidation`
-- **Collection helpers**: `traverseArray`, `traverseArrayOption`, `sequenceArrayOption`, `unique`, `intoMap`, `entriesOf`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
+- **Collection helpers**: `traverseArray`, `traverseArrayOption`, `sequenceArray`, `sequenceArrayAsync`, `sequenceArrayOption`, `unique`, `intoMap`, `entriesOf`, `toObject`, `assoc`, `dissoc`, `lookup`, `intoSet`, `conj`, `disj`, `member`
 - **Immutable list ADT**: `List`, `nil`, `cons`, `singletonList`, `fromArray`, `toArray`, `headList`, `tailList`, `isNil`, `isCons`, `isEmptyList`, `lengthList`, `mapList`, `flatMapList`, `appendList`, `reverseList`, `filterList`, `foldList`, `foldLeftList`, `foldLeftListCurried`, `traverseList`
 
 ## Why a prelude when these libraries exist?

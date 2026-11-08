@@ -8,7 +8,8 @@
  * (Rule 11.1: one type, one file).
  */
 
-import { type Option, type Result, err, isErr, isOk, isSome, none, some } from './adt.js';
+import { type Option, type Result, err, isErr, isOk, isSome } from './adt.js';
+import { refineBrand } from './brand.js';
 import { fromNullable } from './combinators.js';
 import { type Brand } from './core.js';
 
@@ -103,7 +104,11 @@ export const findO = findOption;
 // core consumes a value on which arithmetic reasoning is sound.
 // ---------------------------------------------------------------------------
 
-/** A `number` proven to be finite, an integer. */
+/**
+ * A `number` proven to be finite, an integer. Integers beyond 2^53 pass, and
+ * there integer arithmetic is inexact (`2 ** 53 + 1 === 2 ** 53`); prefer
+ * `SafeInt` for values used in arithmetic.
+ */
 export type Int = Brand<number, 'Int'>;
 
 /** A `number` proven to be finite and strictly greater than zero. */
@@ -122,26 +127,18 @@ export const isFiniteNumber = (value: number): boolean => Number.isFinite(value)
  * Smart constructor for `Int`. `Some` iff `value` is a finite integer.
  * @law isSome(mkInt(n)) ≡ Number.isInteger(n)
  */
-export const mkInt = (value: number): Option<Int> =>
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): smart-constructor body, brand applied after Number.isInteger guard
-  Number.isInteger(value) ? some(value as Int) : none;
+export const mkInt: (value: number) => Option<Int> = refineBrand<number, 'Int'>((value) => Number.isInteger(value));
 
 /**
  * Smart constructor for `Positive`. `Some` iff `value` is finite and `> 0`.
  * @law isSome(mkPositive(n)) ≡ Number.isFinite(n) && n > 0
  */
-export const mkPositive = (value: number): Option<Positive> =>
-  Number.isFinite(value) && value > 0
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): smart-constructor body, brand applied after finiteness/sign guard
-    ? some(value as Positive)
-    : none;
+export const mkPositive: (value: number) => Option<Positive> =
+  refineBrand<number, 'Positive'>((value) => Number.isFinite(value) && value > 0);
 
 /**
  * Smart constructor for `NonNegative`. `Some` iff `value` is finite and `>= 0`.
  * @law isSome(mkNonNegative(n)) ≡ Number.isFinite(n) && n >= 0
  */
-export const mkNonNegative = (value: number): Option<NonNegative> =>
-  Number.isFinite(value) && value >= 0
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- DEVIATION(1.6): smart-constructor body, brand applied after finiteness/sign guard
-    ? some(value as NonNegative)
-    : none;
+export const mkNonNegative: (value: number) => Option<NonNegative> =
+  refineBrand<number, 'NonNegative'>((value) => Number.isFinite(value) && value >= 0);

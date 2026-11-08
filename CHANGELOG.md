@@ -10,6 +10,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-11-08
+
+### Features
+
+- add **`refineBrand`** (`brand` module): the smart constructor of a brand from its predicate. It holds the package's single brand assertion, so neither the prelude nor its consumers need a `DEVIATION(1.6)` assertion per smart constructor. `mkInt`, `mkPositive` and `mkNonNegative` are now built from it (behaviour unchanged).
+- add **bounded numerics** (`numeric` module): **`mkIntBetween`** / **`mkNumberBetween`** (Option-returning smart constructors of a range brand), **`mkClampedBetween`** (the total, clamping constructor), **`clamp`** (total; `NaN` goes to the minimum), and **`checkNumber`** / **`refineNumber`** with the **`NumberSpec`** and **`NumberIssue`** types for parsers that report why a number fails.
+- add **`SafeInt`** / **`mkSafeInt`** and **`PositiveInt`** / **`mkPositiveInt`**. `Int` admits integers beyond 2^53, where integer arithmetic is inexact; its documentation now points to `SafeInt`. Tightening `Int` itself is left for a major release.
+- add **`UnitInterval`** (`unit-interval` module): **`mkUnitInterval`**, **`clampUnitInterval`**, **`ratio`** and **`multiplyUnitInterval`** — a finite number in `[0, 1]` with operations closed over it.
+- add **`sequenceArray`** and **`sequenceArrayAsync`**: collapse Results (or concurrently running `Promise<Result>`s) into one, with the first `Err` by position.
+- 25 new tests (`fp.numeric.test.ts`), property-based for every new `@law`; suite now **374**.
+
 ## [2.5.0] - 2026-10-14
 
 ### Features

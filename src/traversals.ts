@@ -67,6 +67,32 @@ export const sequenceArrayOption = <A>(items: ReadonlyArray<Option<A>>): Option<
   traverseArrayOption<Option<A>, A>((o) => o)(items);
 
 /**
+ * Collapses an array of Results into a Result of an array.
+ * Returns the first Err in array order; otherwise Ok of all values.
+ *
+ * @law sequenceArray(xs) ≡ traverseArray(x => x)(xs)
+ * @law sequenceArray([])  ≡ ok([])
+ */
+export const sequenceArray = <A, E>(items: ReadonlyArray<Result<A, E>>): Result<ReadonlyArray<A>, E> =>
+  traverseArray<Result<A, E>, A, E>((r) => r)(items);
+
+/**
+ * Awaits Result-returning effects that already run concurrently, and
+ * collapses them into one Result: the first Err in array order (not the first
+ * to settle, so the outcome is deterministic), otherwise Ok of all values in
+ * order. Every effect runs to completion; a rejected promise rejects the whole,
+ * as `Promise.all` does — capture throws with `tryCatchAsync` first.
+ *
+ * @example
+ * const pages = await sequenceArrayAsync(collections.map((c) => fetchPage(deps, c)));
+ *
+ * @law sequenceArrayAsync(xs.map(x => Promise.resolve(x))) ≡ Promise.resolve(sequenceArray(xs))
+ */
+export const sequenceArrayAsync = async <A, E>(
+  items: ReadonlyArray<Promise<Result<A, E>>>,
+): Promise<Result<ReadonlyArray<A>, E>> => sequenceArray(await Promise.all(items));
+
+/**
  * Runs an observer effect for Ok values and returns input Result.
  */
 export const tap =
