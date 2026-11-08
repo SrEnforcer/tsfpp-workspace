@@ -22,7 +22,9 @@ for repo_name in "${subtree_repos[@]}"; do
   remote="$(subtree_remote_for "$repo_name")"
   tracking_ref="refs/remotes/subtree-preflight/$repo_name/main"
 
-  git fetch --quiet "$remote" main:"$tracking_ref"
+  # --no-prune: with fetch.prune set, git deletes an up-to-date explicit
+  # destination ref and does not recreate it.
+  git fetch --quiet --no-prune "$remote" main:"$tracking_ref"
 
   local_split="$(git subtree split --prefix="$repo_path" HEAD)"
   remote_head="$(git rev-parse "$tracking_ref")"
