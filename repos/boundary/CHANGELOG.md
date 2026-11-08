@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-11-08
+
 ### Fixed
 
 - **Zod 4 compatibility.** `fromZodError` read `zodError.errors`, which Zod 4 removed, so with Zod 4 every refused body in `parseJsonWithSchema` / `mkJsonHandler` threw a `TypeError` (a 500) instead of answering 422. It now reads `issues` (Zod 4, and Zod 3, which has both) and falls back to `errors`. `JsonSchema`, `EnvSchema` and `fromZodError` share the new `SchemaError` type, whose path segments may be symbols as Zod 4 types them; `loadConfig` no longer needs an adapter for a Zod 4 schema. Verified against `zod@4.6.7`.

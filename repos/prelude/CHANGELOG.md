@@ -10,6 +10,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-11-08
+
 ### Features
 
 - add **`refineBrand`** (`brand` module): the smart constructor of a brand from its predicate. It holds the package's single brand assertion, so neither the prelude nor its consumers need a `DEVIATION(1.6)` assertion per smart constructor. `mkInt`, `mkPositive` and `mkNonNegative` are now built from it (behaviour unchanged).
